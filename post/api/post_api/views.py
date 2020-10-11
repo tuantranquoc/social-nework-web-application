@@ -1,4 +1,5 @@
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 
 from community.models import Community, SubCommunity
 from post.models import Post
@@ -8,9 +9,8 @@ from post.serializers import PostSerializer
 
 @api_view(["GET"])
 def post_list_view(request):
-    list_post = Post.objects.all()
-    serializer = PostSerializer(list_post, many=True)
-    return Response({"list": serializer.data}, status=200)
+    query = Post.objects.all()
+    return get_paginated_queryset_response(query, request)
 
 
 @api_view(["GET", "POST"])
@@ -97,3 +97,11 @@ def post_action(request):
             return Response({"detail": "Action down_vote success"}, status=200)
         return Response({"detail": "Action success"}, status=200)
     return Response({"detail": "unknown action"}, status=200)
+
+
+def get_paginated_queryset_response(query_set, request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 20
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
