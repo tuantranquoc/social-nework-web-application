@@ -40,6 +40,8 @@ urlpatterns = [
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),
     path('api/profile/<str:username>', profile_api_view.profile_detail_view),
+    path('api/login', profile_api_view.login_via_react_view),
+    path('api/register', profile_api_view.register_via_react_view),
 ]
 
 # urlpatterns += staticfiles_urlpatterns()
