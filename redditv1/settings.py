@@ -25,7 +25,7 @@ SECRET_KEY = '-$4r+c*pwl8-$#0-sl*dm8+u_j@%q5ad55gfb-f$v!8!5epk*z'
 DEBUG = True
 ALLOWED_HOST = ['127.0.0.1', 'localhost']
 ALLOWED_HOSTS = []
-
+CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
 INSTALLED_APPS = [
