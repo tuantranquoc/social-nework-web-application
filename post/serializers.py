@@ -3,6 +3,7 @@ import random
 from rest_framework import serializers
 
 from account.serializers import PublicProfileSerializer
+from community.models import Community
 from post.models import Post, Comment
 
 MAX_CONTENT_LENGTH = 300
@@ -83,3 +84,18 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         if len(value) > 1000:
             raise serializers.ValidationError("This tweet is too long!")
         return value
+
+class CommunitySerializer(serializers.ModelSerializer):
+    #   count = serializers.SerializerMethodField(read_only=True)
+    communities = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Community
+        fields = ['communities']
+
+    def get_count(self, obj):
+        return obj.tweet.count()
+
+    def get_communities(self, obj):
+        data = obj.community_type
+        return data

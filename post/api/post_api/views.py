@@ -2,9 +2,12 @@ from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
 from community.models import Community, SubCommunity
-from post.models import Post
+from post.models import Post, PositivePoint
 from rest_framework.response import Response
 from post.serializers import PostSerializer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 @api_view(["GET"])
@@ -33,6 +36,9 @@ def post_create_api(request):
             _sub_community = SubCommunity.objects.filter(community_type=sub_community).first()
             current_post = Post.objects.create(user=user, content=content, community=_community or None,
                                                sub_community=_sub_community or None)
+            positive_point = PositivePoint.objects.filter(user=user).first()
+            positive_point.point = positive_point.point + 1
+            positive_point.save()
             serializer = PostSerializer(current_post)
             return Response(serializer.data, status=200)
 
@@ -87,13 +93,19 @@ def post_action(request):
     if not post:
         return Response({"detail": "post not found"}, status=204)
     if action:
+        user = User.object.filter(post__post_id=post_id).first()
+        positive_point = PositivePoint.objects.filter(user=user).first()
         if action == "up_vote":
             post.up_vote.add(request.user)
             post.down_vote.remove(request.user)
+            positive_point.point = positive_point.point + 2
+            positive_point.save()
             return Response({"detail": "Action up_vote success"}, status=200)
         if action == "down_vote":
             post.down_vote.add(request.user)
             post.up_vote.remove(request.user)
+            positive_point.point = positive_point.point - 2
+            positive_point.save()
             return Response({"detail": "Action down_vote success"}, status=200)
         return Response({"detail": "Action success"}, status=200)
     return Response({"detail": "unknown action"}, status=200)
