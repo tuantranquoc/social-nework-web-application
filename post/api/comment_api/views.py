@@ -9,14 +9,12 @@ from post.serializers import PostSerializer, CommentSerializer
 
 @api_view(['GET'])
 def comment_parent_list_view(request, comment_id, *args, **kwargs):
-    if request.user.is_authenticated:
-        comment = Comment.objects.filter(id=comment_id).first()
-        comment = Comment.objects.filter(parent=comment)
-
-        if not comment:
-            return Response({}, status=204)
-        serializer = CommentSerializer(comment, many=True)
-        return Response(serializer.data, status=200)
+    comment = Comment.objects.filter(id=comment_id).first()
+    comment = Comment.objects.filter(parent=comment)
+    if not comment:
+        return Response({}, status=204)
+    serializer = CommentSerializer(comment, many=True)
+    return Response(serializer.data, status=200)
 
 
 @api_view(['POST'])
@@ -55,13 +53,8 @@ def comment_create_view(request, *args, **kwargs):
 
 @api_view(['GET'])  # http method client has send == POST
 def comment_api_view(request, post_id, *args, **kwargs):
-    if request.user.is_authenticated:
-        # Comment.objects.create(user_id=1, tweet=tweet, content="okay")
-        # comment = Comment.objects.filter(tweet=tweet, user_id=1)
-        comment = Comment.objects.filter(post_id=post_id)
-        if not comment:
-            return Response({}, status=204)
-        serializer = CommentSerializer(comment, many=True)
-        return Response(serializer.data, status=200)
-    else:
-        return HttpResponse(" not OKE1")
+    comment = Comment.objects.filter(post_id=post_id)
+    if not comment:
+        return Response({}, status=204)
+    serializer = CommentSerializer(comment, many=True)
+    return Response(serializer.data, status=200)

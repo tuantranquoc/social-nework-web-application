@@ -1,6 +1,8 @@
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from django.contrib.auth import get_user_model
+from rest_framework.pagination import PageNumberPagination
+
 from community.models import Community, SubCommunity
 from post.models import Post, Comment, PositivePoint
 from rest_framework.response import Response
@@ -26,9 +28,14 @@ def community_create_view(request, name, *args, **kwargs):
 
 @api_view(['GET', 'POST'])
 def community_list_view(request, *args, **kwargs):
-    if request.user.is_authenticated:
-        communities = Community.objects.all()
-        serializer = CommunitySerializer(communities, many=True)
-        return Response(serializer.data, status=200)
-    else:
-        return HttpResponse({}, 403)
+    communities = Community.objects.all()
+    serializer = CommunitySerializer(communities, many=True)
+    return Response(serializer.data, status=200)
+
+
+def get_paginated_queryset_response(query_set, request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 20
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = CommunitySerializer(paginated_qs, many=True, context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
