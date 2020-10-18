@@ -19,7 +19,7 @@ def post_list_view(request):
 @api_view(["GET", "POST"])
 def post_create_api(request):
     if not request.user.is_authenticated:
-        return Response({"detail": "Redirect to login page"}, status=400)
+        return Response({"detail": "Redirect to login page"}, status=401)
     if request.method == "POST":
         content = request.data.get("content")
         community = request.data.get("community")
@@ -49,7 +49,7 @@ def post_create_api(request):
 @api_view(["POST"])
 def post_delete_api(request, post_id):
     if not request.user.is_authenticated:
-        return Response({"detail": "Redirect to login page"}, status=400)
+        return Response({"detail": "Redirect to login page"}, status=401)
     post = Post.objects.filter(id=post_id)
     if not post:
         return Response({"detail": "Post not found!"}, status=400)
@@ -63,7 +63,7 @@ def post_delete_api(request, post_id):
 @api_view(["GET"])
 def post_find_by_id(request, post_id):
     if not request.user.is_authenticated:
-        return Response({"detail": "Redirect to login page"}, status=400)
+        return Response({"detail": "Redirect to login page"}, status=401)
     post = Post.objects.filter(id=post_id).first()
     if post:
         serializer = PostSerializer(post)

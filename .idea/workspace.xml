@@ -5,6 +5,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/post/api/comment_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/comment_api/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/post/api/community_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/community_api/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/post/api/post_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/post_api/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/post/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,7 +112,7 @@
       <workItem from="1602928741823" duration="601000" />
       <workItem from="1602929708011" duration="3000" />
       <workItem from="1603011137496" duration="272000" />
-      <workItem from="1603013813540" duration="234000" />
+      <workItem from="1603013813540" duration="1558000" />
     </task>
     <servers />
   </component>

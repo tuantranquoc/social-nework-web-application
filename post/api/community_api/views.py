@@ -23,7 +23,7 @@ def community_create_view(request, name, *args, **kwargs):
             return Response({}, status=200)
         return Response({'detail': 'community already exist!'}, status=400)
     else:
-        return Response({}, 403)
+        return Response({}, 401)
 
 
 @api_view(['GET', 'POST'])

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
 
 from community.models import Community, SubCommunity
 
@@ -50,6 +51,15 @@ class PositivePoint(models.Model):
 
     def __id__(self):
         return self.id
+
+
+def user_did_save(sender, instance, created, *args, **kwargs):
+    if created:
+        PositivePoint.objects.get_or_create(user=instance)
+
+
+# user save will trigger profile save
+post_save.connect(user_did_save, sender=User)
 
 
 class Comment(models.Model):

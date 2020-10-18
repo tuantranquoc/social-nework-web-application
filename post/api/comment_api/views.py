@@ -33,6 +33,7 @@ def child_comment_create_view(request, comment_id, *args, **kwargs):
             serializer = CommentSerializer(comment)
             return Response(serializer.data, status=201)
         return Response({"detail", "Bad Request"}, status=400)
+    return Response({"detail", "unauthenticated "}, status=401)
 
 
 @api_view(['POST'])  # http method client has send == POST
