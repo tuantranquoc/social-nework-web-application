@@ -31,6 +31,14 @@ def profile_detail_view(request, username):
     return get_paginated_queryset_recommend_user_response(profiles, request)
 
 
+@api_view(["GET"])
+def profile_current_detail_view(request):
+    if request.user.is_authenticated:
+        profiles = Profile.objects.filter(user__username=request.user.username)
+        return get_paginated_queryset_recommend_user_response(profiles, request)
+    return Response({}, status=401)
+
+
 @api_view(['GET', 'POST'])
 def profile_detail_api_view(request, username, *args, **kwargs):
     # get the profile for the pass user name
