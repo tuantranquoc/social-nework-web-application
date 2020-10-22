@@ -34,10 +34,15 @@ def profile_detail_view(request, username):
 
 @api_view(["GET"])
 def profile_current_detail_view(request):
+    print(request.session.get("username"))
     if request.user.is_authenticated:
         profiles = Profile.objects.filter(user__username=request.user.username)
         return get_paginated_queryset_recommend_user_response(profiles, request)
     return Response({}, status=400)
+    # if not request.user.is_authenticated:
+    #     profiles = Profile.objects.filter(user__username=request.user.username)
+    #     return get_paginated_queryset_recommend_user_response(profiles, request)
+    # return Response({}, status=400)
 
 
 @api_view(['GET', 'POST'])
@@ -146,12 +151,14 @@ def get_following_profiles(request, username, *args, **kwargs):
 
 @api_view(['GET', 'POST'])
 def login_via_react_view(request, *args, **kwargs):
+    print(request.session.session_key)
     username = request.data.get("username")
     password = request.data.get("password")
     user = authenticate(username=username, password=password)
-    print(username, password)
     if user:
         login(request, user)
+        request.session["username"] = request.user.username
+        print(request.session.get("username"))
         return Response({Message.SC_OK}, status=200)
     return Response({Message.SC_NOT_FOUND}, status=404)
 

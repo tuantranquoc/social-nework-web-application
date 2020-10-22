@@ -128,3 +128,10 @@ def get_paginated_queryset_response(query_set, request):
     paginated_qs = paginator.paginate_queryset(query_set, request)
     serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
     return paginator.get_paginated_response(serializer.data)
+
+
+@api_view(["GET"])
+def test(request):
+    if request.user.is_authenticated:
+        return Response({"hello"})
+    return Response({"-hello"})

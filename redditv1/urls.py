@@ -18,6 +18,7 @@ from django.urls import path
 from post.api.post_api import views as post_api_view
 from post.api.comment_api import views as comment_api_view
 from account.api import views as profile_api_view
+from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
     # admin urls
@@ -31,6 +32,7 @@ urlpatterns = [
     path('api/post/repost/<int:post_id>', post_api_view.re_post),
     path('api/post/action', post_api_view.post_action),
     path('api/post/count/<str:community_type>', post_api_view.get_count_by_community),
+    path('api/test', post_api_view.test),
 
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
@@ -46,6 +48,10 @@ urlpatterns = [
     path('api/login', profile_api_view.login_via_react_view),
     path('api/logout', profile_api_view.logout_view_js),
     path('api/register', profile_api_view.register_via_react_view),
+
+    # token
+    path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
 # urlpatterns += staticfiles_urlpatterns()

@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'account', 'post', 'rest_framework', 'community', 'chat','corsheaders',
+    'account', 'post', 'rest_framework', 'community', 'chat', 'corsheaders',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
@@ -126,6 +127,8 @@ DEFAULT_RENDERER_CLASSES = [
 
 DEFAULT_AUTHENTICATION_CLASSES = [
     'rest_framework.authentication.SessionAuthentication',
+    'rest_framework.authentication.TokenAuthentication',
+    'rest_framework_simplejwt.authentication.JWTAuthentication',
 ]
 
 if DEBUG:
@@ -134,6 +137,7 @@ if DEBUG:
     ]
 
     DEFAULT_AUTHENTICATION_CLASSES += [
+
         # 'redditv1.dev_auth.dev.DevAuthentication'
         # 'rest_framework.authentication.SessionAuthentication',
     ]
