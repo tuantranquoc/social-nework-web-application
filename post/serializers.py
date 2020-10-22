@@ -28,7 +28,6 @@ class PostSerializer(serializers.ModelSerializer):
     up_vote = serializers.SerializerMethodField(read_only=True)
     down_vote = serializers.SerializerMethodField(read_only=True)
     community_type = serializers.SerializerMethodField(read_only=True)
-    sub_community_type = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
@@ -37,7 +36,7 @@ class PostSerializer(serializers.ModelSerializer):
                   'content',
                   'parent',
                   'timestamp',
-                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type', 'sub_community_type']
+                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type']
 
     def get_up_vote(self, obj):
         return obj.up_vote.count()

@@ -30,18 +30,21 @@ urlpatterns = [
     path('api/post/delete/<int:post_id>', post_api_view.post_delete_api),
     path('api/post/repost/<int:post_id>', post_api_view.re_post),
     path('api/post/action', post_api_view.post_action),
+    path('api/post/count/<str:community_type>', post_api_view.get_count_by_community),
 
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
     path('api/comment/create/', comment_api_view.comment_create_view),
     path('api/comment/parent/<int:comment_id>', comment_api_view.comment_parent_list_view),
     path('api/comment/child/create/<int:comment_id>', comment_api_view.child_comment_create_view),
+    path('api/comment/action', comment_api_view.comment_action),
 
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),
     path('api/profile', profile_api_view.profile_current_detail_view),
     path('api/profile/<str:username>', profile_api_view.profile_detail_view),
     path('api/login', profile_api_view.login_via_react_view),
+    path('api/logout', profile_api_view.logout_view_js),
     path('api/register', profile_api_view.register_via_react_view),
 ]
 

@@ -134,7 +134,7 @@ if DEBUG:
     ]
 
     DEFAULT_AUTHENTICATION_CLASSES += [
-        'redditv1.dev_auth.dev.DevAuthentication'
+        # 'redditv1.dev_auth.dev.DevAuthentication'
         # 'rest_framework.authentication.SessionAuthentication',
     ]
 

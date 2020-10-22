@@ -1,22 +1,14 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Community, SubCommunity
+from .models import Community
 
 
 class CommunityAdmin(admin.ModelAdmin):
-    list_display = ['__str__', '__id__']
+    list_display = ['__id__','__str__', '__creator__','__user_count__']
 
     class Meta:
         model = Community
 
 
-class SubCommunityAdmin(admin.ModelAdmin):
-    list_display = ['__str__', '__id__','__timestamp__','__parent__','__sub_parent__']
-
-    class Meta:
-        model = SubCommunity
-
-
 admin.site.register(Community, CommunityAdmin)
-admin.site.register(SubCommunity, SubCommunityAdmin)
