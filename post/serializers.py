@@ -57,18 +57,22 @@ class PostSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField(read_only=True)
-    random = serializers.SerializerMethodField(read_only=True)
+    up_vote = serializers.SerializerMethodField(read_only=True)
+    down_vote = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Comment
         # ['content']
-        fields = ['content', 'username', 'post', 'id', 'random']
+        fields = ['content', 'username', 'post', 'id', 'up_vote', 'down_vote']
 
     def get_username(self, obj):
         return obj.user.username
 
-    def get_random(self, obj):
-        return random.randint(0, 10)
+    def get_up_vote(self, obj):
+        return obj.up_vote.count()
+
+    def get_down_vote(self, obj):
+        return obj.down_vote.count()
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
@@ -83,6 +87,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         if len(value) > 1000:
             raise serializers.ValidationError("This tweet is too long!")
         return value
+
 
 class CommunitySerializer(serializers.ModelSerializer):
     #   count = serializers.SerializerMethodField(read_only=True)

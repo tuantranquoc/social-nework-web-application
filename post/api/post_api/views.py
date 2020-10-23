@@ -132,8 +132,6 @@ def count_post_by_community(community):
     count = 0
     if Post.objects.filter(community__community_type=community):
         count = Post.objects.filter(community__community_type=community).count()
-    elif Post.objects.filter(sub_community__community_type=community):
-        count = Post.objects.filter(sub_community__community_type=community).count()
     return count
 
 
