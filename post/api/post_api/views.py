@@ -128,6 +128,25 @@ def get_count_by_community(request, community_type):
     return Response({"Total: ": count_post_by_community(community_type)})
 
 
+@api_view(["GET"])
+def get_post_count(request):
+    count = Post.objects.filter(user=request.user).count()
+    return Response({"Total: ": count})
+
+
+@api_view(["GET"])
+def get_comment_count(request):
+    count = Comment.objects.filter(user=request.user).count()
+    return Response({"Total: ": count})
+
+
+@api_view(["GET"])
+def get_count_by_vote(request):
+    up_vote_count = Post.objects.filter(up_vote=request.user).count()
+    down_vote_count = Post.objects.filter(down_vote=request.user).count()
+    return Response({"Total: ": up_vote_count + down_vote_count})
+
+
 def count_post_by_community(community):
     count = 0
     if Post.objects.filter(community__community_type=community):

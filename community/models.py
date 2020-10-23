@@ -9,7 +9,7 @@ class Community(models.Model):
     id = models.AutoField(primary_key=True)
     community_type = models.CharField(max_length=255, blank=True, null=True)
     user = models.ManyToManyField(User, blank=True)
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True)
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
     time_stamp = models.DateTimeField(auto_now_add=True)
     creator = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name="owner")
 

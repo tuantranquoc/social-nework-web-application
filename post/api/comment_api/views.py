@@ -81,3 +81,12 @@ def comment_action(request):
             return Response(Message.SC_OK, status=200)
         return Response(Message.SC_BAD_RQ, status=400)
     return Response(Message.SC_BAD_RQ, status=400)
+
+
+@api_view(["GET"])
+def get_comment_by_id(request, comment_id):
+    comment = Comment.objects.filter(id=comment_id).first()
+    if comment:
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data, status=200)
+    return Response(Message.SC_BAD_RQ, status=400)
