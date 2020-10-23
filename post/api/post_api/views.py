@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
 from community.models import Community
-from post.models import Post, PositivePoint
+from post.models import Post, PositivePoint, Comment
 from rest_framework.response import Response
 from post.serializers import PostSerializer
 from django.contrib.auth import get_user_model
@@ -90,8 +90,7 @@ def post_action(request):
     if not post:
         return Response({Message.SC_NOT_FOUND}, status=204)
     if action:
-        user = User.object.filter(post__post_id=post_id).first()
-        positive_point = PositivePoint.objects.filter(user=user).first()
+        positive_point = PositivePoint.objects.filter(user=request.user).first()
         if action == "up_vote":
             post.up_vote.add(request.user)
             post.down_vote.remove(request.user)
@@ -106,6 +105,22 @@ def post_action(request):
             return Response({Message.SC_OK}, status=200)
         return Response({Message.SC_OK}, status=200)
     return Response({Message.SC_OK}, status=200)
+
+
+@api_view(["GET"])
+def user_post(request):
+    if request.user.is_authenticated:
+        query = Post.objects.filter(user=request.user)
+        return get_paginated_queryset_response(query, request)
+    return Response({Message.SC_NO_AUTH}, status=401)
+
+
+@api_view(["GET"])
+def user_comment_post(request):
+    if request.user.is_authenticated:
+        comment = Comment.objects.filter(user=request.user)
+        # return get_paginated_queryset_response(query, request)
+    return Response({Message.SC_NO_AUTH}, status=401)
 
 
 @api_view(["GET"])

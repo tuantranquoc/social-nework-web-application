@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/post/action', post_api_view.post_action),
     path('api/post/count/<str:community_type>', post_api_view.get_count_by_community),
     path('api/test', post_api_view.test),
+    path('api/post/user', post_api_view.user_post),
 
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
