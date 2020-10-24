@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="9b303dd0-e5be-4df3-8215-400d759e2d14" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/api/comment_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/comment_api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/api/post_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/post_api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/redditv1/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/redditv1/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/venv/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/venv/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,7 +131,7 @@
       <workItem from="1603456612767" duration="6893000" />
       <workItem from="1603496764705" duration="956000" />
       <workItem from="1603507058459" duration="2175000" />
-      <workItem from="1603511788296" duration="1158000" />
+      <workItem from="1603511788296" duration="1433000" />
     </task>
     <servers />
   </component>
