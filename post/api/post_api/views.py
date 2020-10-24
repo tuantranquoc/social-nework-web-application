@@ -92,12 +92,22 @@ def post_action(request):
     if action:
         positive_point = PositivePoint.objects.filter(user=request.user).first()
         if action == "up_vote":
+            if Post.objects.filter(id=post_id, up_vote=request.user):
+                post.up_vote.remove(request.user)
+                positive_point.point = positive_point.point - 2
+                positive_point.save()
+                return Response({Message.SC_OK}, status=200)
             post.up_vote.add(request.user)
             post.down_vote.remove(request.user)
             positive_point.point = positive_point.point + 2
             positive_point.save()
             return Response({Message.SC_OK}, status=200)
         if action == "down_vote":
+            if Post.objects.filter(id=post_id, down_vote=request.user):
+                post.down_vote.remove(request.user)
+                positive_point.point = positive_point.point + 2
+                positive_point.save()
+                return Response({Message.SC_OK}, status=200)
             post.down_vote.add(request.user)
             post.up_vote.remove(request.user)
             positive_point.point = positive_point.point - 2
