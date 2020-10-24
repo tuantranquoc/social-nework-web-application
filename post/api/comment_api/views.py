@@ -79,7 +79,6 @@ def comment_action(request):
             comment.up_vote.remove(request.user)
             comment.down_vote.add(request.user)
             return Response(Message.SC_OK, status=200)
-        return Response(Message.SC_BAD_RQ, status=400)
     return Response(Message.SC_BAD_RQ, status=400)
 
 

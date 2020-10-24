@@ -103,8 +103,7 @@ def post_action(request):
             positive_point.point = positive_point.point - 2
             positive_point.save()
             return Response({Message.SC_OK}, status=200)
-        return Response({Message.SC_OK}, status=200)
-    return Response({Message.SC_OK}, status=200)
+    return Response({Message.SC_BAD_RQ}, status=400)
 
 
 @api_view(["GET"])
