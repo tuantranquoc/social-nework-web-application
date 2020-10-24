@@ -146,6 +146,15 @@ def get_count_by_vote(request):
     down_vote_count = Post.objects.filter(down_vote=request.user).count()
     return Response({"Total: ": up_vote_count + down_vote_count})
 
+@api_view(["POST"])
+def check_vote(request):
+    if request.user.is_authenticated:
+        post_id = request.data.get('id')
+        if Post.objects.filter(up_vote=request.user,id=post_id):
+            return Response({"up_vote"})
+        if Post.objects.filter(down_vote=request.user,id=post_id):
+            return Response({"down_vote"})
+    return Response({"down_vote"})
 
 def count_post_by_community(community):
     count = 0

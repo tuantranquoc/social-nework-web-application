@@ -90,3 +90,15 @@ def get_comment_by_id(request, comment_id):
         serializer = CommentSerializer(comment)
         return Response(serializer.data, status=200)
     return Response(Message.SC_BAD_RQ, status=400)
+
+
+@api_view(["POST"])
+def check_vote(request):
+    if request.user.is_authenticated:
+        comment_id = request.data.get('id')
+        if Comment.objects.filter(up_vote=request.user,id=comment_id):
+            return Response({"up_vote"})
+        if Comment.objects.filter(down_vote=request.user,id=comment_id):
+            return Response({"down_vote"})
+    return Response({"none"})
+

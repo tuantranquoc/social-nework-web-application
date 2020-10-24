@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/post/user', post_api_view.user_post),
     path('api/post/count', post_api_view.get_post_count),
     path('api/post/vote/count', post_api_view.get_count_by_vote),
+    path('api/post/check/vote', post_api_view.check_vote),
 
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
@@ -44,7 +45,7 @@ urlpatterns = [
     path('api/comment/action', comment_api_view.comment_action),
     path('api/comment/count', post_api_view.get_comment_count),
     path('api/comment/comment/<int:comment_id>', comment_api_view.get_comment_by_id),
-
+    path('api/comment/check/vote', comment_api_view.check_vote),
 
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),
