@@ -154,7 +154,7 @@ def check_vote(request):
             return Response({"up_vote"})
         if Post.objects.filter(down_vote=request.user,id=post_id):
             return Response({"down_vote"})
-    return Response({"down_vote"})
+    return Response({"none"})
 
 def count_post_by_community(community):
     count = 0

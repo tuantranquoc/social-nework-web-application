@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9b303dd0-e5be-4df3-8215-400d759e2d14" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/venv/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/venv/.gitignore" afterDir="false" />
-    </list>
+    <list default="true" id="9b303dd0-e5be-4df3-8215-400d759e2d14" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -47,14 +44,15 @@
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\QuocTuan\PycharmProjects\redditv1" />
+      <recent name="C:\Users\QuocTuan\PycharmProjects\redditv1\post\api\post_api" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\QuocTuan\PycharmProjects\redditv1\post\api\community_api" />
       <recent name="C:\Users\QuocTuan\PycharmProjects\redditv1\post\api\comment_api" />
       <recent name="C:\Users\QuocTuan\PycharmProjects\redditv1\account" />
       <recent name="C:\Users\QuocTuan\PycharmProjects\redditv1\post" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\QuocTuan\PycharmProjects\redditv1\post\api\post_api" />
     </key>
   </component>
   <component name="RunManager">
@@ -131,7 +129,7 @@
       <workItem from="1603456612767" duration="6893000" />
       <workItem from="1603496764705" duration="956000" />
       <workItem from="1603507058459" duration="2175000" />
-      <workItem from="1603511788296" duration="1433000" />
+      <workItem from="1603511788296" duration="2271000" />
     </task>
     <servers />
   </component>
