@@ -13,12 +13,16 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path
 from post.api.post_api import views as post_api_view
 from post.api.comment_api import views as comment_api_view
 from account.api import views as profile_api_view
 from rest_framework_simplejwt import views as jwt_views
+
+from redditv1 import settings
 
 urlpatterns = [
     # admin urls
@@ -54,15 +58,17 @@ urlpatterns = [
     path('api/login', profile_api_view.login_via_react_view),
     path('api/logout', profile_api_view.logout_view_js),
     path('api/register', profile_api_view.register_via_react_view),
+    path('api/profile/update/', profile_api_view.profile_update_via_react_view),
 
     # token
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
-# urlpatterns += staticfiles_urlpatterns()
-#
-# if settings.DEBUG:
-#     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-#     urlpatterns += static(settings.MEDIA_URL,
-#                           document_root=settings.MEDIA_ROOT)
+
+urlpatterns += staticfiles_urlpatterns()
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

@@ -135,6 +135,41 @@ def profile_background_post(request, *args, **kwargs):
         return Response({}, status=401)
 
 
+@api_view(['POST'])
+def profile_update_via_react_view(request, *args, **kwargs):
+    if not request.user.is_authenticated:
+        return Response({}, status=401)
+    user = request.user
+    my_profile = user.profile
+    first_name = request.data.get("first_name")
+    last_name = request.data.get("last_name")
+    location = request.data.get("location")
+    bio = request.data.get("bio")
+    email = request.data.get("email")
+    if request.data.get("background"):
+        data = request.data.get("background")
+        format, imgstr = data.split(';base64,')
+        ext = format.split('/')[-1]
+        image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        my_profile.background = image
+    if request.data.get("avatar"):
+        data = request.data.get("avatar")
+        format, imgstr = data.split(';base64,')
+        ext = format.split('/')[-1]
+        image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        my_profile.avatar = image
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    my_profile.location = location
+    my_profile.bio = bio
+    user.save()
+    my_profile.save()
+    if not my_profile.background or not my_profile.avatar:
+        return Response({Message.SC_BAD_IMG}, status=400)
+    return Response({}, status=200)
+
+
 @api_view(['GET'])
 def get_following_profiles(request, username, *args, **kwargs):
     if request.user.is_authenticated:
@@ -178,7 +213,6 @@ def register_via_react_view(request, *args, **kwargs):
 
 @api_view(['GET', 'POST'])
 def logout_view_js(request, *args, **kwargs):
-    # form = MyModelForm(request.POST or NONE)
     if request.method == 'POST':
         logout(request)
         return Response({}, status=200)
@@ -186,3 +220,14 @@ def logout_view_js(request, *args, **kwargs):
         logout(request)
         return Response({}, status=200)
     return Response({}, status=400)
+
+
+@api_view(['GET', 'POST'])
+def register_via_react_view(request, *args, **kwargs):
+    username = request.data.get("username")
+    password = request.data.get("password")
+    if username and password:
+        user = User.objects.create_user(username=username, password=password)
+        if not user:
+            return Response({}, status=400)
+    return Response({}, status=200)

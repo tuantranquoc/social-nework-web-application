@@ -1,3 +1,6 @@
+import base64
+
+from django.core.files.base import ContentFile
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
@@ -25,6 +28,7 @@ def post_create_api(request):
     if request.method == "POST":
         content = request.data.get("content")
         community = request.data.get("community")
+        image = request.data.get('image')
         if community is None:
             return Response({Message.SC_BAD_RQ}, status=400)
         user = request.user
@@ -32,13 +36,22 @@ def post_create_api(request):
             if community:
                 if Community.objects.filter(community_type=community):
                     _community = Community.objects.filter(community_type=community).first()
-                    _community = Community.objects.filter(community_type=community).first()
-                    current_post = Post.objects.create(user=user, content=content, community=_community)
                     positive_point = PositivePoint.objects.filter(user=user).first()
                     positive_point.point = positive_point.point + 1
                     positive_point.save()
+                    if image:
+                        if len(image) > len('data:,'):
+                            format, imgstr = image.split(';base64,')
+                            ext = format.split('/')[-1]
+                            image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+                            current_post = Post.objects.create(user=user, content=content, community=_community)
+                            current_post.image = image
+                            current_post.save()
+                            serializer = PostSerializer(current_post)
+                            return Response(serializer.data, status=201)
+                    current_post = Post.objects.create(user=user, content=content, community=_community)
                     serializer = PostSerializer(current_post)
-                    return Response(serializer.data, status=200)
+                    return Response(serializer.data, status=201)
             return Response({Message.SC_BAD_RQ}, status=400)
         return Response({Message.SC_BAD_RQ}, status=400)
     return Response({Message.SC_BAD_RQ}, status=200)
@@ -155,15 +168,17 @@ def get_count_by_vote(request):
     down_vote_count = Post.objects.filter(down_vote=request.user).count()
     return Response({"Total: ": up_vote_count + down_vote_count})
 
+
 @api_view(["POST"])
 def check_vote(request):
     if request.user.is_authenticated:
         post_id = request.data.get('id')
-        if Post.objects.filter(up_vote=request.user,id=post_id):
+        if Post.objects.filter(up_vote=request.user, id=post_id):
             return Response({"up_vote"})
-        if Post.objects.filter(down_vote=request.user,id=post_id):
+        if Post.objects.filter(down_vote=request.user, id=post_id):
             return Response({"down_vote"})
     return Response({"none"})
+
 
 def count_post_by_community(community):
     count = 0

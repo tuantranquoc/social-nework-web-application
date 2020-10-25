@@ -8,3 +8,4 @@ class Message:
     SC_NOT_FOUND = "NOT FOUND"
     SC_LOGIN_REDIRECT = "Redirect to login page"
     SC_PERMISSION_DENIED = "Permission denied"
+    SC_BAD_IMG = "Image unknown format or damaged"
