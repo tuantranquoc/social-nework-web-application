@@ -1,6 +1,8 @@
 import base64
 
 from django.core.files.base import ContentFile
+from django.db.models import Count
+from pipenv.vendor.tomlkit.items import Null
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
@@ -138,6 +140,18 @@ def user_post(request):
 
 
 @api_view(["GET"])
+def user_post_filter_by_up_vote(request):
+    if request.user.is_authenticated:
+        query = Post.objects.filter(user=request.user).annotate(
+            user_count=Count("up_vote")
+        ).order_by(
+            "-user_count"
+        )
+        return get_paginated_queryset_response(query, request)
+    return Response({Message.SC_NO_AUTH}, status=401)
+
+
+@api_view(["GET"])
 def user_comment_post(request):
     if request.user.is_authenticated:
         comment = Comment.objects.filter(user=request.user)
@@ -196,7 +210,41 @@ def get_paginated_queryset_response(query_set, request):
 
 
 @api_view(["GET"])
-def test(request):
+def filter_by_up_vote(request):
+    query = Post.objects.annotate(
+        user_count=Count("up_vote")
+    ).order_by(
+        "-user_count"
+    )
+    return get_paginated_queryset_response(query, request)
+
+
+@api_view(["GET"])
+def get_post_by_comment(request):
     if request.user.is_authenticated:
-        return Response({"hello"})
-    return Response({"-hello"})
+        # find list of comment by this user
+        # level 1
+        comment_list = Comment.objects.filter(user=request.user, parent__isnull=True)
+        # query = Post.objects.filter(comment__in=comment_list)
+        # level 2 + 3
+        comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=False).filter(
+            parent__parent__parent__isnull=True, user=request.user)
+        comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=True,
+                                                                                   user=request.user)
+        query = Post.objects.filter(comment__in=comment_list)
+        query_2 = Post.objects.filter(comment__in=parent_comment(comment_list_level_2, 2))
+        query_3 = Post.objects.filter(comment__in=parent_comment(comment_list_level_3, 3))
+        query_result = (query | query_2 | query_3).distinct()
+        return get_paginated_queryset_response(query_result, request)
+    return Response({Message.SC_NO_AUTH}, status=401)
+
+
+def parent_comment(comment_list, level):
+    comments = []
+    if level == 3:
+        for level_3 in comment_list:
+            comments.append(level_3.parent.parent)
+    if level == 2:
+        for level_2 in comment_list:
+            comments.append(level_2.parent)
+    return comments

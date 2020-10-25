@@ -40,7 +40,10 @@ urlpatterns = [
     path('api/post/count', post_api_view.get_post_count),
     path('api/post/vote/count', post_api_view.get_count_by_vote),
     path('api/post/check/vote', post_api_view.check_vote),
-
+    path('api/post/filter/up_vote', post_api_view.filter_by_up_vote),
+    path('api/post/filter/user/up_vote', post_api_view.user_post_filter_by_up_vote),
+    path('api/post/comment', post_api_view.get_post_by_comment),
+    # 12
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
     path('api/comment/create/', comment_api_view.comment_create_view),
@@ -50,7 +53,7 @@ urlpatterns = [
     path('api/comment/count', post_api_view.get_comment_count),
     path('api/comment/comment/<int:comment_id>', comment_api_view.get_comment_by_id),
     path('api/comment/check/vote', comment_api_view.check_vote),
-
+    # 8
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),
     path('api/profile', profile_api_view.profile_current_detail_view),
@@ -59,12 +62,11 @@ urlpatterns = [
     path('api/logout', profile_api_view.logout_view_js),
     path('api/register', profile_api_view.register_via_react_view),
     path('api/profile/update/', profile_api_view.profile_update_via_react_view),
-
+    # 7
     # token
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
 ]
-
 
 urlpatterns += staticfiles_urlpatterns()
 

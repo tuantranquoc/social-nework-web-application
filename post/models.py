@@ -83,7 +83,9 @@ class Comment(models.Model):
         return self.user.username
 
     def __parent__(self):
-        return self.parent.id
+        if self.parent:
+            return self.parent.id
+        return None
 
     def __post__(self):
         return self.post.id

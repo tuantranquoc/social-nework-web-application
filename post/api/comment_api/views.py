@@ -1,5 +1,8 @@
+from django.db.models import Count
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
+
 from post.models import Post, Comment, PositivePoint
 from rest_framework.response import Response
 from post.serializers import PostSerializer, CommentSerializer
@@ -7,6 +10,13 @@ from redditv1.message import Message
 
 
 # comment api view
+def get_paginated_queryset_response(query_set, request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 20
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = CommentSerializer(paginated_qs, many=True, context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
+
 
 @api_view(['GET'])
 def comment_parent_list_view(request, comment_id, *args, **kwargs):
@@ -95,9 +105,18 @@ def get_comment_by_id(request, comment_id):
 def check_vote(request):
     if request.user.is_authenticated:
         comment_id = request.data.get('id')
-        if Comment.objects.filter(up_vote=request.user,id=comment_id):
+        if Comment.objects.filter(up_vote=request.user, id=comment_id):
             return Response({"up_vote"})
-        if Comment.objects.filter(down_vote=request.user,id=comment_id):
+        if Comment.objects.filter(down_vote=request.user, id=comment_id):
             return Response({"down_vote"})
     return Response({"none"})
 
+
+@api_view(["GET"])
+def filter_by_up_vote(request):
+    query = Comment.objects.annotate(
+        user_count=Count("up_vote")
+    ).order_by(
+        "-user_count"
+    )
+    return get_paginated_queryset_response(query, request)
