@@ -36,7 +36,7 @@ def get_list_community_by_user(request):
     if request.user.is_authenticated:
         query = Community.objects.filter(user=request.user)
         return get_paginated_queryset_response(query, request)
-    return Response({Message.SC_OK}, status=200)
+    return Response({Message.SC_LOGIN_REDIRECT}, status=200)
 
 
 @api_view(["POST"])

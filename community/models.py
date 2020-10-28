@@ -11,7 +11,7 @@ class Community(models.Model):
     user = models.ManyToManyField(User, blank=True)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
     time_stamp = models.DateTimeField(auto_now_add=True)
-    creator = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name="owner")
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="owner")
     state = models.BooleanField(default=True)
 
     class Meta:

@@ -2,19 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9b303dd0-e5be-4df3-8215-400d759e2d14" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/community/migrations/0011_community_state.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/88c3dbbf-2367-49ec-81b2-0ae530ef3741.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/88c3dbbf-2367-49ec-81b2-0ae530ef3741.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/community/migrations/0012_auto_20201028_2023.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/community/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/community/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/community/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/community/api/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/community/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/community/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/api/community_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/community_api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/api/post_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/post_api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/redditv1/message.py" beforeDir="false" afterPath="$PROJECT_DIR$/redditv1/message.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/redditv1/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/redditv1/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +144,7 @@
       <workItem from="1603695653630" duration="4000" />
       <workItem from="1603713359872" duration="699000" />
       <workItem from="1603803488602" duration="6534000" />
-      <workItem from="1603887815639" duration="3041000" />
+      <workItem from="1603887815639" duration="3628000" />
     </task>
     <servers />
   </component>
