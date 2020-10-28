@@ -91,15 +91,22 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
 class CommunitySerializer(serializers.ModelSerializer):
     #   count = serializers.SerializerMethodField(read_only=True)
-    communities = serializers.SerializerMethodField(read_only=True)
+    id = serializers.SerializerMethodField(read_only=True)
+    community_type = serializers.SerializerMethodField(read_only=True)
+    is_main = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Community
-        fields = ['communities']
+        fields = ['id','community_type','is_main']
 
-    def get_count(self, obj):
-        return obj.tweet.count()
+    def get_id(self, obj):
+        return obj.id
 
-    def get_communities(self, obj):
-        data = obj.community_type
-        return data
+    def get_community_type(self, obj):
+       return obj.community_type
+
+    def get_is_main(self, obj):
+        if obj.parent is None:
+            return "true"
+        return "false"
+

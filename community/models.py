@@ -12,6 +12,7 @@ class Community(models.Model):
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
     time_stamp = models.DateTimeField(auto_now_add=True)
     creator = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name="owner")
+    state = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['id']
@@ -33,3 +34,6 @@ class Community(models.Model):
 
     def __creator__(self):
         return self.creator
+
+    def __state__(self):
+        return self.state

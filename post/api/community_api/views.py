@@ -7,6 +7,7 @@ from community.models import Community
 from post.models import Post, Comment, PositivePoint
 from rest_framework.response import Response
 from post.serializers import PostSerializer, CommentSerializer, CommunitySerializer
+from redditv1.message import Message
 
 User = get_user_model()
 
@@ -31,6 +32,15 @@ def community_list_view(request, *args, **kwargs):
     communities = Community.objects.all()
     serializer = CommunitySerializer(communities, many=True)
     return Response(serializer.data, status=200)
+
+
+@api_view(['GET'])
+def get_follow_community(request):
+    if request.user.is_authenticated:
+        communities = Community.objects.filter(user=request.user)
+
+
+
 
 
 def get_paginated_queryset_response(query_set, request):

@@ -74,12 +74,19 @@ def post_delete_api(request, post_id):
 
 @api_view(["GET"])
 def post_find_by_id(request, post_id):
-    if not request.user.is_authenticated:
-        return Response({Message.SC_LOGIN_REDIRECT}, status=401)
     post = Post.objects.filter(id=post_id).first()
     if post:
-        serializer = PostSerializer(post)
-        return Response(serializer.data, status=200)
+        if post.community.state is True:
+            # and Community.objects.filter(user=request.user, community_type=post.community)
+            serializer = PostSerializer(post)
+            return Response(serializer.data, status=200)
+        if post.community.state is False:
+            if not request.user.is_authenticated:
+                return Response({Message.SC_LOGIN_REDIRECT}, status=401)
+            if Community.objects.filter(user=request.user, community_type=post.community):
+                serializer = PostSerializer(post)
+                return Response(serializer.data, status=200)
+            return Response({Message.MUST_FOLLOW}, status=400)
     return Response({Message.SC_NOT_FOUND}, status=204)
 
 
@@ -222,10 +229,8 @@ def filter_by_up_vote(request):
 @api_view(["GET"])
 def get_post_by_comment(request):
     if request.user.is_authenticated:
-        # find list of comment by this user
         # level 1
         comment_list = Comment.objects.filter(user=request.user, parent__isnull=True)
-        # query = Post.objects.filter(comment__in=comment_list)
         # level 2 + 3
         comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=False).filter(
             parent__parent__parent__isnull=True, user=request.user)

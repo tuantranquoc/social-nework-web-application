@@ -24,6 +24,9 @@ class Profile(models.Model):
     user = Profile.objects.()
     """
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self):
         return self.user.username
 
@@ -32,6 +35,9 @@ class Profile(models.Model):
 
     def __time__(self):
         return self.timestamp
+
+    def __point__(self):
+        return self.user.positivepoint.point
 
 
 class FollowerRelation(models.Model):

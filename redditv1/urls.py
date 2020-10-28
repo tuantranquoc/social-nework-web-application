@@ -20,6 +20,7 @@ from django.urls import path
 from post.api.post_api import views as post_api_view
 from post.api.comment_api import views as comment_api_view
 from account.api import views as profile_api_view
+from community.api import views as community_api_view
 from rest_framework_simplejwt import views as jwt_views
 
 from redditv1 import settings
@@ -62,6 +63,12 @@ urlpatterns = [
     path('api/logout', profile_api_view.logout_view_js),
     path('api/register', profile_api_view.register_via_react_view),
     path('api/profile/update/', profile_api_view.profile_update_via_react_view),
+    # community api
+    path('api/community/create', community_api_view.create_community),
+    path('api/community/user/list', community_api_view.get_list_community_by_user),
+    path('api/community/list', community_api_view.get_list_community),
+    path('api/community/user/action', community_api_view.community_action),
+    path('api/community/change/state/<str:community_type>', community_api_view.change_state),
     # 7
     # token
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
