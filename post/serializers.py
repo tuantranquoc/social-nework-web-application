@@ -36,7 +36,7 @@ class PostSerializer(serializers.ModelSerializer):
                   'content',
                   'parent',
                   'timestamp',
-                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type']
+                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type','view_count']
 
     def get_up_vote(self, obj):
         return obj.up_vote.count()

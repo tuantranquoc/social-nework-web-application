@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'redditv1.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'test2',
+        'NAME': 'test3',
         'USER': 'postgres',
         'PASSWORD': 'password',
         'HOST': 'localhost',
