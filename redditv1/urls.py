@@ -28,7 +28,6 @@ from redditv1 import settings
 urlpatterns = [
     # admin urls
     path('admin/', admin.site.urls),
-
     # post api
     path('api/post', post_api_view.post_list_view),
     path('api/post/create', post_api_view.post_create_api),
@@ -54,6 +53,7 @@ urlpatterns = [
     path('api/comment/count', post_api_view.get_comment_count),
     path('api/comment/comment/<int:comment_id>', comment_api_view.get_comment_by_id),
     path('api/comment/check/vote', comment_api_view.check_vote),
+    path('api/comment/<int:post_id>/count', comment_api_view.count_comment_by_post),
     # 8
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),

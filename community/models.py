@@ -24,7 +24,7 @@ class Community(models.Model):
         return self.user.count()
 
     def __post_count__(self):
-        return self.pos
+        return self.post
 
     def __id__(self):
         return self.id

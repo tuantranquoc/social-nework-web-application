@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9b303dd0-e5be-4df3-8215-400d759e2d14" name="Default Changelist" comment="" />
+    <list default="true" id="9b303dd0-e5be-4df3-8215-400d759e2d14" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/post/migrations/0013_auto_20201029_1522.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/post/migrations/0014_posttype_post.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/post/migrations/0015_auto_20201029_1528.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/post/migrations/0016_auto_20201029_1530.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/post/migrations/0017_auto_20201029_1628.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/post/migrations/0018_auto_20201029_1948.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/post/migrations/0019_auto_20201029_1952.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/post/migrations/0020_auto_20201029_1958.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/88c3dbbf-2367-49ec-81b2-0ae530ef3741.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/88c3dbbf-2367-49ec-81b2-0ae530ef3741.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/account/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/community/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/community/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/post/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/post/api/comment_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/comment_api/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/post/api/post_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/post_api/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/post/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/post/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/redditv1/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/redditv1/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/redditv1/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/redditv1/urls.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -140,6 +160,8 @@
       <workItem from="1603713359872" duration="699000" />
       <workItem from="1603803488602" duration="6534000" />
       <workItem from="1603887815639" duration="4020000" />
+      <workItem from="1603939399852" duration="2611000" />
+      <workItem from="1603959141952" duration="16033000" />
     </task>
     <servers />
   </component>
@@ -186,13 +208,13 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="277" y="62" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1602517682351" />
-    <state x="465" y="244" key="com.intellij.ide.util.TipDialog" timestamp="1603939415634">
+    <state x="465" y="244" key="com.intellij.ide.util.TipDialog" timestamp="1603959141613">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="465" y="244" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1603939415634" />
-    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1600142168504">
+    <state x="465" y="244" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1603959141613" />
+    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1603959937485">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1600142168504" />
+    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1603959937485" />
   </component>
 </project>

@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
+from post.api.post_api.views import parent_comment
 from post.models import Post, Comment, PositivePoint
 from rest_framework.response import Response
 from post.serializers import PostSerializer, CommentSerializer
@@ -120,3 +121,17 @@ def filter_by_up_vote(request):
         "-user_count"
     )
     return get_paginated_queryset_response(query, request)
+
+
+@api_view(["GET"])
+def count_comment_by_post(request, post_id):
+    post = Post.objects.filter(id=post_id).first()
+    if post:
+        comment_list = Comment.objects.filter(post=post)
+        count_1 = Comment.objects.filter(post=post).count()
+        count_2 = Comment.objects.filter(parent__isnull=False, parent__in=comment_list).count()
+        count_3 = Comment.objects.filter(parent__isnull=False, parent__parent__in=comment_list).count()
+        total = count_1 + count_2 + count_3
+        return Response({"Total": total}, status=200)
+    return Response({Message.SC_BAD_RQ}, status=400)
+

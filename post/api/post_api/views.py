@@ -1,13 +1,15 @@
 import base64
-
+import datetime
+from datetime import timedelta
 from django.core.files.base import ContentFile
 from django.db.models import Count
+from django.utils import timezone
 from pipenv.vendor.tomlkit.items import Null
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
 from community.models import Community
-from post.models import Post, PositivePoint, Comment
+from post.models import Post, PositivePoint, Comment, View
 from rest_framework.response import Response
 from post.serializers import PostSerializer
 from django.contrib.auth import get_user_model
@@ -77,15 +79,35 @@ def post_find_by_id(request, post_id):
     post = Post.objects.filter(id=post_id).first()
     if post:
         if post.community.state is True:
-            # and Community.objects.filter(user=request.user, community_type=post.community)
+            post.view_count = post.view_count + 1
+            post.save()
             serializer = PostSerializer(post)
             return Response(serializer.data, status=200)
         if post.community.state is False:
             if not request.user.is_authenticated:
                 return Response({Message.SC_LOGIN_REDIRECT}, status=401)
             if Community.objects.filter(user=request.user, community_type=post.community):
-                serializer = PostSerializer(post)
-                return Response(serializer.data, status=200)
+                view = View.objects.filter(user=request.user, post=post).first()
+                if not view:
+                    view = View.objects.create(post=post)
+                    view.user.add(request.user)
+                    view.save()
+                if view.old_timestamp is None:
+                    view.old_timestamp = timezone.now()
+                    view.save()
+                    post.view_count = post.view_count + 1
+                    post.save()
+                    serializer = PostSerializer(post)
+                    return Response(serializer.data, status=200)
+                if view.old_timestamp is not None:
+                    difference = (timezone.now() - view.old_timestamp).total_seconds()
+                    if difference >= 120:
+                        post.view_count = post.view_count + 1
+                        view.old_timestamp = timezone.now()
+                        view.save()
+                        post.save()
+                    serializer = PostSerializer(post)
+                    return Response(serializer.data, status=200)
             return Response({Message.MUST_FOLLOW}, status=400)
     return Response({Message.SC_NOT_FOUND}, status=204)
 
