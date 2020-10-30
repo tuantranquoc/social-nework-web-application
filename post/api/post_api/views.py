@@ -190,57 +190,57 @@ def user_comment_post(request):
 
 @api_view(["GET"])
 def get_count_by_community(request, community_type):
-    return Response({"Total: ": count_post_by_community(community_type)})
+    return Response({"Total": count_post_by_community(community_type)})
 
 
 @api_view(["GET"])
 def get_post_count(request):
     count = Post.objects.filter(user=request.user).count()
-    return Response({"Total: ": count})
+    return Response({"Total": count})
 
 
 @api_view(["GET"])
 def get_comment_count(request):
     count = Comment.objects.filter(user=request.user).count()
-    return Response({"Total: ": count})
+    return Response({"Total": count})
 
 
 @api_view(["GET"])
 def get_count_by_vote(request):
     up_vote_count = Post.objects.filter(up_vote=request.user).count()
     down_vote_count = Post.objects.filter(down_vote=request.user).count()
-    return Response({"Total: ": up_vote_count + down_vote_count})
+    return Response({"Total": up_vote_count + down_vote_count})
 
 
 @api_view(["GET"])
 def get_count_by_up_vote(request):
     up_vote_count = Post.objects.filter(up_vote=request.user).count()
-    return Response({"Total: ": up_vote_count})
+    return Response({"Total": up_vote_count})
 
 
 @api_view(["GET"])
 def get_count_by_username_up_vote(request, username):
     up_vote_count = Post.objects.filter(up_vote__username=username).count()
-    return Response({"Total: ": up_vote_count})
+    return Response({"Total": up_vote_count})
 
 
 @api_view(["GET"])
 def get_count_by_down_vote(request):
     down_vote_count = Post.objects.filter(down_vote=request.user).count()
-    return Response({"Total: ": down_vote_count})
+    return Response({"Total": down_vote_count})
 
 
 @api_view(["GET"])
 def get_count_by_username_down_vote(request, username):
     down_vote_count = Post.objects.filter(down_vote__username=username).count()
-    return Response({"Total: ": down_vote_count})
+    return Response({"Total": down_vote_count})
 
 
 @api_view(["GET"])
 def get_count_by_user_vote(request, username):
     up_vote_count = Post.objects.filter(up_vote__username=username).count()
     down_vote_count = Post.objects.filter(down_vote__username=username).count()
-    return Response({"Total: ": up_vote_count + down_vote_count})
+    return Response({"Total": up_vote_count + down_vote_count})
 
 
 @api_view(["POST"])
