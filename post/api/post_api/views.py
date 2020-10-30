@@ -212,6 +212,37 @@ def get_count_by_vote(request):
     return Response({"Total: ": up_vote_count + down_vote_count})
 
 
+@api_view(["GET"])
+def get_count_by_up_vote(request):
+    up_vote_count = Post.objects.filter(up_vote=request.user).count()
+    return Response({"Total: ": up_vote_count})
+
+
+@api_view(["GET"])
+def get_count_by_username_up_vote(request, username):
+    up_vote_count = Post.objects.filter(up_vote__username=username).count()
+    return Response({"Total: ": up_vote_count})
+
+
+@api_view(["GET"])
+def get_count_by_down_vote(request):
+    down_vote_count = Post.objects.filter(down_vote=request.user).count()
+    return Response({"Total: ": down_vote_count})
+
+
+@api_view(["GET"])
+def get_count_by_username_down_vote(request, username):
+    down_vote_count = Post.objects.filter(down_vote__username=username).count()
+    return Response({"Total: ": down_vote_count})
+
+
+@api_view(["GET"])
+def get_count_by_user_vote(request, username):
+    up_vote_count = Post.objects.filter(up_vote__username=username).count()
+    down_vote_count = Post.objects.filter(down_vote__username=username).count()
+    return Response({"Total: ": up_vote_count + down_vote_count})
+
+
 @api_view(["POST"])
 def check_vote(request):
     if request.user.is_authenticated:
@@ -267,6 +298,24 @@ def get_post_by_comment(request):
 
 
 @api_view(["GET"])
+def get_post_by_username_comment(request, username):
+    if request.user.is_authenticated:
+        # level 1
+        comment_list = Comment.objects.filter(user__username=username, parent__isnull=True)
+        # level 2 + 3
+        comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=False).filter(
+            parent__parent__parent__isnull=True, user__username=username)
+        comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=True,
+                                                                                   user__username=username)
+        query = Post.objects.filter(comment__in=comment_list)
+        query_2 = Post.objects.filter(comment__in=parent_comment(comment_list_level_2, 2))
+        query_3 = Post.objects.filter(comment__in=parent_comment(comment_list_level_3, 3))
+        query_result = (query | query_2 | query_3).distinct()
+        return get_paginated_queryset_response(query_result, request)
+    return Response({Message.SC_NO_AUTH}, status=401)
+
+
+@api_view(["GET"])
 def find_post_by_user(request, username):
     post = Post.objects.filter(user__username=username)
     if post:
@@ -282,6 +331,26 @@ def count_post_by_user(request, username):
     if count:
         return Response({"Total": count}, status=200)
     return Response({Message.SC_NOT_FOUND}, status=400)
+
+
+@api_view(["GET"])
+def find_post_by_up_vote(request):
+    if request.user.is_authenticated:
+        post = Post.objects.filter(up_vote=request.user)
+        if post:
+            return get_paginated_queryset_response(post, request)
+        return Response({Message.SC_NOT_FOUND}, status=400)
+    return Response({Message.SC_LOGIN_REDIRECT}, status=401)
+
+
+@api_view(["GET"])
+def find_post_by_down_vote(request):
+    if request.user.is_authenticated:
+        post = Post.objects.filter(down_vote=request.user)
+        if post:
+            return get_paginated_queryset_response(post, request)
+        return Response({Message.SC_NOT_FOUND}, status=400)
+    return Response({Message.SC_LOGIN_REDIRECT}, status=401)
 
 
 def parent_comment(comment_list, level):

@@ -41,11 +41,19 @@ urlpatterns = [
     path('api/post/count', post_api_view.get_post_count),
     path('api/post/count/user/<str:username>', post_api_view.count_post_by_user),
     path('api/post/vote/count', post_api_view.get_count_by_vote),
+    path('api/post/up_vote/count', post_api_view.get_count_by_up_vote),
+    path('api/post/down_vote/count', post_api_view.get_count_by_down_vote),
+    path('api/post/vote/count/user/<str:username>', post_api_view.get_count_by_user_vote),
+    path('api/post/up_vote/count/user/<str:username>', post_api_view.get_count_by_username_up_vote),
+    path('api/post/down_vote/count/user/<str:username>', post_api_view.get_count_by_username_down_vote),
     path('api/post/check/vote', post_api_view.check_vote),
     path('api/post/filter/up_vote', post_api_view.filter_by_up_vote),
     path('api/post/filter/user/up_vote', post_api_view.user_post_filter_by_up_vote),
     path('api/post/comment', post_api_view.get_post_by_comment),
-    # 12
+    path('api/post/comment/<str:username>', post_api_view.get_post_by_username_comment),
+    path('api/post/up_vote', post_api_view.find_post_by_up_vote),
+    path('api/post/down_vote', post_api_view.find_post_by_down_vote),
+    # 20
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
     path('api/comment/create/', comment_api_view.comment_create_view),
@@ -57,7 +65,7 @@ urlpatterns = [
     path('api/comment/comment/<int:comment_id>', comment_api_view.get_comment_by_id),
     path('api/comment/check/vote', comment_api_view.check_vote),
     path('api/comment/<int:post_id>/count', comment_api_view.count_comment_by_post),
-    # 8
+    # 9
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),
     path('api/profile', profile_api_view.profile_current_detail_view),
@@ -66,6 +74,7 @@ urlpatterns = [
     path('api/logout', profile_api_view.logout_view_js),
     path('api/register', profile_api_view.register_via_react_view),
     path('api/profile/update/', profile_api_view.profile_update_via_react_view),
+    # 6
     # community api
     path('api/community/create', community_api_view.create_community),
     path('api/community/user/list', community_api_view.get_list_community_by_user),

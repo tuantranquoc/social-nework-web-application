@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9b303dd0-e5be-4df3-8215-400d759e2d14" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/88c3dbbf-2367-49ec-81b2-0ae530ef3741.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/88c3dbbf-2367-49ec-81b2-0ae530ef3741.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/api/comment_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/comment_api/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/post/api/post_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/post_api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/redditv1/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/redditv1/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -151,7 +147,7 @@
       <workItem from="1603939399852" duration="2611000" />
       <workItem from="1603959141952" duration="17492000" />
       <workItem from="1603988706921" duration="620000" />
-      <workItem from="1604064972812" duration="1257000" />
+      <workItem from="1604064972812" duration="3584000" />
     </task>
     <servers />
   </component>
