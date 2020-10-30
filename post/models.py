@@ -70,13 +70,13 @@ class PositivePoint(models.Model):
         return self.id
 
 
-def user_did_save(sender, instance, created, *args, **kwargs):
+def user_did_save_pp(sender, instance, created, *args, **kwargs):
     if created:
         PositivePoint.objects.get_or_create(user=instance)
 
 
 # user save will trigger profile save
-post_save.connect(user_did_save, sender=User)
+post_save.connect(user_did_save_pp, sender=User)
 
 
 class Comment(models.Model):

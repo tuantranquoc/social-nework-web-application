@@ -33,6 +33,7 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ['user',
                   'id',
+                  'title',
                   'content',
                   'parent',
                   'timestamp',

@@ -266,6 +266,24 @@ def get_post_by_comment(request):
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
+@api_view(["GET"])
+def find_post_by_user(request, username):
+    post = Post.objects.filter(user__username=username)
+    if post:
+        return get_paginated_queryset_response(post, request)
+    return Response({Message.SC_NOT_FOUND}, status=400)
+
+
+@api_view(["GET"])
+def count_post_by_user(request, username):
+    print("count", username)
+    count = Post.objects.filter(user__username=username).count()
+    print("count", username)
+    if count:
+        return Response({"Total": count}, status=200)
+    return Response({Message.SC_NOT_FOUND}, status=400)
+
+
 def parent_comment(comment_list, level):
     comments = []
     if level == 3:
