@@ -52,7 +52,9 @@ urlpatterns = [
     path('api/post/comment', post_api_view.get_post_by_comment),
     path('api/post/comment/<str:username>', post_api_view.get_post_by_username_comment),
     path('api/post/up_vote', post_api_view.find_post_by_up_vote),
+    path('api/post/up_vote/<str:username>', post_api_view.find_post_by_username_up_vote),
     path('api/post/down_vote', post_api_view.find_post_by_down_vote),
+    path('api/post/down_vote/<str:username>', post_api_view.find_post_by_username_down_vote),
     # 20
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
