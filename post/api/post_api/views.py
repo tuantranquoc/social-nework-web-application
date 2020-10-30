@@ -346,11 +346,14 @@ def find_post_by_up_vote(request):
 @api_view(["GET"])
 def find_post_by_username_up_vote(request, username):
     if request.user.is_authenticated:
-        post = Post.objects.filter(up_vote__username=username, community__state=True)
-        if post:
-            return get_paginated_queryset_response(post, request)
+        no_block = Post.objects.filter(up_vote__username=username, community__user=request.user)
+        if no_block:
+            return get_paginated_queryset_response(no_block, request)
         return Response({Message.SC_NOT_FOUND}, status=400)
-    return Response({Message.SC_LOGIN_REDIRECT}, status=401)
+    post = Post.objects.filter(up_vote__username=username, community__state=True)
+    if post:
+        return get_paginated_queryset_response(post, request)
+    return Response({Message.SC_NOT_FOUND}, status=400)
 
 
 @api_view(["GET"])
@@ -366,11 +369,14 @@ def find_post_by_down_vote(request):
 @api_view(["GET"])
 def find_post_by_username_down_vote(request, username):
     if request.user.is_authenticated:
-        post = Post.objects.filter(down_vote__username=username)
-        if post:
-            return get_paginated_queryset_response(post, request)
+        no_block = Post.objects.filter(down_vote__username=username, community__user=request.user)
+        if no_block:
+            return get_paginated_queryset_response(no_block, request)
         return Response({Message.SC_NOT_FOUND}, status=400)
-    return Response({Message.SC_LOGIN_REDIRECT}, status=401)
+    post = Post.objects.filter(down_vote__username=username, community__state=True)
+    if post:
+        return get_paginated_queryset_response(post, request)
+    return Response({Message.SC_NOT_FOUND}, status=400)
 
 
 def parent_comment(comment_list, level):
