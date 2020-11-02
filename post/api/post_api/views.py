@@ -374,6 +374,19 @@ def find_post_by_username_down_vote(request, username):
     return Response({Message.SC_NOT_FOUND}, status=400)
 
 
+@api_view(['GET'])
+def trending(request):
+    post = Post.objects.filter(community__state=True).annotate(
+        user_count=Count("up_vote")
+    )
+    return get_paginated_queryset_response(post, request)
+
+
+@api_view(['GET'])
+def recent(request):
+    post = Post.objects.filter(community__state=True).order_by('-timestamp')
+    return get_paginated_queryset_response(post, request)
+
 
 def parent_comment(comment_list, level):
     comments = []
