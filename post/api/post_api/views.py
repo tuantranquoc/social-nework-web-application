@@ -1,10 +1,7 @@
 import base64
-import datetime
-from datetime import timedelta
 from django.core.files.base import ContentFile
 from django.db.models import Count
 from django.utils import timezone
-from pipenv.vendor.tomlkit.items import Null
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
@@ -299,20 +296,18 @@ def get_post_by_comment(request):
 
 @api_view(["GET"])
 def get_post_by_username_comment(request, username):
-    if request.user.is_authenticated:
-        # level 1
-        comment_list = Comment.objects.filter(user__username=username, parent__isnull=True)
-        # level 2 + 3
-        comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=False).filter(
-            parent__parent__parent__isnull=True, user__username=username)
-        comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=True,
-                                                                                   user__username=username)
-        query = Post.objects.filter(comment__in=comment_list)
-        query_2 = Post.objects.filter(comment__in=parent_comment(comment_list_level_2, 2))
-        query_3 = Post.objects.filter(comment__in=parent_comment(comment_list_level_3, 3))
-        query_result = (query | query_2 | query_3).distinct()
-        return get_paginated_queryset_response(query_result, request)
-    return Response({Message.SC_NO_AUTH}, status=401)
+    # level 1
+    comment_list = Comment.objects.filter(user__username=username, parent__isnull=True)
+    # level 2 + 3
+    comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=False).filter(
+        parent__parent__parent__isnull=True, user__username=username)
+    comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=True,
+                                                                               user__username=username)
+    query = Post.objects.filter(comment__in=comment_list)
+    query_2 = Post.objects.filter(comment__in=parent_comment(comment_list_level_2, 2))
+    query_3 = Post.objects.filter(comment__in=parent_comment(comment_list_level_3, 3))
+    query_result = (query | query_2 | query_3).distinct()
+    return get_paginated_queryset_response(query_result, request)
 
 
 @api_view(["GET"])
