@@ -386,7 +386,7 @@ def find_post_by_username_down_vote(request, username):
 def trending(request):
     post = Post.objects.filter(community__state=True).annotate(
         user_count=Count("up_vote")
-    )
+    ).order_by('-user_count')
     return get_paginated_queryset_response_5(post, request)
 
 
