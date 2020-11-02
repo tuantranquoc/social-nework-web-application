@@ -265,6 +265,14 @@ def get_paginated_queryset_response(query_set, request):
     serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
     return paginator.get_paginated_response(serializer.data)
 
+def get_paginated_queryset_response_5(query_set, request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 5
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
+
+
 
 @api_view(["GET"])
 def filter_by_up_vote(request):
@@ -379,13 +387,13 @@ def trending(request):
     post = Post.objects.filter(community__state=True).annotate(
         user_count=Count("up_vote")
     )
-    return get_paginated_queryset_response(post, request)
+    return get_paginated_queryset_response_5(post, request)
 
 
 @api_view(['GET'])
 def recent(request):
     post = Post.objects.filter(community__state=True).order_by('-timestamp')
-    return get_paginated_queryset_response(post, request)
+    return get_paginated_queryset_response_5(post, request)
 
 
 def parent_comment(comment_list, level):
