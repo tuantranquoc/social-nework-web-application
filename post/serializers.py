@@ -99,7 +99,7 @@ class CommunitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Community
-        fields = ['id', 'community_type', 'is_main', 'avatar', 'background', 'description', 'follower']
+        fields = ['id', 'community_type', 'is_main', 'avatar', 'background', 'description', 'follower','timestamp']
 
     def get_id(self, obj):
         return obj.id
