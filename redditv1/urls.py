@@ -83,6 +83,7 @@ urlpatterns = [
     # 6
     # community api
     path('api/community/create', community_api_view.create_community),
+    path('api/community', community_api_view.get_community),
     path('api/community/user/list', community_api_view.get_list_community_by_user),
     path('api/community/list', community_api_view.get_list_community),
     path('api/community/user/action', community_api_view.community_action),

@@ -31,6 +31,15 @@ def create_community(request):
         return Response({Message.SC_OK}, status=201)
 
 
+@api_view(["POST"])
+def get_community(request):
+    community_type = request.data.get('community')
+    if community_type:
+        community = Community.objects.filter(community_type=community_type)
+        return get_paginated_queryset_response(community, request)
+    return Response({Message.SC_BAD_RQ}, status=400)
+
+
 @api_view(["GET"])
 def get_list_community_by_user(request):
     if request.user.is_authenticated:

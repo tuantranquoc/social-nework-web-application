@@ -95,10 +95,11 @@ class CommunitySerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField(read_only=True)
     community_type = serializers.SerializerMethodField(read_only=True)
     is_main = serializers.SerializerMethodField(read_only=True)
+    follower = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Community
-        fields = ['id', 'community_type', 'is_main', 'avatar', 'background', 'description']
+        fields = ['id', 'community_type', 'is_main', 'avatar', 'background', 'description', 'follower']
 
     def get_id(self, obj):
         return obj.id
@@ -110,3 +111,8 @@ class CommunitySerializer(serializers.ModelSerializer):
         if obj.parent is None:
             return "true"
         return "false"
+
+    def get_follower(self, obj):
+        if obj.user:
+            return obj.user.count()
+        return 0
