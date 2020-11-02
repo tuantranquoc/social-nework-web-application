@@ -55,8 +55,9 @@ urlpatterns = [
     path('api/post/up_vote/<str:username>', post_api_view.find_post_by_username_up_vote),
     path('api/post/down_vote', post_api_view.find_post_by_down_vote),
     path('api/post/down_vote/<str:username>', post_api_view.find_post_by_username_down_vote),
-    path('api/post/trending', post_api_view.trending),
+    path('api/post/trending/<int:days>', post_api_view.trending),
     path('api/post/recent', post_api_view.recent),
+    path('api/post/hot', post_api_view.hot),
 
     # 25
     # comment api

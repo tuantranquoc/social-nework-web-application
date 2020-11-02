@@ -130,7 +130,6 @@ class View(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
     user = models.ManyToManyField(User)
     old_timestamp = models.DateTimeField(blank=True, null=True, default=None)
-    new_timestamp = models.DateTimeField(blank=True, null=True, default=None)
 
     def __user__(self):
         return self.user
@@ -138,8 +137,7 @@ class View(models.Model):
     def __old_timestamp__(self):
         return self.old_timestamp
 
-    def __new_timestamp__(self):
-        return self.new_timestamp
+
 
 
 def user_did_save(sender, instance, created, *args, **kwargs):

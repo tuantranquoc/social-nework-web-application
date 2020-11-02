@@ -34,7 +34,7 @@ class PostTypeAdmin(admin.ModelAdmin):
 
 
 class ViewAdmin(admin.ModelAdmin):
-    list_display = ['__user__', '__old_timestamp__', '__new_timestamp__']
+    list_display = ['__user__', '__old_timestamp__']
 
     class Meta:
         model = View

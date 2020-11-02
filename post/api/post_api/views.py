@@ -1,10 +1,13 @@
 import base64
+import datetime
 from django.core.files.base import ContentFile
+from django.core.paginator import Paginator
 from django.db.models import Count
 from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
+from account.models import Profile
 from community.models import Community
 from post.models import Post, PositivePoint, Comment, View
 from rest_framework.response import Response
@@ -18,7 +21,14 @@ User = get_user_model()
 
 @api_view(["GET"])
 def post_list_view(request):
-    query = Post.objects.filter(community__state=True)
+    if request.user.is_authenticated:
+        query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user))\
+            .union(Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first()))
+        query = Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())
+        return get_paginated_queryset_response(query, request)
+    top_community = Community.objects.filter(state=True).annotate(user_count=Count('user')).order_by(
+        '-user_count')
+    query = Post.objects.filter(community__state=True, community__in=top_community).order_by('-view_count')
     return get_paginated_queryset_response(query, request)
 
 
@@ -76,20 +86,42 @@ def post_find_by_id(request, post_id):
     post = Post.objects.filter(id=post_id).first()
     if post:
         if post.community.state is True:
-            post.view_count = post.view_count + 1
-            post.save()
-            serializer = PostSerializer(post)
-            return Response(serializer.data, status=200)
+            if not request.user.is_authenticated:
+                serializer = PostSerializer(post)
+                return Response(serializer.data, status=200)
+            view = View.objects.filter(user=request.user, post=post).first()
+            if not view:
+                view = View.objects.create(post=post)
+                view.user.add(request.user)
+                view.save()
+            if view.old_timestamp is None:
+                view.old_timestamp = timezone.now()
+                view.save()
+                post.view_count = post.view_count + 1
+                post.save()
+                serializer = PostSerializer(post)
+                return Response(serializer.data, status=200)
+            if view.old_timestamp is not None:
+                difference = (timezone.now() - view.old_timestamp).total_seconds()
+                if difference >= 120:
+                    post.view_count = post.view_count + 1
+                    view.old_timestamp = timezone.now()
+                    view.save()
+                    post.save()
+                serializer = PostSerializer(post)
+                return Response(serializer.data, status=200)
         if post.community.state is False:
             if not request.user.is_authenticated:
                 return Response({Message.SC_LOGIN_REDIRECT}, status=401)
             if Community.objects.filter(user=request.user, community_type=post.community):
                 view = View.objects.filter(user=request.user, post=post).first()
                 if not view:
+                    print("1 if")
                     view = View.objects.create(post=post)
                     view.user.add(request.user)
                     view.save()
                 if view.old_timestamp is None:
+                    print("2 if")
                     view.old_timestamp = timezone.now()
                     view.save()
                     post.view_count = post.view_count + 1
@@ -97,6 +129,7 @@ def post_find_by_id(request, post_id):
                     serializer = PostSerializer(post)
                     return Response(serializer.data, status=200)
                 if view.old_timestamp is not None:
+                    print("3 if")
                     difference = (timezone.now() - view.old_timestamp).total_seconds()
                     if difference >= 120:
                         post.view_count = post.view_count + 1
@@ -265,13 +298,13 @@ def get_paginated_queryset_response(query_set, request):
     serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
     return paginator.get_paginated_response(serializer.data)
 
+
 def get_paginated_queryset_response_5(query_set, request):
     paginator = PageNumberPagination()
     paginator.page_size = 5
     paginated_qs = paginator.paginate_queryset(query_set, request)
     serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
     return paginator.get_paginated_response(serializer.data)
-
 
 
 @api_view(["GET"])
@@ -383,10 +416,24 @@ def find_post_by_username_down_vote(request, username):
 
 
 @api_view(['GET'])
-def trending(request):
+def trending(request, days):
+    if days:
+        past = timestamp_in_past_by_day(days)
+        post = Post.objects.filter(community__state=True, timestamp__gte=past,
+                                   timestamp__lte=datetime.datetime.now()).annotate(
+            user_count=Count("up_vote")
+        ).order_by('-user_count')
+        return get_paginated_queryset_response_5(post, request)
     post = Post.objects.filter(community__state=True).annotate(
         user_count=Count("up_vote")
     ).order_by('-user_count')
+    return get_paginated_queryset_response_5(post, request)
+
+
+@api_view(['GET'])
+def hot(request):
+    post = Post.objects.filter(community__state=True, timestamp__gte=timestamp_in_past_by_day(1),
+                               timestamp__lte=datetime.datetime.now()).order_by('-view_count')
     return get_paginated_queryset_response_5(post, request)
 
 
@@ -405,3 +452,8 @@ def parent_comment(comment_list, level):
         for level_2 in comment_list:
             comments.append(level_2.parent)
     return comments
+
+
+def timestamp_in_past_by_day(days):
+    print("past day", timezone.now() - datetime.timedelta(days))
+    return timezone.now() - datetime.timedelta(days)
