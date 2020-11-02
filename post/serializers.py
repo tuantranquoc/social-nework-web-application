@@ -37,7 +37,7 @@ class PostSerializer(serializers.ModelSerializer):
                   'content',
                   'parent',
                   'timestamp',
-                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type','view_count']
+                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type', 'view_count']
 
     def get_up_vote(self, obj):
         return obj.up_vote.count()
@@ -64,7 +64,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         # ['content']
-        fields = ['content', 'username', 'post', 'id', 'up_vote', 'down_vote','timestamp']
+        fields = ['content', 'username', 'post', 'id', 'up_vote', 'down_vote', 'timestamp']
 
     def get_username(self, obj):
         return obj.user.username
@@ -98,16 +98,15 @@ class CommunitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Community
-        fields = ['id','community_type','is_main']
+        fields = ['id', 'community_type', 'is_main', 'avatar', 'background', 'description']
 
     def get_id(self, obj):
         return obj.id
 
     def get_community_type(self, obj):
-       return obj.community_type
+        return obj.community_type
 
     def get_is_main(self, obj):
         if obj.parent is None:
             return "true"
         return "false"
-

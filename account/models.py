@@ -39,6 +39,11 @@ class Profile(models.Model):
     def __point__(self):
         return self.user.positivepoint.point
 
+    def __follower__(self):
+        return self.follower.count()
+
+
+
 
 class FollowerRelation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

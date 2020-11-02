@@ -5,7 +5,7 @@ from .models import Post, PositivePoint, Comment, PostType, View
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['__id__', '__str__', '__up_vote__', '__down_vote__', '__time__', '__type__', '__view__']
+    list_display = ['__id__', '__str__','__user__', '__up_vote__', '__down_vote__', '__time__', '__type__', '__view__']
 
     class Meta:
         model = Post

@@ -54,6 +54,9 @@ class Post(models.Model):
     def __view__(self):
         return self.view_count
 
+    def __user__(self):
+        return self.user.username
+
 
 class PositivePoint(models.Model):
     id = models.AutoField(primary_key=True)

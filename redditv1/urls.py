@@ -76,6 +76,7 @@ urlpatterns = [
     path('api/logout', profile_api_view.logout_view_js),
     path('api/register', profile_api_view.register_via_react_view),
     path('api/profile/update/', profile_api_view.profile_update_via_react_view),
+    path('api/profile/action/', profile_api_view.profile_action),
     # 6
     # community api
     path('api/community/create', community_api_view.create_community),

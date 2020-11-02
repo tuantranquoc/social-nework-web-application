@@ -6,7 +6,7 @@ from post.models import PositivePoint
 
 
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ['__str__', '__id__', '__time__', '__point__']
+    list_display = ['__str__', '__id__', '__time__', '__point__', '__follower__']
 
     class Meta:
         model = Profile

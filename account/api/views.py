@@ -231,3 +231,19 @@ def register_via_react_view(request, *args, **kwargs):
         if not user:
             return Response({}, status=400)
     return Response({}, status=200)
+
+
+@api_view(['POST'])
+def profile_action(request):
+    if request.user.is_authenticated:
+        user_id = request.data.get("user_id")
+        action = request.data.get("action")
+        profile = Profile.objects.filter(user__id=user_id).first()
+        if profile:
+            if action == "follow":
+                profile.follower.add(request.user)
+            if action == "un_follow":
+                profile.follower.add(request.user)
+            return Response({Message.SC_OK}, status=200)
+        return Response({Message.SC_NOT_FOUND}, status=400)
+    return Response({Message.SC_NO_AUTH}, status=401)

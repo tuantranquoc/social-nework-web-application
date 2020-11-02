@@ -18,7 +18,7 @@ User = get_user_model()
 
 @api_view(["GET"])
 def post_list_view(request):
-    query = Post.objects.all()
+    query = Post.objects.filter(community__state=True)
     return get_paginated_queryset_response(query, request)
 
 
@@ -172,7 +172,7 @@ def user_post_filter_by_up_vote(request):
             user_count=Count("up_vote")
         ).order_by(
             "-user_count"
-        )
+        ).filter(community__user=request.user)
         return get_paginated_queryset_response(query, request)
     return Response({Message.SC_NO_AUTH}, status=401)
 
@@ -272,7 +272,7 @@ def filter_by_up_vote(request):
         user_count=Count("up_vote")
     ).order_by(
         "-user_count"
-    )
+    ).filter(community__state=True)
     return get_paginated_queryset_response(query, request)
 
 
@@ -372,6 +372,7 @@ def find_post_by_username_down_vote(request, username):
     if post:
         return get_paginated_queryset_response(post, request)
     return Response({Message.SC_NOT_FOUND}, status=400)
+
 
 
 def parent_comment(comment_list, level):

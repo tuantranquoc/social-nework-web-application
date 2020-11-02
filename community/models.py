@@ -13,6 +13,9 @@ class Community(models.Model):
     time_stamp = models.DateTimeField(auto_now_add=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="owner")
     state = models.BooleanField(default=True)
+    description = models.TextField(default="")
+    avatar = models.ImageField(upload_to='images/', blank=True, null=True)
+    background = models.ImageField(upload_to='images/', blank=True, null=True)
 
     class Meta:
         ordering = ['id']
@@ -37,3 +40,6 @@ class Community(models.Model):
 
     def __state__(self):
         return self.state
+
+    def __description__(self):
+        return self.description
