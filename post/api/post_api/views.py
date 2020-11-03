@@ -21,12 +21,13 @@ User = get_user_model()
 
 @api_view(["GET"])
 def post_list_view(request):
-    if request.user.is_authenticated:
-        query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user)) \
-            .union(Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first()))
-        return get_paginated_queryset_response(query, request)
     top_community = Community.objects.filter(state=True).annotate(user_count=Count('user')).order_by(
         '-user_count')
+    if request.user.is_authenticated:
+        query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user)) \
+            .union(Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
+            Post.objects.filter(community__state=True, community__in=top_community).order_by('-view_count'))
+        return get_paginated_queryset_response(query, request)
     query = Post.objects.filter(community__state=True, community__in=top_community).order_by('-view_count')
     return get_paginated_queryset_response(query, request)
 
@@ -453,6 +454,7 @@ def hot(request):
 def recent(request):
     post = Post.objects.filter(community__state=True).order_by('-timestamp')
     return get_paginated_queryset_response_5(post, request)
+
 
 @api_view(['GET'])
 def get_type_list(request):

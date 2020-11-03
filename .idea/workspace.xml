@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9b303dd0-e5be-4df3-8215-400d759e2d14" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/post/migrations/0022_auto_20201103_0851.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/user_case.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/88c3dbbf-2367-49ec-81b2-0ae530ef3741.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/88c3dbbf-2367-49ec-81b2-0ae530ef3741.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/post/api/post_api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/api/post_api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/post/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/post/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/redditv1/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/redditv1/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,7 +151,7 @@
       <workItem from="1604147779858" duration="304000" />
       <workItem from="1604240418561" duration="1653000" />
       <workItem from="1604286982832" duration="9619000" />
-      <workItem from="1604363276754" duration="3424000" />
+      <workItem from="1604363276754" duration="3719000" />
     </task>
     <servers />
   </component>
