@@ -20,7 +20,7 @@ class Post(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     community = models.ForeignKey(Community, on_delete=models.CASCADE, blank=True, null=True)
     title = models.CharField(max_length=60, blank=True, null=True)
-    type = models.OneToOneField("PostType", blank=True, null=True, on_delete=models.CASCADE)
+    type = models.ForeignKey("PostType", blank=True, null=True, on_delete=models.CASCADE)
     view_count = models.IntegerField(default=0)
 
     # view = models.ForeignKey("View", on_delete=models.CASCADE, blank=True, null=True)

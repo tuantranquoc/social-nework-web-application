@@ -9,9 +9,9 @@ from rest_framework.pagination import PageNumberPagination
 
 from account.models import Profile
 from community.models import Community
-from post.models import Post, PositivePoint, Comment, View
+from post.models import Post, PositivePoint, Comment, View, PostType
 from rest_framework.response import Response
-from post.serializers import PostSerializer
+from post.serializers import PostSerializer, PostTypeSerializer
 from django.contrib.auth import get_user_model
 
 from redditv1.message import Message
@@ -22,9 +22,8 @@ User = get_user_model()
 @api_view(["GET"])
 def post_list_view(request):
     if request.user.is_authenticated:
-        query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user))\
+        query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user)) \
             .union(Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first()))
-        query = Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())
         return get_paginated_queryset_response(query, request)
     top_community = Community.objects.filter(state=True).annotate(user_count=Count('user')).order_by(
         '-user_count')
@@ -37,9 +36,11 @@ def post_create_api(request):
     if not request.user.is_authenticated:
         return Response({Message.SC_LOGIN_REDIRECT}, status=401)
     if request.method == "POST":
+        title = request.data.get("title")
         content = request.data.get("content")
         community = request.data.get("community")
         image = request.data.get('image')
+        type = request.data.get('type')
         if community is None:
             return Response({Message.SC_BAD_RQ}, status=400)
         user = request.user
@@ -55,12 +56,15 @@ def post_create_api(request):
                             format, imgstr = image.split(';base64,')
                             ext = format.split('/')[-1]
                             image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-                            current_post = Post.objects.create(user=user, content=content, community=_community)
+                            current_post = Post.objects.create(user=user, content=content, community=_community,
+                                                               title=title,
+                                                               type=PostType.objects.filter(type=type).first())
                             current_post.image = image
                             current_post.save()
                             serializer = PostSerializer(current_post)
                             return Response(serializer.data, status=201)
-                    current_post = Post.objects.create(user=user, content=content, community=_community)
+                    current_post = Post.objects.create(user=user, content=content, community=_community, title=title,
+                                                       type=PostType.objects.filter(type=type).first())
                     serializer = PostSerializer(current_post)
                     return Response(serializer.data, status=201)
             return Response({Message.SC_BAD_RQ}, status=400)
@@ -307,6 +311,14 @@ def get_paginated_queryset_response_5(query_set, request):
     return paginator.get_paginated_response(serializer.data)
 
 
+def get_paginated_queryset_response_post_type(query_set, request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 5
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = PostTypeSerializer(paginated_qs, many=True, context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
+
+
 @api_view(["GET"])
 def filter_by_up_vote(request):
     query = Post.objects.annotate(
@@ -441,6 +453,11 @@ def hot(request):
 def recent(request):
     post = Post.objects.filter(community__state=True).order_by('-timestamp')
     return get_paginated_queryset_response_5(post, request)
+
+@api_view(['GET'])
+def get_type_list(request):
+    query = PostType.objects.all()
+    return get_paginated_queryset_response_post_type(query, request)
 
 
 def parent_comment(comment_list, level):

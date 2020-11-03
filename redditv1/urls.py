@@ -58,6 +58,7 @@ urlpatterns = [
     path('api/post/trending/<int:days>', post_api_view.trending),
     path('api/post/recent', post_api_view.recent),
     path('api/post/hot', post_api_view.hot),
+    path('api/post/type', post_api_view.get_type_list),
 
     # 25
     # comment api

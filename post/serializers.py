@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from account.serializers import PublicProfileSerializer
 from community.models import Community
-from post.models import Post, Comment
+from post.models import Post, Comment, PostType
 
 MAX_CONTENT_LENGTH = 300
 
@@ -28,6 +28,7 @@ class PostSerializer(serializers.ModelSerializer):
     up_vote = serializers.SerializerMethodField(read_only=True)
     down_vote = serializers.SerializerMethodField(read_only=True)
     community_type = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
@@ -37,7 +38,7 @@ class PostSerializer(serializers.ModelSerializer):
                   'content',
                   'parent',
                   'timestamp',
-                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type', 'view_count']
+                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type', 'type', 'view_count']
 
     def get_up_vote(self, obj):
         return obj.up_vote.count()
@@ -53,6 +54,11 @@ class PostSerializer(serializers.ModelSerializer):
     def get_sub_community_type(self, obj):
         if obj.sub_community:
             return obj.sub_community.community_type
+        return None
+
+    def get_type(self, obj):
+        if obj.type:
+            return obj.type.type
         return None
 
 
@@ -99,7 +105,7 @@ class CommunitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Community
-        fields = ['id', 'community_type', 'is_main', 'avatar', 'background', 'description', 'follower','timestamp']
+        fields = ['id', 'community_type', 'is_main', 'avatar', 'background', 'description', 'follower', 'timestamp']
 
     def get_id(self, obj):
         return obj.id
@@ -116,3 +122,15 @@ class CommunitySerializer(serializers.ModelSerializer):
         if obj.user:
             return obj.user.count()
         return 0
+
+
+class PostTypeSerializer(serializers.ModelSerializer):
+    #   count = serializers.SerializerMethodField(read_only=True)
+    id = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = PostType
+        fields = ['id', 'type']
+
+    def get_id(self, obj):
+        return obj.id
