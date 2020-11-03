@@ -1,12 +1,12 @@
 from django.db.models import Count
-from django.http import HttpResponse
+from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
-from post.api.post_api.views import parent_comment
-from post.models import Post, Comment, PositivePoint
+from post.api.post_api.views import timestamp_in_the_past_by_day
+from post.models import Post, Comment
 from rest_framework.response import Response
-from post.serializers import PostSerializer, CommentSerializer
+from post.serializers import CommentSerializer, CommentGraphSerializer
 from redditv1.message import Message
 
 
@@ -16,6 +16,17 @@ def get_paginated_queryset_response(query_set, request):
     paginator.page_size = 20
     paginated_qs = paginator.paginate_queryset(query_set, request)
     serializer = CommentSerializer(paginated_qs, many=True, context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
+
+
+def get_paginated_queryset_response_graph(query_set, request, page_size):
+    paginator = PageNumberPagination()
+    if page_size:
+        paginator.page_size = page_size
+    else:
+        paginator.page_size = 50
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = CommentGraphSerializer(paginated_qs, many=True, context={"request": request})
     return paginator.get_paginated_response(serializer.data)
 
 
@@ -154,3 +165,16 @@ def count_by_user_post(request, username):
     if comment:
         return Response({"Total": comment.count()}, status=200)
     return Response({Message.SC_NOT_FOUND}, status=400)
+
+
+@api_view(["POST", "GET"])
+def get_comment_by_time_interval(request):
+    from_timestamp = request.data.get('from_timestamp')
+    to_timestamp = request.data.get('to_timestamp')
+    page_size = request.data.get('page_size')
+    if from_timestamp is not None and to_timestamp is not None:
+        query = Comment.objects.filter(timestamp__gte=from_timestamp, timestamp__lte=to_timestamp, user=request.user)
+        return get_paginated_queryset_response_graph(query, request, page_size)
+    query = Comment.objects.filter(timestamp__gte=timestamp_in_the_past_by_day(30), timestamp__lte=timezone.now(),
+                                   user=request.user)
+    return get_paginated_queryset_response_graph(query, request, page_size)

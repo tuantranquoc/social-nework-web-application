@@ -26,7 +26,7 @@ class Post(models.Model):
     # view = models.ForeignKey("View", on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-timestamp']
 
     def __id__(self):
         return self.id
@@ -91,6 +91,9 @@ class Comment(models.Model):
     up_vote = models.ManyToManyField(User, related_name="c_up_vote", blank=True)
     down_vote = models.ManyToManyField(User, related_name="c_down_vote", blank=True)
 
+    class Meta:
+        ordering = ['-id']
+
     def __id__(self):
         return self.id
 
@@ -122,6 +125,9 @@ class Comment(models.Model):
 class PostType(models.Model):
     type = models.CharField(max_length=60)
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self):
         return self.type
 
@@ -131,6 +137,9 @@ class View(models.Model):
     user = models.ManyToManyField(User)
     old_timestamp = models.DateTimeField(blank=True, null=True, default=None)
 
+    class Meta:
+        ordering = ['-id']
+
     def __user__(self):
         return self.user
 
@@ -138,12 +147,3 @@ class View(models.Model):
         return self.old_timestamp
 
 
-
-
-def user_did_save(sender, instance, created, *args, **kwargs):
-    if created:
-        View.objects.get_or_create(user=instance)
-
-
-# user save will trigger profile save
-post_save.connect(user_did_save, sender=User)

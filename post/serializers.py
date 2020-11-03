@@ -134,3 +134,25 @@ class PostTypeSerializer(serializers.ModelSerializer):
 
     def get_id(self, obj):
         return obj.id
+
+
+class CommentGraphSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'timestamp']
+
+    def get_id(self, obj):
+        return obj.id
+
+
+class PostGraphSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ['id', 'timestamp']
+
+    def get_id(self, obj):
+        return obj.id

@@ -43,8 +43,6 @@ class Profile(models.Model):
         return self.follower.count()
 
 
-
-
 class FollowerRelation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)

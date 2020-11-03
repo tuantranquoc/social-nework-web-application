@@ -16,5 +16,5 @@ class ContentSerializer(serializers.ModelSerializer):
         model = Content
         fields = ['id', 'username', 'content', 'timestamp']
 
-    def get_username(self,obj):
+    def get_username(self, obj):
         return obj.user.username

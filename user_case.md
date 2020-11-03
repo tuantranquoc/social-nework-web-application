@@ -1,5 +1,5 @@
 What user see on first main page:
--> Control flow for user Anonymous and Authenticated user.
+-> Control flow for Anonymous user and Authenticated user.
 Anonymous user will see:
 - Post in top community and public mode
 - Post has high view but not recently, so we will make it like 1 week if possible

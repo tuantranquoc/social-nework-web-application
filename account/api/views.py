@@ -1,12 +1,17 @@
 import base64
+import operator
+from functools import reduce
 
 from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.core.files.base import ContentFile
+from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from account.models import Profile
 from account.serializers import PublicProfileSerializer
+from post.models import Post
+from post.serializers import PostSerializer
 from redditv1.message import Message
 
 User = get_user_model()
@@ -226,6 +231,7 @@ def logout_view_js(request, *args, **kwargs):
 def register_via_react_view(request, *args, **kwargs):
     username = request.data.get("username")
     password = request.data.get("password")
+    print(username, password)
     if username and password:
         user = User.objects.create_user(username=username, password=password)
         if not user:
@@ -247,3 +253,43 @@ def profile_action(request):
             return Response({Message.SC_OK}, status=200)
         return Response({Message.SC_NOT_FOUND}, status=400)
     return Response({Message.SC_NO_AUTH}, status=401)
+
+
+def spilt_user_tag(hash_tag):
+    if "@" in hash_tag:
+        hash_tag_list = hash_tag.split("@")
+        hash_tag_list.pop(0)
+        return hash_tag_list
+    return hash_tag
+
+
+@api_view(['POST'])
+def search(request):
+    key_word = request.data.get('key_word')
+    if key_word:
+        if '@' in key_word:
+            tags = spilt_user_tag(key_word)
+            profiles = Profile.objects.filter(user__username__in=tags)
+            return get_paginated_queryset_recommend_user_response(profiles, request)
+        if '#' in key_word:
+            tags = spilt_content(key_word)
+            query = Post.objects.filter(reduce(operator.and_, (Q(content__contains=x) for x in tags)))
+            return get_paginated_queryset_response(query, request, 10)
+        query = Post.objects.filter(content__contains=key_word)
+        return get_paginated_queryset_response(query, request, 10)
+
+
+def spilt_content(hash_tag):
+    if "#" in hash_tag:
+        hash_tag_list = hash_tag.split("#")
+        hash_tag_list.pop(0)
+        return hash_tag_list
+    return hash_tag
+
+
+def get_paginated_queryset_response(query_set, request, page_size):
+    paginator = PageNumberPagination()
+    paginator.page_size = page_size
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
