@@ -86,7 +86,6 @@ def post_delete_api(request, post_id):
 def post_find_by_id(request, post_id):
     post = Post.objects.filter(id=post_id).first()
     if post:
-        view = View.objects.filter(user=request.user, post=post).first()
         if post.community.state is True:
             if not request.user.is_authenticated:
                 serializer = PostSerializer(post)
@@ -94,11 +93,13 @@ def post_find_by_id(request, post_id):
             if post.user == request.user:
                 serializer = PostSerializer(post)
                 return Response(serializer.data, status=200)
+            view = View.objects.filter(user=request.user, post=post).first()
             serializer = check_view(view, post, request.user)
             return Response(serializer.data, status=200)
         if post.community.state is False:
             if not request.user.is_authenticated:
                 return Response({Message.SC_LOGIN_REDIRECT}, status=401)
+            view = View.objects.filter(user=request.user, post=post).first()
             if Community.objects.filter(user=request.user, community_type=post.community):
                 serializer = check_view(view, post, request.user)
                 return Response(serializer.data, status=200)
