@@ -22,7 +22,7 @@ from post.api.comment_api import views as comment_api_view
 from account.api import views as profile_api_view
 from community.api import views as community_api_view
 from rest_framework_simplejwt import views as jwt_views
-
+from chat.api import views as chat_api_view
 from redditv1 import settings
 
 urlpatterns = [
@@ -59,6 +59,7 @@ urlpatterns = [
     path('api/post/recent', post_api_view.recent),
     path('api/post/hot', post_api_view.hot),
     path('api/post/type', post_api_view.get_type_list),
+    path('api/post/graph', post_api_view.get_post_by_time_interval),
 
     # 25
     # comment api
@@ -72,6 +73,7 @@ urlpatterns = [
     path('api/comment/comment/<int:comment_id>', comment_api_view.get_comment_by_id),
     path('api/comment/check/vote', comment_api_view.check_vote),
     path('api/comment/<int:post_id>/count', comment_api_view.count_comment_by_post),
+    path('api/comment/graph', comment_api_view.get_comment_by_time_interval),
     # 9
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),
@@ -90,8 +92,13 @@ urlpatterns = [
     path('api/community/list', community_api_view.get_list_community),
     path('api/community/user/action', community_api_view.community_action),
     path('api/community/change/state/<str:community_type>', community_api_view.change_state),
+    # char api
+    path('api/chatroom/create/<str:username>', chat_api_view.create_chat_room),
+    path('api/chatroom/chat/<str:username>', chat_api_view.create_chat),
+    path('api/chatroom/view/<str:username>', chat_api_view.get_chat_view),
     # 7
     # token
+    path('api/search/', profile_api_view.search),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
 ]
