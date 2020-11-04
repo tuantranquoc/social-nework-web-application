@@ -23,6 +23,8 @@ def post_list_view(request):
     top_community = Community.objects.filter(state=True).annotate(user_count=Count('user')).order_by(
         '-user_count')
     if request.user.is_authenticated:
+        # top_community = Community.objects.filter(user=request.user).union(
+        #     Community.objects.filter(community__state=True)).distinct('community_type')
         query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user)) \
             .union(Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
             Post.objects.filter(community__state=True, community__in=top_community).order_by('-view_count'))

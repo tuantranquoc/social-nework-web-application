@@ -1,3 +1,6 @@
+import base64
+
+from django.core.files.base import ContentFile
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -82,3 +85,34 @@ def change_state(request, community_type):
             return Response(Message.SC_PERMISSION_DENIED, status=403)
         return Response(Message.SC_BAD_RQ, status=400)
     return Response(Message.SC_LOGIN_REDIRECT, status=403)
+
+
+@api_view(['POST'])
+def community_update_via_react_view(request, *args, **kwargs):
+    if not request.user.is_authenticated:
+        return Response({}, status=401)
+    user = request.user
+    community_type = request.data.get('community_type')
+    community = Community.objects.filter(creator=request.user, community_type=community_type).first()
+    background = request.data.get("background")
+    description = request.data.get("description")
+    avatar = request.data.get("avatar")
+    if background:
+        data = request.data.get("background")
+        format, imgstr = data.split(';base64,')
+        ext = format.split('/')[-1]
+        image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        community.background = image
+    if avatar:
+        data = request.data.get("avatar")
+        format, imgstr = data.split(';base64,')
+        ext = format.split('/')[-1]
+        image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        community.avatar = image
+    if description:
+        community.description = description
+    user.save()
+    community.save()
+    if not community.background or not community.avatar:
+        return Response({Message.SC_BAD_IMG}, status=400)
+    return Response({}, status=200)

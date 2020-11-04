@@ -92,6 +92,7 @@ urlpatterns = [
     path('api/community/list', community_api_view.get_list_community),
     path('api/community/user/action', community_api_view.community_action),
     path('api/community/change/state/<str:community_type>', community_api_view.change_state),
+    path('api/community/update/', community_api_view.community_update_via_react_view),
     # char api
     path('api/chatroom/create/<str:username>', chat_api_view.create_chat_room),
     path('api/chatroom/chat/<str:username>', chat_api_view.create_chat),
