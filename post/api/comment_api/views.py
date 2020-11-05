@@ -187,7 +187,8 @@ def reset(request):
     for comment in query:
         comment_point = CommentPoint.objects.filter(comment=comment)
         if not comment_point:
-            CommentPoint.objects.create(comment=comment)
+            CommentPoint.objects.create(comment=comment,
+                                        point=rank.confidence(comment.up_vote.count(), comment.down_vote.count()))
     return Response({Message.SC_OK}, status=200)
 
 
