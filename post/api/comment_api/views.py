@@ -2,9 +2,9 @@ from django.db.models import Count
 from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
-
+from post import rank
 from post.api.post_api.views import timestamp_in_the_past_by_day
-from post.models import Post, Comment
+from post.models import Post, Comment, CommentPoint
 from rest_framework.response import Response
 from post.serializers import CommentSerializer, CommentGraphSerializer
 from redditv1.message import Message
@@ -32,8 +32,7 @@ def get_paginated_queryset_response_graph(query_set, request, page_size):
 
 @api_view(['GET'])
 def comment_parent_list_view(request, comment_id, *args, **kwargs):
-    comment = Comment.objects.filter(id=comment_id).first()
-    comment = Comment.objects.filter(parent=comment)
+    comment = Comment.objects.filter(parent__id=comment_id).order_by('-commentpoint__point')
     if not comment:
         return Response({}, status=204)
     serializer = CommentSerializer(comment, many=True)
@@ -51,6 +50,7 @@ def child_comment_create_view(request, comment_id, *args, **kwargs):
             return Response({}, status=204)
         content = request.data.get("content")
         comment = Comment.objects.create(parent=comment, content=content, user=request.user)
+        CommentPoint.objects.create(comment=comment)
         if comment:
             serializer = CommentSerializer(comment)
             return Response(serializer.data, status=201)
@@ -67,6 +67,7 @@ def comment_create_view(request, *args, **kwargs):
         if content and post_id:
             post = Post.objects.get(id=post_id)
             comment = Comment.objects.create(user=request.user, post=post, content=content)
+            CommentPoint.objects.create(comment=comment)
             comment = Comment.objects.filter(id=comment.id)
             serializer = CommentSerializer(comment, many=True)
             return Response(serializer.data, status=201)
@@ -76,9 +77,7 @@ def comment_create_view(request, *args, **kwargs):
 
 @api_view(['GET'])  # http method client has send == POST
 def comment_api_view(request, post_id, *args, **kwargs):
-    comment = Comment.objects.filter(post_id=post_id)
-    # test comment count
-    # test comment count
+    comment = Comment.objects.filter(post_id=post_id).order_by('-commentpoint__point')
     if not comment:
         return Response({}, status=204)
     serializer = CommentSerializer(comment, many=True)
@@ -96,10 +95,12 @@ def comment_action(request):
         if action == "up_vote":
             comment.up_vote.add(request.user)
             comment.down_vote.remove(request.user)
+            comment_point_update(comment)
             return Response(Message.SC_OK, status=200)
         if action == "down_vote":
             comment.up_vote.remove(request.user)
             comment.down_vote.add(request.user)
+            comment_point_update(comment)
             return Response(Message.SC_OK, status=200)
     return Response(Message.SC_BAD_RQ, status=400)
 
@@ -178,3 +179,20 @@ def get_comment_by_time_interval(request):
     query = Comment.objects.filter(timestamp__gte=timestamp_in_the_past_by_day(30), timestamp__lte=timezone.now(),
                                    user=request.user)
     return get_paginated_queryset_response_graph(query, request, page_size)
+
+
+@api_view(["GET"])
+def reset(request):
+    query = Comment.objects.all()
+    for comment in query:
+        comment_point = CommentPoint.objects.filter(comment=comment).first()
+        if not comment_point:
+            CommentPoint.objects.create(comment=comment)
+    return Response({Message.SC_OK}, status=200)
+
+
+def comment_point_update(comment):
+    if comment:
+        comment_point = CommentPoint.objects.filter(comment=comment).first()
+        comment_point.point = rank.confidence(comment.up_vote.count(), comment.down_vote.count())
+        comment_point.save()

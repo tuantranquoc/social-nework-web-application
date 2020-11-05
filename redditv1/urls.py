@@ -74,6 +74,7 @@ urlpatterns = [
     path('api/comment/check/vote', comment_api_view.check_vote),
     path('api/comment/<int:post_id>/count', comment_api_view.count_comment_by_post),
     path('api/comment/graph', comment_api_view.get_comment_by_time_interval),
+    path('api/comment/all', comment_api_view.reset),
     # 9
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),

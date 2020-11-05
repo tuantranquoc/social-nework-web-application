@@ -122,6 +122,20 @@ class Comment(models.Model):
         return self.down_vote.count()
 
 
+class CommentPoint(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
+    point = models.FloatField(default=0)
+
+    class Meta:
+        ordering = ['-point']
+
+    def __id__(self):
+        return self.comment.id
+
+    def __point__(self):
+        return self.point
+
+
 class PostType(models.Model):
     type = models.CharField(max_length=60)
 
@@ -145,5 +159,3 @@ class View(models.Model):
 
     def __old_timestamp__(self):
         return self.old_timestamp
-
-
