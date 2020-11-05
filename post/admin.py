@@ -1,11 +1,12 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Post, PositivePoint, Comment, PostType, View, CommentPoint
+from .models import Post, PositivePoint, Comment, PostType, View, CommentPoint, PostPoint
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['__id__', '__str__','__user__', '__up_vote__', '__down_vote__', '__time__', '__type__', '__view__']
+    list_display = ['__id__', '__str__', '__user__', '__up_vote__', '__down_vote__', '__time__', '__type__', '__view__',
+                    '__point__']
 
     class Meta:
         model = Post
@@ -25,11 +26,20 @@ class CommentAdmin(admin.ModelAdmin):
     class Meta:
         model = Comment
 
+
 class CommentPointAdmin(admin.ModelAdmin):
-    list_display = ['__id__','__point__']
+    list_display = ['__id__', '__point__']
 
     class Meta:
         model = CommentPoint
+
+
+class PostPointAdmin(admin.ModelAdmin):
+    list_display = ['__id__', '__point__']
+
+    class Meta:
+        model = PostPoint
+
 
 class PostTypeAdmin(admin.ModelAdmin):
     list_display = ['__str__']
@@ -50,3 +60,4 @@ admin.site.register(View, ViewAdmin)
 admin.site.register(PostType, PostTypeAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(CommentPoint, CommentPointAdmin)
+admin.site.register(PostPoint, PostPointAdmin)

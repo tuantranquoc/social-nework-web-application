@@ -60,7 +60,7 @@ urlpatterns = [
     path('api/post/hot', post_api_view.hot),
     path('api/post/type', post_api_view.get_type_list),
     path('api/post/graph', post_api_view.get_post_by_time_interval),
-
+    path('api/post/reset', post_api_view.reset),
     # 25
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),

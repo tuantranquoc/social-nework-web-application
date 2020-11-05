@@ -8,7 +8,8 @@ from rest_framework.pagination import PageNumberPagination
 
 from account.models import Profile
 from community.models import Community
-from post.models import Post, PositivePoint, Comment, View, PostType
+from post import rank
+from post.models import Post, PositivePoint, Comment, View, PostType, PostPoint
 from rest_framework.response import Response
 from post.serializers import PostSerializer, PostTypeSerializer, PostGraphSerializer
 from django.contrib.auth import get_user_model
@@ -23,13 +24,16 @@ def post_list_view(request):
     top_community = Community.objects.filter(state=True).annotate(user_count=Count('user')).order_by(
         '-user_count')
     if request.user.is_authenticated:
-        # top_community = Community.objects.filter(user=request.user).union(
-        #     Community.objects.filter(community__state=True)).distinct('community_type')
-        query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user)) \
-            .union(Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
-            Post.objects.filter(community__state=True, community__in=top_community).order_by('-view_count'))
+        top_community = Community.objects.filter(user=request.user).union(
+            Community.objects.filter(community__state=True)).distinct('community_type')
+        # query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user)) \
+        #     .union(Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
+        #     Post.objects.filter(community__state=True, community__in=top_community).distinct().order_by('-postpoint__point'))
+        # query = Post.objects.all().order_by('postpoint__point')
+        query = Post.objects.filter(user=request.user).union(
+            Post.objects.filter(community__user=request.user)).order_by('-point')
         return get_paginated_queryset_response(query, request)
-    query = Post.objects.filter(community__state=True, community__in=top_community).order_by('-view_count')
+    query = Post.objects.filter(community__state=True, community__in=top_community).order_by('-postpoint__point')
     return get_paginated_queryset_response(query, request)
 
 
@@ -66,6 +70,7 @@ def post_create_api(request):
                         return Response(serializer.data, status=201)
                 current_post = Post.objects.create(user=user, content=content, community=_community, title=title,
                                                    type=PostType.objects.filter(type=type).first())
+                PostPoint.objects.create(post=current_post)
                 serializer = PostSerializer(current_post)
                 return Response(serializer.data, status=201)
         return Response({Message.SC_BAD_RQ}, status=400)
@@ -137,22 +142,34 @@ def post_action(request):
                 post.up_vote.remove(request.user)
                 positive_point.point = positive_point.point - 2
                 positive_point.save()
+                post_point = PostPoint.objects.filter(post=post).first()
+                post_point.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
+                                            datetime.datetime.now())
                 return Response({Message.SC_OK}, status=200)
             post.up_vote.add(request.user)
             post.down_vote.remove(request.user)
             positive_point.point = positive_point.point + 2
             positive_point.save()
+            post_point = PostPoint.objects.filter(post=post).first()
+            post_point.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
+                                        datetime.datetime.now())
             return Response({Message.SC_OK}, status=200)
         if action == "down_vote":
             if Post.objects.filter(id=post_id, down_vote=request.user):
                 post.down_vote.remove(request.user)
                 positive_point.point = positive_point.point + 2
                 positive_point.save()
+                post_point = PostPoint.objects.filter(post=post).first()
+                post_point.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
+                                            datetime.datetime.now())
                 return Response({Message.SC_OK}, status=200)
             post.down_vote.add(request.user)
             post.up_vote.remove(request.user)
             positive_point.point = positive_point.point - 2
             positive_point.save()
+            post_point = PostPoint.objects.filter(post=post).first()
+            post_point.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
+                                        datetime.datetime.now())
             return Response({Message.SC_OK}, status=200)
     return Response({Message.SC_BAD_RQ}, status=400)
 
@@ -408,7 +425,7 @@ def trending(request, days):
 @api_view(['GET'])
 def hot(request):
     post = Post.objects.filter(community__state=True, timestamp__gte=timestamp_in_the_past_by_day(1),
-                               timestamp__lte=datetime.datetime.now()).order_by('-view_count')
+                               timestamp__lte=datetime.datetime.now()).order_by('-postpoint__point')
     return get_paginated_queryset_response_5(post, request)
 
 
@@ -448,6 +465,21 @@ def get_post_by_time_interval(request):
     return get_paginated_queryset_response_graph(query, request, page_size)
 
 
+@api_view(["GET"])
+def reset(request):
+    # query = PostPoint.objects.all()
+    # query.delete()
+    post = Post.objects.all()
+    for p in post:
+        # post_point = PostPoint.objects.filter(post=p)
+        # if not post_point:
+        #     PostPoint.objects.create(post=p,
+        #                              point=rank.hot(p.up_vote.count(), p.down_vote.count(), datetime.datetime.now()))
+        p.point = rank.hot(p.up_vote.count(), p.down_vote.count(), p.timestamp)
+        p.save()
+    return Response({Message.SC_OK}, status=200)
+
+
 def get_paginated_queryset_response_graph(query_set, request, page_size):
     paginator = PageNumberPagination()
     if page_size:
@@ -460,7 +492,6 @@ def get_paginated_queryset_response_graph(query_set, request, page_size):
 
 
 def timestamp_in_the_past_by_day(days):
-    print("past day", timezone.now() - datetime.timedelta(days))
     return timezone.now() - datetime.timedelta(days)
 
 

@@ -22,6 +22,7 @@ class Post(models.Model):
     title = models.CharField(max_length=60, blank=True, null=True)
     type = models.ForeignKey("PostType", blank=True, null=True, on_delete=models.CASCADE)
     view_count = models.IntegerField(default=0)
+    point = models.FloatField(default=0)
 
     # view = models.ForeignKey("View", on_delete=models.CASCADE, blank=True, null=True)
 
@@ -56,6 +57,23 @@ class Post(models.Model):
 
     def __user__(self):
         return self.user.username
+
+    def __point__(self):
+        return self.point
+
+
+class PostPoint(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+    point = models.FloatField(default=0)
+
+    class Meta:
+        ordering = ['-point']
+
+    def __id__(self):
+        return self.post.id
+
+    def __point__(self):
+        return self.point
 
 
 class PositivePoint(models.Model):

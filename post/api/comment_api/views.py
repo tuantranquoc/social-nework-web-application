@@ -30,9 +30,15 @@ def get_paginated_queryset_response_graph(query_set, request, page_size):
     return paginator.get_paginated_response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def comment_parent_list_view(request, comment_id, *args, **kwargs):
-    comment = Comment.objects.filter(parent__id=comment_id).order_by('-commentpoint__point')
+    sort = request.data.get("sort")
+    comment = Comment.objects.filter(parent__id=comment_id)
+    if sort:
+        print("sort", sort)
+        comment.order_by('-up_vote')
+    else:
+        comment.order_by('-commentpoint__point')
     if not comment:
         return Response({}, status=204)
     serializer = CommentSerializer(comment, many=True)
