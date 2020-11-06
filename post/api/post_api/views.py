@@ -9,7 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 from account.models import Profile
 from community.models import Community
 from post import rank
-from post.models import Post, PositivePoint, Comment, View, PostType, PostPoint
+from post.models import Post, PositivePoint, Comment, View, PostType
 from rest_framework.response import Response
 from post.serializers import PostSerializer, PostTypeSerializer, PostGraphSerializer
 from django.contrib.auth import get_user_model
@@ -74,7 +74,7 @@ def post_create_api(request):
                         return Response(serializer.data, status=201)
                 current_post = Post.objects.create(user=user, content=content, community=_community, title=title,
                                                    type=PostType.objects.filter(type=type).first())
-                PostPoint.objects.create(post=current_post)
+
                 serializer = PostSerializer(current_post)
                 return Response(serializer.data, status=201)
         return Response({Message.SC_BAD_RQ}, status=400)
@@ -429,7 +429,7 @@ def trending(request, days):
 @api_view(['GET'])
 def hot(request):
     post = Post.objects.filter(community__state=True, timestamp__gte=timestamp_in_the_past_by_day(1),
-                               timestamp__lte=datetime.datetime.now()).order_by('-postpoint__point')
+                               timestamp__lte=datetime.datetime.now()).order_by('-point')
     return get_paginated_queryset_response_5(post, request)
 
 
@@ -520,12 +520,12 @@ def check_view(view, post, user):
             post.save()
         serializer = PostSerializer(post)
         return serializer
-    if view.old_timestamp is not None:
-        difference = (timezone.now() - view.old_timestamp).total_seconds()
-        if difference >= 120:
-            post.view_count = post.view_count + 1
-            view.old_timestamp = timezone.now()
-            view.save()
-            post.save()
-        serializer = PostSerializer(post)
-        return serializer
+    # if view.old_timestamp is not None:
+    #     difference = (timezone.now() - view.old_timestamp).total_seconds()
+    #     if difference >= 120:
+    #         post.view_count = post.view_count + 1
+    #         view.old_timestamp = timezone.now()
+    #         view.save()
+    #         post.save()
+    #     serializer = PostSerializer(post)
+    #     return serializer

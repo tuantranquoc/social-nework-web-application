@@ -32,22 +32,28 @@ class PublicProfileSerializer(serializers.ModelSerializer):
             is_following = user in obj.follower.all()
         return is_following
 
-    def get_follower_count(self, obj):
+    @staticmethod
+    def get_follower_count(obj):
         return obj.follower.count()
 
-    def get_following_count(self, obj):
+    @staticmethod
+    def get_following_count(obj):
         return obj.user.following.count()
 
-    def get_first_name(self, obj):
+    @staticmethod
+    def get_first_name(obj):
         return obj.user.first_name
 
-    def get_last_name(self, obj):
+    @staticmethod
+    def get_last_name(obj):
         return obj.user.last_name
 
-    def get_username(self, obj):
+    @staticmethod
+    def get_username(obj):
         return obj.user.username
 
-    def get_email(self, obj):
+    @staticmethod
+    def get_email(obj):
         return obj.user.email
 
 

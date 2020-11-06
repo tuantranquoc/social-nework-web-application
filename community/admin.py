@@ -5,7 +5,7 @@ from .models import Community
 
 
 class CommunityAdmin(admin.ModelAdmin):
-    list_display = ['__id__', '__str__', '__creator__', '__user_count__', '__state__', '__description__']
+    list_display = ['__id__', '__str__', '__creator__', '__user_count__', '__state__', '__description__', '__rule__']
 
     class Meta:
         model = Community

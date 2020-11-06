@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
-from django.db.models.signals import post_save, pre_save
 from community.models import Community
 
 User = get_user_model()
@@ -23,8 +22,6 @@ class Post(models.Model):
     type = models.ForeignKey("PostType", blank=True, null=True, on_delete=models.CASCADE)
     view_count = models.IntegerField(default=0)
     point = models.FloatField(default=0)
-
-    # view = models.ForeignKey("View", on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         ordering = ['-point']

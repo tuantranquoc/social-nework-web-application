@@ -149,15 +149,15 @@ def profile_update_via_react_view(request, *args, **kwargs):
     location = request.data.get("location")
     bio = request.data.get("bio")
     email = request.data.get("email")
+    background = request.data.get("background")
+    avatar = request.data.get("avatar")
     if request.data.get("background"):
-        data = request.data.get("background")
-        format, imgstr = data.split(';base64,')
+        format, imgstr = background.split(';base64,')
         ext = format.split('/')[-1]
         image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
         my_profile.background = image
     if request.data.get("avatar"):
-        data = request.data.get("avatar")
-        format, imgstr = data.split(';base64,')
+        format, imgstr = avatar.split(';base64,')
         ext = format.split('/')[-1]
         image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
         my_profile.avatar = image
@@ -184,8 +184,6 @@ def get_following_profiles(request, username, *args, **kwargs):
     return Response({}, status=403)
 
 
-# auth
-
 @api_view(['GET', 'POST'])
 def login_via_react_view(request, *args, **kwargs):
     username = request.data.get("username")
@@ -194,7 +192,6 @@ def login_via_react_view(request, *args, **kwargs):
     if user:
         login(request, user)
         request.session["username"] = request.user.username
-
         return Response({Message.SC_OK}, status=200)
     return Response({Message.SC_NOT_FOUND}, status=404)
 
@@ -284,10 +281,8 @@ def recommend_user_from_profile(request, username, *args, **kwargs):
     if request.user.is_authenticated:
         user = request.user
         following = user.following.all()
-        print(following)
         profile_user_following = User.objects.filter(username=username).first()
         profile_user_following = profile_user_following.following.all()
-        print(profile_user_following)
         user_profile = Profile.objects.filter(user__profile__in=profile_user_following)
         u = user_profile.annotate(count=Count('follower')).order_by(
             "-count"
@@ -312,18 +307,13 @@ def recommend_user_from_feed(request, *args, **kwargs):
 
         # get their profiles to get following list
         pr = Profile.objects.filter(user__profile__in=profiles)
-
         for p in profiles:
             _pr = p.user.following.annotate(count=Count("follower")).exclude(user__profile__in=profiles).exclude(
                 user=request.user).order_by("-count")
-
             _pr1 = _pr1 | _pr
-
-        idss = set(_pr1)
-
-        profile_list = Profile.objects.filter(user__profile__in=idss).annotate(count=Count("follower")).order_by(
+        profiles_ = set(_pr1)
+        profile_list = Profile.objects.filter(user__profile__in=profiles_).annotate(count=Count("follower")).order_by(
             "-count")
-        print(profile_list)
         return get_paginated_queryset_recommend_user_response(profile_list, request)
     return Response({}, status=400)
 
@@ -333,11 +323,9 @@ def recommend_user_from_global(request, *args, **kwargs):
     if request.user.is_authenticated:
         user = request.user
         following = user.following.all()
-        print("following user", following)
         profiles = Profile.objects.annotate(count=Count("follower")).exclude(user__profile__in=following).exclude(
             user=request.user).order_by("-count")
 
-        print(profiles)
         return get_paginated_queryset_recommend_user_response(profiles, request)
     return Response({}, status=400)
 

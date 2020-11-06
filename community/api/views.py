@@ -25,13 +25,30 @@ def create_community(request):
     if request.user.is_authenticated:
         community = request.data.get("community")
         sub_community = request.data.get("sub_community")
+        background = request.data.get("background")
+        description = request.data.get("description")
+        avatar = request.data.get("avatar")
+        rule = request.data.get("rule")
         if not Community.objects.filter(community_type=community):
             return Response({Message.SC_NOT_FOUND}, status=400)
         if request.user.positivepoint.point <= 10:
             return Response({Message.SC_NOT_ENOUGH_POINT}, status=400)
         parent = Community.objects.filter(community_type=community).first()
-        Community.objects.create(community_type=sub_community, parent=parent)
-        return Response({Message.SC_OK}, status=201)
+        community = Community.objects.create(community_type=sub_community, parent=parent, description=description,
+                                             rule=rule)
+        if background:
+            format, imgstr = background.split(';base64,')
+            ext = format.split('/')[-1]
+            image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+            community.background = image
+        if avatar:
+            format, imgstr = avatar.split(';base64,')
+            ext = format.split('/')[-1]
+            image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+            community.avatar = image
+        community.save()
+        serializer = CommunitySerializer(community)
+        return Response({serializer.data}, status=201)
 
 
 @api_view(["POST"])

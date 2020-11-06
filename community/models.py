@@ -16,6 +16,7 @@ class Community(models.Model):
     description = models.TextField(default="")
     avatar = models.ImageField(upload_to='images/', blank=True, null=True)
     background = models.ImageField(upload_to='images/', blank=True, null=True)
+    rule = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ['id']
@@ -40,3 +41,6 @@ class Community(models.Model):
 
     def __description__(self):
         return self.description
+
+    def __rule__(self):
+        return self.rule

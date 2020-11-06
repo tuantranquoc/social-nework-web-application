@@ -154,18 +154,6 @@ def count_comment_by_post(request, post_id):
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
-def count_by_post(post_id):
-    post = Post.objects.filter(id=post_id).first()
-    if post:
-        comment_list = Comment.objects.filter(post=post)
-        count_1 = Comment.objects.filter(post=post).count()
-        count_2 = Comment.objects.filter(parent__isnull=False, parent__in=comment_list).count()
-        count_3 = Comment.objects.filter(parent__isnull=False, parent__parent__in=comment_list).count()
-        total = count_1 + count_2 + count_3
-        return Response({"Total": total}, status=200)
-    return Response({Message.SC_BAD_RQ}, status=400)
-
-
 @api_view(["GET"])
 def count_by_user_post(request, username):
     comment = Comment.objects.filter(user__username=username)

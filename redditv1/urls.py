@@ -61,7 +61,7 @@ urlpatterns = [
     path('api/post/type', post_api_view.get_type_list),
     path('api/post/graph', post_api_view.get_post_by_time_interval),
     path('api/post/reset', post_api_view.reset),
-    # 25
+    # 31
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
     path('api/comment/create/', comment_api_view.comment_create_view),
@@ -75,7 +75,7 @@ urlpatterns = [
     path('api/comment/<int:post_id>/count', comment_api_view.count_comment_by_post),
     path('api/comment/graph', comment_api_view.get_comment_by_time_interval),
     path('api/comment/all', comment_api_view.reset),
-    # 9
+    # 11
     # profile api
     path('api/profiles', profile_api_view.profile_list_view),
     path('api/profile', profile_api_view.profile_current_detail_view),
@@ -88,7 +88,7 @@ urlpatterns = [
     path('api/profile/recommend/global', profile_api_view.recommend_user_from_global),
     path('api/profile/recommend/feed', profile_api_view.recommend_user_from_feed),
     path('api/profile/recommend/profile/<str:username>', profile_api_view.recommend_user_from_profile),
-    # 6
+    # 10
     # community api
     path('api/community/create', community_api_view.create_community),
     path('api/community', community_api_view.get_community),
@@ -98,11 +98,12 @@ urlpatterns = [
     path('api/community/change/state/<str:community_type>', community_api_view.change_state),
     path('api/community/update/', community_api_view.community_update_via_react_view),
     path('api/community/recommend/<str:community>', community_api_view.recommend_sub_community),
+    # 7
     # char api
     path('api/chatroom/create/<str:username>', chat_api_view.create_chat_room),
     path('api/chatroom/chat/<str:username>', chat_api_view.create_chat),
     path('api/chatroom/view/<str:username>', chat_api_view.get_chat_view),
-    # 7
+    # 6
     # token
     path('api/search/', profile_api_view.search),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
