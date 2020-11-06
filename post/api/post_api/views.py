@@ -31,9 +31,11 @@ def post_list_view(request):
         #     Post.objects.filter(community__state=True, community__in=top_community).distinct().order_by('-postpoint__point'))
         # query = Post.objects.all().order_by('postpoint__point')
         query = Post.objects.filter(user=request.user).union(
-            Post.objects.filter(community__user=request.user)).order_by('-point')
+            Post.objects.filter(community__user=request.user)).union(
+            Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).distinct().order_by(
+            '-point')
         return get_paginated_queryset_response(query, request)
-    query = Post.objects.filter(community__state=True, community__in=top_community).order_by('-postpoint__point')
+    query = Post.objects.filter(community__state=True, community__in=top_community)
     return get_paginated_queryset_response(query, request)
 
 
@@ -137,39 +139,41 @@ def post_action(request):
         return Response({Message.SC_NOT_FOUND}, status=204)
     if action:
         positive_point = PositivePoint.objects.filter(user=request.user).first()
+        if not positive_point:
+            positive_point = PositivePoint.objects.create(user=request.user)
         if action == "up_vote":
             if Post.objects.filter(id=post_id, up_vote=request.user):
                 post.up_vote.remove(request.user)
                 positive_point.point = positive_point.point - 2
                 positive_point.save()
-                post_point = PostPoint.objects.filter(post=post).first()
-                post_point.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
-                                            datetime.datetime.now())
+                post.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
+                                      post.timestamp)
+                post.save()
                 return Response({Message.SC_OK}, status=200)
             post.up_vote.add(request.user)
             post.down_vote.remove(request.user)
             positive_point.point = positive_point.point + 2
             positive_point.save()
-            post_point = PostPoint.objects.filter(post=post).first()
-            post_point.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
-                                        datetime.datetime.now())
+            post.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
+                                  post.timestamp)
+            post.save()
             return Response({Message.SC_OK}, status=200)
         if action == "down_vote":
             if Post.objects.filter(id=post_id, down_vote=request.user):
                 post.down_vote.remove(request.user)
                 positive_point.point = positive_point.point + 2
                 positive_point.save()
-                post_point = PostPoint.objects.filter(post=post).first()
-                post_point.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
-                                            datetime.datetime.now())
+                post.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
+                                      post.timestamp)
+                post.save()
                 return Response({Message.SC_OK}, status=200)
             post.down_vote.add(request.user)
             post.up_vote.remove(request.user)
             positive_point.point = positive_point.point - 2
             positive_point.save()
-            post_point = PostPoint.objects.filter(post=post).first()
-            post_point.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
-                                        datetime.datetime.now())
+            post.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
+                                  post.timestamp)
+            post.save()
             return Response({Message.SC_OK}, status=200)
     return Response({Message.SC_BAD_RQ}, status=400)
 

@@ -27,7 +27,7 @@ class Post(models.Model):
     # view = models.ForeignKey("View", on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ['-point']
 
     def __id__(self):
         return self.id
