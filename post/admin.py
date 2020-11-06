@@ -21,7 +21,7 @@ class PositivePointAdmin(admin.ModelAdmin):
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = ['__id__', '__str__', '__user__', '__parent__', '__up_vote__', '__down_vote__', '__timestamp__',
-                    '__post__']
+                    '__post__', '__point__']
 
     class Meta:
         model = Comment

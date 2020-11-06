@@ -69,12 +69,14 @@ def post_create_api(request):
                                                            title=title,
                                                            type=PostType.objects.filter(type=type).first())
                         current_post.image = image
+                        current_post.point = rank.hot(0, 0, current_post.timestamp)
                         current_post.save()
                         serializer = PostSerializer(current_post)
                         return Response(serializer.data, status=201)
                 current_post = Post.objects.create(user=user, content=content, community=_community, title=title,
                                                    type=PostType.objects.filter(type=type).first())
-
+                current_post.point = rank.hot(0, 0, current_post.timestamp)
+                current_post.save()
                 serializer = PostSerializer(current_post)
                 return Response(serializer.data, status=201)
         return Response({Message.SC_BAD_RQ}, status=400)

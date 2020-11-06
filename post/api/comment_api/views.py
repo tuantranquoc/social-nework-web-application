@@ -179,10 +179,12 @@ def get_comment_by_time_interval(request):
 def reset(request):
     query = Comment.objects.all()
     for comment in query:
-        comment_point = CommentPoint.objects.filter(comment=comment)
-        if not comment_point:
-            CommentPoint.objects.create(comment=comment,
-                                        point=rank.confidence(comment.up_vote.count(), comment.down_vote.count()))
+        # comment_point = CommentPoint.objects.filter(comment=comment)
+        # if not comment_point:
+        #     CommentPoint.objects.create(comment=comment,
+        #                                 point=rank.confidence(comment.up_vote.count(), comment.down_vote.count()))
+        comment.point = rank.confidence(comment.up_vote.count(),comment.down_vote.count())
+        comment.save()
     return Response({Message.SC_OK}, status=200)
 
 

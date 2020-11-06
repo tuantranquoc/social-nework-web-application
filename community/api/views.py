@@ -5,7 +5,10 @@ from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+
+from account.models import Profile
 from community.models import Community
+from post.models import PositivePoint
 from post.serializers import CommunitySerializer
 from redditv1.message import Message
 
@@ -36,6 +39,9 @@ def create_community(request):
         parent = Community.objects.filter(community_type=community).first()
         community = Community.objects.create(community_type=sub_community, parent=parent, description=description,
                                              rule=rule)
+        positive_point = PositivePoint.objects.filter(user=request.user).first()
+        positive_point.point = positive_point.point - 10
+        positive_point.save()
         if background:
             format, imgstr = background.split(';base64,')
             ext = format.split('/')[-1]
@@ -48,7 +54,7 @@ def create_community(request):
             community.avatar = image
         community.save()
         serializer = CommunitySerializer(community)
-        return Response({serializer.data}, status=201)
+        return Response(serializer.data, status=201)
 
 
 @api_view(["POST"])

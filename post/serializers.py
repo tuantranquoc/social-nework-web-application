@@ -73,7 +73,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['content', 'username', 'post', 'id', 'up_vote', 'down_vote', 'timestamp']
+        fields = ['content', 'username', 'post', 'id', 'up_vote', 'down_vote', 'timestamp', 'point']
 
     @staticmethod
     def get_username(obj):

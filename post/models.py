@@ -105,9 +105,10 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
     up_vote = models.ManyToManyField(User, related_name="c_up_vote", blank=True)
     down_vote = models.ManyToManyField(User, related_name="c_down_vote", blank=True)
+    point = models.FloatField(default=0)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-point']
 
     def __id__(self):
         return self.id
@@ -135,6 +136,9 @@ class Comment(models.Model):
 
     def __down_vote__(self):
         return self.down_vote.count()
+
+    def __point__(self):
+        return self.point
 
 
 class CommentPoint(models.Model):
