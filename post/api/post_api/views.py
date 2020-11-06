@@ -25,11 +25,8 @@ def post_list_view(request):
         '-user_count')
     if request.user.is_authenticated:
         top_community = Community.objects.filter(user=request.user).union(
-            Community.objects.filter(community__state=True)).distinct('community_type')
-        # query = Post.objects.filter(user=request.user).union(Post.objects.filter(community__user=request.user)) \
-        #     .union(Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
-        #     Post.objects.filter(community__state=True, community__in=top_community).distinct().order_by('-postpoint__point'))
-        # query = Post.objects.all().order_by('postpoint__point')
+            Community.objects.filter(community__state=True)).distinct()
+        print("count",top_community.count())
         query = Post.objects.filter(user=request.user).union(
             Post.objects.filter(community__user=request.user)).union(
             Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
