@@ -32,7 +32,8 @@ def post_list_view(request):
         # query = Post.objects.all().order_by('postpoint__point')
         query = Post.objects.filter(user=request.user).union(
             Post.objects.filter(community__user=request.user)).union(
-            Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).distinct().order_by(
+            Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
+            Post.objects.filter(community__state=True).distinct()).distinct().order_by(
             '-point')
         return get_paginated_queryset_response(query, request)
     query = Post.objects.filter(community__state=True, community__in=top_community)

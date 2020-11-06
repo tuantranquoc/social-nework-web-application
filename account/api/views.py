@@ -242,12 +242,14 @@ def register_via_react_view(request, *args, **kwargs):
 @api_view(['POST'])
 def profile_action(request):
     if request.user.is_authenticated:
-        user_id = request.data.get("user_id")
+        user_id = request.data.get("id")
         action = request.data.get("action")
         profile = Profile.objects.filter(user__id=user_id).first()
+        print(profile.user.username)
         if profile:
             if action == "follow":
                 profile.follower.add(request.user)
+                return Response({Message.SC_OK}, status=200)
             if action == "un_follow":
                 profile.follower.add(request.user)
             return Response({Message.SC_OK}, status=200)
