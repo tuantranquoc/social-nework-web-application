@@ -8,3 +8,4 @@ Authenticated user will see:
 - Post of followed user
 - Post of community that they are followed (order by newly post of course)
 - Random burning post in day (union)
+Admin page

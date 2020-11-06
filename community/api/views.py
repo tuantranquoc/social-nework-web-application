@@ -116,3 +116,9 @@ def community_update_via_react_view(request, *args, **kwargs):
     if not community.background or not community.avatar:
         return Response({Message.SC_BAD_IMG}, status=400)
     return Response({}, status=200)
+
+
+@api_view(['GET', 'POST'])
+def recommend_sub_community(request, community):
+    sub_community = Community.objects.filter(parent__community_type=community).exclude(user=request.user)
+    return get_paginated_queryset_response(sub_community, request)

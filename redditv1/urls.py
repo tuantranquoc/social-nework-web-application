@@ -85,15 +85,19 @@ urlpatterns = [
     path('api/register', profile_api_view.register_via_react_view),
     path('api/profile/update/', profile_api_view.profile_update_via_react_view),
     path('api/profile/action/', profile_api_view.profile_action),
+    path('api/profile/recommend/global', profile_api_view.recommend_user_from_global),
+    path('api/profile/recommend/feed', profile_api_view.recommend_user_from_feed),
+    path('api/profile/recommend/profile/<str:username>', profile_api_view.recommend_user_from_profile),
     # 6
     # community api
     path('api/community/create', community_api_view.create_community),
     path('api/community', community_api_view.get_community),
     path('api/community/user/list', community_api_view.get_list_community_by_user),
     path('api/community/list', community_api_view.get_list_community),
-    path('api/community/user/action', community_api_view.community_action),
+    path('api/community/action', community_api_view.community_action),
     path('api/community/change/state/<str:community_type>', community_api_view.change_state),
     path('api/community/update/', community_api_view.community_update_via_react_view),
+    path('api/community/recommend/<str:community>', community_api_view.recommend_sub_community),
     # char api
     path('api/chatroom/create/<str:username>', chat_api_view.create_chat_room),
     path('api/chatroom/chat/<str:username>', chat_api_view.create_chat),

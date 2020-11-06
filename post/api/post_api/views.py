@@ -19,19 +19,23 @@ from redditv1.message import Message
 User = get_user_model()
 
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 def post_list_view(request):
+    # options are point and timestamp
+    sort = request.data.get("sort")
+    if not sort:
+        sort = '-point'
+    if sort == 'timestamp':
+        sort = '-timestamp'
     top_community = Community.objects.filter(state=True).annotate(user_count=Count('user')).order_by(
         '-user_count')
     if request.user.is_authenticated:
         top_community = Community.objects.filter(user=request.user).union(
             Community.objects.filter(community__state=True)).distinct()
-        print("count",top_community.count())
         query = Post.objects.filter(user=request.user).union(
             Post.objects.filter(community__user=request.user)).union(
             Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
-            Post.objects.filter(community__state=True).distinct()).distinct().order_by(
-            '-point')
+            Post.objects.filter(community__state=True).distinct()).distinct().order_by(sort)
         return get_paginated_queryset_response(query, request)
     query = Post.objects.filter(community__state=True, community__in=top_community)
     return get_paginated_queryset_response(query, request)
@@ -355,9 +359,7 @@ def find_post_by_user(request, username):
 
 @api_view(["GET"])
 def count_post_by_user(request, username):
-    print("count", username)
     count = Post.objects.filter(user__username=username).count()
-    print("count", username)
     if count:
         return Response({"Total": count}, status=200)
     return Response({Message.SC_NOT_FOUND}, status=400)

@@ -4,7 +4,7 @@ from functools import reduce
 
 from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.core.files.base import ContentFile
-from django.db.models import Q
+from django.db.models import Q, Count
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -39,7 +39,6 @@ def profile_detail_view(request, username):
 
 @api_view(["GET"])
 def profile_current_detail_view(request):
-    print(request.session.get("username"))
     if request.user.is_authenticated:
         profiles = Profile.objects.filter(user__username=request.user.username)
         return get_paginated_queryset_recommend_user_response(profiles, request)
@@ -53,16 +52,15 @@ def profile_current_detail_view(request):
 @api_view(['GET', 'POST'])
 def profile_detail_api_view(request, username, *args, **kwargs):
     # get the profile for the pass user name
-    print("user: ", request.user)
-    print("target:", username)
+
     qs = Profile.objects.filter(user__username=username)
-    print(qs)
+
     if not qs.exists():
         return Response({"detail": "User not found"}, status=404)
     profile_obj = qs.first()
     serializer = PublicProfileSerializer(instance=profile_obj, context={"request": request})
     data = request.data or {}
-    print(data)
+
     if request.method == "POST":
         me = request.user
         action = data.get("action")
@@ -83,12 +81,12 @@ def profile_image_post(request, *args, **kwargs):
         if request.FILES:
             image = request.FILES['img']
             profile = profile.first()
-            print(type(image))
+
             # profile.background = image
-            print("past background", profile.background)
+
             profile.background = image
             profile.save()
-            print("current", profile.background)
+
             return Response({}, status=200)
         else:
             return Response({}, status=400)
@@ -107,10 +105,10 @@ def profile_avatar_post(request, *args, **kwargs):
 
             image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
             # profile.background = image
-            print("past background", profile.avatar)
+
             profile.avatar = image
             profile.save()
-            print("current", profile.avatar)
+
             return Response({}, status=200)
         else:
             return Response({}, status=400)
@@ -129,10 +127,10 @@ def profile_background_post(request, *args, **kwargs):
 
             image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
             # profile.background = image
-            print("past background", profile.background)
+
             profile.background = image
             profile.save()
-            print("current", profile.background)
+
             return Response({}, status=200)
         else:
             return Response({}, status=400)
@@ -179,7 +177,6 @@ def profile_update_via_react_view(request, *args, **kwargs):
 def get_following_profiles(request, username, *args, **kwargs):
     if request.user.is_authenticated:
         profile = Profile.objects.filter(user__username=username).first()
-        print(profile)
         if profile:
             following = profile.user.following.all()
             return get_paginated_queryset_recommend_user_response(following, request)
@@ -191,14 +188,13 @@ def get_following_profiles(request, username, *args, **kwargs):
 
 @api_view(['GET', 'POST'])
 def login_via_react_view(request, *args, **kwargs):
-    print(request.session.session_key)
     username = request.data.get("username")
     password = request.data.get("password")
     user = authenticate(username=username, password=password)
     if user:
         login(request, user)
         request.session["username"] = request.user.username
-        print(request.session.get("username"))
+
         return Response({Message.SC_OK}, status=200)
     return Response({Message.SC_NOT_FOUND}, status=404)
 
@@ -231,7 +227,6 @@ def logout_view_js(request, *args, **kwargs):
 def register_via_react_view(request, *args, **kwargs):
     username = request.data.get("username")
     password = request.data.get("password")
-    print(username, password)
     if username and password:
         user = User.objects.create_user(username=username, password=password)
         if not user:
@@ -245,7 +240,6 @@ def profile_action(request):
         user_id = request.data.get("id")
         action = request.data.get("action")
         profile = Profile.objects.filter(user__id=user_id).first()
-        print(profile.user.username)
         if profile:
             if action == "follow":
                 profile.follower.add(request.user)
@@ -279,6 +273,73 @@ def search(request):
             return get_paginated_queryset_response(query, request, 10)
         query = Post.objects.filter(content__contains=key_word)
         return get_paginated_queryset_response(query, request, 10)
+
+
+@api_view(['GET'])
+def recommend_user_from_profile(request, username, *args, **kwargs):
+    """
+    get list follower from this acc
+    profile -> follower acc -> max follower count okay >?
+    """
+    if request.user.is_authenticated:
+        user = request.user
+        following = user.following.all()
+        print(following)
+        profile_user_following = User.objects.filter(username=username).first()
+        profile_user_following = profile_user_following.following.all()
+        print(profile_user_following)
+        user_profile = Profile.objects.filter(user__profile__in=profile_user_following)
+        u = user_profile.annotate(count=Count('follower')).order_by(
+            "-count"
+        )
+        u = u.exclude(user__profile__in=following).exclude(user=request.user)
+        return get_paginated_queryset_recommend_user_response(u, request)
+
+
+@api_view(['GET'])
+def recommend_user_from_feed(request, *args, **kwargs):
+    """
+    get all follower list from feed -> feed mean that all the tweet that user has follow
+    get all the follower profile from em
+    """
+    if request.user.is_authenticated:
+        user = request.user
+        # profiles that this user follow
+        profiles = user.following.all()
+
+        _pr = Profile.objects.none()
+        _pr1 = Profile.objects.none()
+
+        # get their profiles to get following list
+        pr = Profile.objects.filter(user__profile__in=profiles)
+
+        for p in profiles:
+            _pr = p.user.following.annotate(count=Count("follower")).exclude(user__profile__in=profiles).exclude(
+                user=request.user).order_by("-count")
+
+            _pr1 = _pr1 | _pr
+
+        idss = set(_pr1)
+
+        profile_list = Profile.objects.filter(user__profile__in=idss).annotate(count=Count("follower")).order_by(
+            "-count")
+        print(profile_list)
+        return get_paginated_queryset_recommend_user_response(profile_list, request)
+    return Response({}, status=400)
+
+
+@api_view(['GET'])
+def recommend_user_from_global(request, *args, **kwargs):
+    if request.user.is_authenticated:
+        user = request.user
+        following = user.following.all()
+        print("following user", following)
+        profiles = Profile.objects.annotate(count=Count("follower")).exclude(user__profile__in=following).exclude(
+            user=request.user).order_by("-count")
+
+        print(profiles)
+        return get_paginated_queryset_recommend_user_response(profiles, request)
+    return Response({}, status=400)
 
 
 def spilt_content(hash_tag):
