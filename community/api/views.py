@@ -1,6 +1,7 @@
 import base64
 
 from django.core.files.base import ContentFile
+from django.db.models import Count
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -145,3 +146,10 @@ def community_update_via_react_view(request, *args, **kwargs):
 def recommend_sub_community(request, community):
     sub_community = Community.objects.filter(parent__community_type=community).exclude(user=request.user)
     return get_paginated_queryset_response(sub_community, request)
+
+
+@api_view(['GET', 'POST'])
+def recommend_community(request):
+    community = Community.objects.all().exclude(user=request.user).annotate(
+        user_count=Count('user')).order_by('user_count')
+    return get_paginated_queryset_response(community, request)

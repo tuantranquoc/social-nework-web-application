@@ -30,28 +30,28 @@
       <Owner>postgres</Owner>
       <IntrospectionStateNumber>1378</IntrospectionStateNumber>
       <Current>1</Current>
-      <Relations>sequence|table|44116|44118|1
-sequence|table|44131|44133|1
-sequence|table|44190|44192|1
+      <Relations>sequence|table|44190|44192|1
 sequence|table|44198|44200|1
 sequence|table|44182|44184|1
+sequence|table|44116|44118|1
+sequence|table|44131|44133|1
+sequence|table|43911|43913|1
+sequence|table|43903|43905|1
+sequence|table|43892|43894|1
+sequence|table|43853|43855|1
+sequence|table|43845|43847|1
+sequence|table|43832|43834|1
+sequence|table|44063|44065|1
+sequence|table|43985|43987|1
+sequence|table|43675|43677|1
+sequence|table|43664|43666|1
+sequence|table|43789|43791|1
 sequence|table|43721|43723|1
 sequence|table|43703|43705|1
 sequence|table|43693|43695|1
 sequence|table|43685|43687|1
 sequence|table|43711|43713|1
 sequence|table|43729|43731|1
-sequence|table|43675|43677|1
-sequence|table|43789|43791|1
-sequence|table|43664|43666|1
-sequence|table|43985|43987|1
-sequence|table|44063|44065|1
-sequence|table|43853|43855|1
-sequence|table|43845|43847|1
-sequence|table|43832|43834|1
-sequence|table|43911|43913|1
-sequence|table|43903|43905|1
-sequence|table|43892|43894|1
 </Relations>
     </database>
     <database id="8" parent="1" name="review">
