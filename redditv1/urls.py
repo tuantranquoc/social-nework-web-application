@@ -99,6 +99,7 @@ urlpatterns = [
     path('api/community/update/', community_api_view.community_update_via_react_view),
     path('api/community/recommend/<str:community>', community_api_view.recommend_sub_community),
     path('api/community/recommend', community_api_view.recommend_community),
+    path('api/community/graph', community_api_view.community_graph),
     # 7
     # char api
     path('api/chatroom/create/<str:username>', chat_api_view.create_chat_room),

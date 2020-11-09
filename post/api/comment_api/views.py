@@ -11,11 +11,15 @@ from redditv1.message import Message
 
 
 # comment api view
-def get_paginated_queryset_response(query_set, request):
+def get_paginated_queryset_response(query_set, request, page_size):
     paginator = PageNumberPagination()
-    paginator.page_size = 20
+    if not page_size:
+        page_size = 20
+    paginator.page_size = page_size
     paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = CommentSerializer(paginated_qs, many=True, context={"request": request})
+    serializer = CommentSerializer(paginated_qs,
+                                   many=True,
+                                   context={"request": request})
     return paginator.get_paginated_response(serializer.data)
 
 
@@ -26,27 +30,28 @@ def get_paginated_queryset_response_graph(query_set, request, page_size):
     else:
         paginator.page_size = 50
     paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = CommentGraphSerializer(paginated_qs, many=True, context={"request": request})
+    serializer = CommentGraphSerializer(paginated_qs,
+                                        many=True,
+                                        context={"request": request})
     return paginator.get_paginated_response(serializer.data)
 
 
 @api_view(['GET', 'POST'])
 def comment_parent_list_view(request, comment_id, *args, **kwargs):
     sort = request.data.get("sort")
+    page_size = request.data.get("page_size")
     comment = Comment.objects.filter(parent__id=comment_id)
     if sort:
-        print("sort", sort)
         comment.order_by('-up_vote')
     else:
         comment.order_by('-commentpoint__point')
     if not comment:
         return Response({}, status=204)
-    serializer = CommentSerializer(comment, many=True)
-    return Response(serializer.data, status=200)
+    return get_paginated_queryset_response(comment, request, page_size)
 
 
 @api_view(['POST'])
-def child_comment_create_view(request, comment_id, *args, **kwargs):
+def child_comment_create_view(request, comment_id):
     """
     data = {"content":"CONTENT"}
     """
@@ -55,7 +60,9 @@ def child_comment_create_view(request, comment_id, *args, **kwargs):
         if not comment:
             return Response({}, status=204)
         content = request.data.get("content")
-        comment = Comment.objects.create(parent=comment, content=content, user=request.user)
+        comment = Comment.objects.create(parent=comment,
+                                         content=content,
+                                         user=request.user)
         CommentPoint.objects.create(comment=comment)
         if comment:
             serializer = CommentSerializer(comment)
@@ -72,7 +79,9 @@ def comment_create_view(request, *args, **kwargs):
 
         if content and post_id:
             post = Post.objects.get(id=post_id)
-            comment = Comment.objects.create(user=request.user, post=post, content=content)
+            comment = Comment.objects.create(user=request.user,
+                                             post=post,
+                                             content=content)
             CommentPoint.objects.create(comment=comment)
             comment = Comment.objects.filter(id=comment.id)
             serializer = CommentSerializer(comment, many=True)
@@ -83,11 +92,12 @@ def comment_create_view(request, *args, **kwargs):
 
 @api_view(['GET'])  # http method client has send == POST
 def comment_api_view(request, post_id, *args, **kwargs):
-    comment = Comment.objects.filter(post_id=post_id).order_by('-commentpoint__point')
+    page_size = request.data.get("page_size")
+    comment = Comment.objects.filter(
+        post_id=post_id).order_by('-commentpoint__point')
     if not comment:
         return Response({}, status=204)
-    serializer = CommentSerializer(comment, many=True)
-    return Response(serializer.data, status=200)
+    return get_paginated_queryset_response(comment, request, page_size)
 
 
 @api_view(['POST'])
@@ -133,12 +143,10 @@ def check_vote(request):
 
 @api_view(["GET"])
 def filter_by_up_vote(request):
+    page_size = request.data.get("page_size")
     query = Comment.objects.annotate(
-        user_count=Count("up_vote")
-    ).order_by(
-        "-user_count"
-    )
-    return get_paginated_queryset_response(query, request)
+        user_count=Count("up_vote")).order_by("-user_count")
+    return get_paginated_queryset_response(query, request, page_size)
 
 
 @api_view(["GET"])
@@ -147,8 +155,10 @@ def count_comment_by_post(request, post_id):
     if post:
         comment_list = Comment.objects.filter(post=post)
         count_1 = Comment.objects.filter(post=post).count()
-        count_2 = Comment.objects.filter(parent__isnull=False, parent__in=comment_list).count()
-        count_3 = Comment.objects.filter(parent__isnull=False, parent__parent__in=comment_list).count()
+        count_2 = Comment.objects.filter(parent__isnull=False,
+                                         parent__in=comment_list).count()
+        count_3 = Comment.objects.filter(
+            parent__isnull=False, parent__parent__in=comment_list).count()
         total = count_1 + count_2 + count_3
         return Response({"Total": total}, status=200)
     return Response({Message.SC_BAD_RQ}, status=400)
@@ -168,10 +178,14 @@ def get_comment_by_time_interval(request):
     to_timestamp = request.data.get('to_timestamp')
     page_size = request.data.get('page_size')
     if from_timestamp is not None and to_timestamp is not None:
-        query = Comment.objects.filter(timestamp__gte=from_timestamp, timestamp__lte=to_timestamp, user=request.user)
+        query = Comment.objects.filter(timestamp__gte=from_timestamp,
+                                       timestamp__lte=to_timestamp,
+                                       user=request.user)
         return get_paginated_queryset_response_graph(query, request, page_size)
-    query = Comment.objects.filter(timestamp__gte=timestamp_in_the_past_by_day(30), timestamp__lte=timezone.now(),
-                                   user=request.user)
+    query = Comment.objects.filter(
+        timestamp__gte=timestamp_in_the_past_by_day(30),
+        timestamp__lte=timezone.now(),
+        user=request.user)
     return get_paginated_queryset_response_graph(query, request, page_size)
 
 
@@ -183,7 +197,8 @@ def reset(request):
         # if not comment_point:
         #     CommentPoint.objects.create(comment=comment,
         #                                 point=rank.confidence(comment.up_vote.count(), comment.down_vote.count()))
-        comment.point = rank.confidence(comment.up_vote.count(),comment.down_vote.count())
+        comment.point = rank.confidence(comment.up_vote.count(),
+                                        comment.down_vote.count())
         comment.save()
     return Response({Message.SC_OK}, status=200)
 
@@ -191,5 +206,6 @@ def reset(request):
 def comment_point_update(comment):
     if comment:
         comment_point = CommentPoint.objects.filter(comment=comment).first()
-        comment_point.point = rank.confidence(comment.up_vote.count(), comment.down_vote.count())
+        comment_point.point = rank.confidence(comment.up_vote.count(),
+                                              comment.down_vote.count())
         comment_point.save()

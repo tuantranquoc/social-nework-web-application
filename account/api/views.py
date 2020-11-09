@@ -242,7 +242,7 @@ def profile_action(request):
                 profile.follower.add(request.user)
                 return Response({Message.SC_OK}, status=200)
             if action == "un_follow":
-                profile.follower.add(request.user)
+                profile.follower.remove(request.user)
             return Response({Message.SC_OK}, status=200)
         return Response({Message.SC_NOT_FOUND}, status=400)
     return Response({Message.SC_NO_AUTH}, status=401)

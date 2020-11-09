@@ -23,22 +23,26 @@ User = get_user_model()
 def post_list_view(request):
     # options are point and timestamp
     sort = request.data.get("sort")
+    page_size = request.data.get("page_size")
     if not sort:
         sort = '-point'
     if sort == 'timestamp':
         sort = '-timestamp'
-    top_community = Community.objects.filter(state=True).annotate(user_count=Count('user')).order_by(
-        '-user_count')
+    top_community = Community.objects.filter(state=True).annotate(
+        user_count=Count('user')).order_by('-user_count')
     if request.user.is_authenticated:
         top_community = Community.objects.filter(user=request.user).union(
             Community.objects.filter(community__state=True)).distinct()
         query = Post.objects.filter(user=request.user).union(
             Post.objects.filter(community__user=request.user)).union(
-            Post.objects.filter(user__following=Profile.objects.filter(user=request.user).first())).union(
-            Post.objects.filter(community__state=True).distinct()).distinct().order_by(sort)
-        return get_paginated_queryset_response(query, request)
-    query = Post.objects.filter(community__state=True, community__in=top_community)
-    return get_paginated_queryset_response(query, request)
+                Post.objects.filter(user__following=Profile.objects.filter(
+                    user=request.user).first())).union(
+                        Post.objects.filter(community__state=True).distinct()
+                    ).distinct().order_by(sort)
+        return get_paginated_queryset_response(query, request, page_size)
+    query = Post.objects.filter(community__state=True,
+                                community__in=top_community)
+    return get_paginated_queryset_response(query, request, page_size)
 
 
 @api_view(["GET", "POST"])
@@ -56,25 +60,36 @@ def post_create_api(request):
         user = request.user
         if community:
             if Community.objects.filter(community_type=community):
-                _community = Community.objects.filter(community_type=community).first()
-                positive_point = PositivePoint.objects.filter(user=user).first()
+                _community = Community.objects.filter(
+                    community_type=community).first()
+                positive_point = PositivePoint.objects.filter(
+                    user=user).first()
                 positive_point.point = positive_point.point + 1
                 positive_point.save()
                 if image:
                     if len(image) > len('data:,'):
                         format, imgstr = image.split(';base64,')
                         ext = format.split('/')[-1]
-                        image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-                        current_post = Post.objects.create(user=user, content=content, community=_community,
-                                                           title=title,
-                                                           type=PostType.objects.filter(type=type).first())
+                        image = ContentFile(base64.b64decode(imgstr),
+                                            name='temp.' + ext)
+                        current_post = Post.objects.create(
+                            user=user,
+                            content=content,
+                            community=_community,
+                            title=title,
+                            type=PostType.objects.filter(type=type).first())
                         current_post.image = image
-                        current_post.point = rank.hot(0, 0, current_post.timestamp)
+                        current_post.point = rank.hot(0, 0,
+                                                      current_post.timestamp)
                         current_post.save()
                         serializer = PostSerializer(current_post)
                         return Response(serializer.data, status=201)
-                current_post = Post.objects.create(user=user, content=content, community=_community, title=title,
-                                                   type=PostType.objects.filter(type=type).first())
+                current_post = Post.objects.create(
+                    user=user,
+                    content=content,
+                    community=_community,
+                    title=title,
+                    type=PostType.objects.filter(type=type).first())
                 current_post.point = rank.hot(0, 0, current_post.timestamp)
                 current_post.save()
                 serializer = PostSerializer(current_post)
@@ -113,7 +128,8 @@ def post_find_by_id(request, post_id):
             if not request.user.is_authenticated:
                 return Response({Message.SC_LOGIN_REDIRECT}, status=401)
             view = View.objects.filter(user=request.user, post=post).first()
-            if Community.objects.filter(user=request.user, community_type=post.community):
+            if Community.objects.filter(user=request.user,
+                                        community_type=post.community):
                 serializer = check_view(view, post, request.user)
                 return Response(serializer.data, status=200)
             return Response({Message.MUST_FOLLOW}, status=400)
@@ -142,7 +158,8 @@ def post_action(request):
     if not post:
         return Response({Message.SC_NOT_FOUND}, status=204)
     if action:
-        positive_point = PositivePoint.objects.filter(user=request.user).first()
+        positive_point = PositivePoint.objects.filter(
+            user=request.user).first()
         if not positive_point:
             positive_point = PositivePoint.objects.create(user=request.user)
         if action == "up_vote":
@@ -150,8 +167,8 @@ def post_action(request):
                 post.up_vote.remove(request.user)
                 positive_point.point = positive_point.point - 2
                 positive_point.save()
-                post.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
-                                      post.timestamp)
+                post.point = rank.hot(post.up_vote.count(),
+                                      post.down_vote.count(), post.timestamp)
                 post.save()
                 return Response({Message.SC_OK}, status=200)
             post.up_vote.add(request.user)
@@ -167,8 +184,8 @@ def post_action(request):
                 post.down_vote.remove(request.user)
                 positive_point.point = positive_point.point + 2
                 positive_point.save()
-                post.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
-                                      post.timestamp)
+                post.point = rank.hot(post.up_vote.count(),
+                                      post.down_vote.count(), post.timestamp)
                 post.save()
                 return Response({Message.SC_OK}, status=200)
             post.down_vote.add(request.user)
@@ -184,21 +201,21 @@ def post_action(request):
 
 @api_view(["GET"])
 def user_post(request):
+    page_size = request.data.get("page_size")
     if request.user.is_authenticated:
         query = Post.objects.filter(user=request.user)
-        return get_paginated_queryset_response(query, request)
+        return get_paginated_queryset_response(query, request, page_size)
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
 @api_view(["GET"])
 def user_post_filter_by_up_vote(request):
+    page_size = request.data.get("page_size")
     if request.user.is_authenticated:
         query = Post.objects.filter(user=request.user).annotate(
-            user_count=Count("up_vote")
-        ).order_by(
-            "-user_count"
-        ).filter(community__user=request.user)
-        return get_paginated_queryset_response(query, request)
+            user_count=Count("up_vote")).order_by("-user_count").filter(
+                community__user=request.user)
+        return get_paginated_queryset_response(query, request, page_size)
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
@@ -276,86 +293,67 @@ def check_vote(request):
     return Response({"none"})
 
 
-def count_post_by_community(community):
-    count = 0
-    if Post.objects.filter(community__community_type=community):
-        count = Post.objects.filter(community__community_type=community).count()
-    return count
-
-
-def get_paginated_queryset_response(query_set, request):
-    paginator = PageNumberPagination()
-    paginator.page_size = 20
-    paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
-    return paginator.get_paginated_response(serializer.data)
-
-
-def get_paginated_queryset_response_5(query_set, request):
-    paginator = PageNumberPagination()
-    paginator.page_size = 5
-    paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = PostSerializer(paginated_qs, many=True, context={"request": request})
-    return paginator.get_paginated_response(serializer.data)
-
-
-def get_paginated_queryset_response_post_type(query_set, request):
-    paginator = PageNumberPagination()
-    paginator.page_size = 5
-    paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = PostTypeSerializer(paginated_qs, many=True, context={"request": request})
-    return paginator.get_paginated_response(serializer.data)
-
-
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 def filter_by_up_vote(request):
+    page_size = request.data.get("page_size")
     query = Post.objects.annotate(
-        user_count=Count("up_vote")
-    ).order_by(
-        "-user_count"
-    ).filter(community__state=True)
-    return get_paginated_queryset_response(query, request)
+        user_count=Count("up_vote")).order_by("-user_count").filter(
+            community__state=True)
+    return get_paginated_queryset_response(query, request, page_size)
 
 
 @api_view(["GET"])
 def get_post_by_comment(request):
+    page_size = request.data.get("page_size")
     if request.user.is_authenticated:
         # level 1
-        comment_list = Comment.objects.filter(user=request.user, parent__isnull=True)
+        comment_list = Comment.objects.filter(user=request.user,
+                                              parent__isnull=True)
         # level 2 + 3
-        comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=False).filter(
-            parent__parent__parent__isnull=True, user=request.user)
-        comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=True,
-                                                                                   user=request.user)
+        comment_list_level_3 = Comment.objects.filter(
+            parent__isnull=False).filter(parent__parent__isnull=False).filter(
+                parent__parent__parent__isnull=True, user=request.user)
+        comment_list_level_2 = Comment.objects.filter(
+            parent__isnull=False).filter(parent__parent__isnull=True,
+                                         user=request.user)
         query = Post.objects.filter(comment__in=comment_list)
-        query_2 = Post.objects.filter(comment__in=parent_comment(comment_list_level_2, 2))
-        query_3 = Post.objects.filter(comment__in=parent_comment(comment_list_level_3, 3))
+        query_2 = Post.objects.filter(
+            comment__in=parent_comment(comment_list_level_2, 2))
+        query_3 = Post.objects.filter(
+            comment__in=parent_comment(comment_list_level_3, 3))
         query_result = (query | query_2 | query_3).distinct()
-        return get_paginated_queryset_response(query_result, request)
+        return get_paginated_queryset_response(query_result, request,
+                                               page_size)
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
 @api_view(["GET"])
 def get_post_by_username_comment(request, username):
+    page_size = request.data.get("page_size")
     # level 1
-    comment_list = Comment.objects.filter(user__username=username, parent__isnull=True)
+    comment_list = Comment.objects.filter(user__username=username,
+                                          parent__isnull=True)
     # level 2 + 3
-    comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=False).filter(
-        parent__parent__parent__isnull=True, user__username=username)
-    comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(parent__parent__isnull=True,
-                                                                               user__username=username)
+    comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(
+        parent__parent__isnull=False).filter(
+            parent__parent__parent__isnull=True, user__username=username)
+    comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(
+        parent__parent__isnull=True, user__username=username)
     query = Post.objects.filter(comment__in=comment_list)
-    query_2 = Post.objects.filter(comment__in=parent_comment(comment_list_level_2, 2))
-    query_3 = Post.objects.filter(comment__in=parent_comment(comment_list_level_3, 3))
+    query_2 = Post.objects.filter(
+        comment__in=parent_comment(comment_list_level_2, 2))
+    query_3 = Post.objects.filter(
+        comment__in=parent_comment(comment_list_level_3, 3))
     query_result = (query | query_2 | query_3).distinct()
-    return get_paginated_queryset_response(query_result, request)
+    return get_paginated_queryset_response(query_result, request, page_size)
 
 
 @api_view(["GET"])
 def find_post_by_user(request, username):
+    page_size = request.data.get("page_size")
     post = Post.objects.filter(user__username=username, community__state=True)
     if post:
-        return get_paginated_queryset_response(post, request)
+        return get_paginated_queryset_response(post, request, page_size)
     return Response({Message.SC_NOT_FOUND}, status=400)
 
 
@@ -369,82 +367,98 @@ def count_post_by_user(request, username):
 
 @api_view(["GET"])
 def find_post_by_up_vote(request):
+    page_size = request.data.get("page_size")
     if request.user.is_authenticated:
         post = Post.objects.filter(up_vote=request.user)
         if post:
-            return get_paginated_queryset_response(post, request)
+            return get_paginated_queryset_response(post, request, page_size)
         return Response({Message.SC_NOT_FOUND}, status=400)
     return Response({Message.SC_LOGIN_REDIRECT}, status=401)
 
 
 @api_view(["GET"])
 def find_post_by_username_up_vote(request, username):
+    page_size = request.data.get("page_size")
     if request.user.is_authenticated:
-        no_block = Post.objects.filter(up_vote__username=username, community__user=request.user)
+        no_block = Post.objects.filter(up_vote__username=username,
+                                       community__user=request.user)
         if no_block:
-            return get_paginated_queryset_response(no_block, request)
+            return get_paginated_queryset_response(no_block, request,
+                                                   page_size)
         return Response({Message.SC_NOT_FOUND}, status=400)
-    post = Post.objects.filter(up_vote__username=username, community__state=True)
+    post = Post.objects.filter(up_vote__username=username,
+                               community__state=True)
     if post:
-        return get_paginated_queryset_response(post, request)
+        return get_paginated_queryset_response(post, request, page_size)
     return Response({Message.SC_NOT_FOUND}, status=400)
 
 
 @api_view(["GET"])
 def find_post_by_down_vote(request):
+    page_size = request.data.get("page_size")
     if request.user.is_authenticated:
         post = Post.objects.filter(down_vote=request.user)
         if post:
-            return get_paginated_queryset_response(post, request)
+            return get_paginated_queryset_response(post, request, page_size)
         return Response({Message.SC_NOT_FOUND}, status=400)
     return Response({Message.SC_LOGIN_REDIRECT}, status=401)
 
 
 @api_view(["GET"])
 def find_post_by_username_down_vote(request, username):
+    page_size = request.data.get("page_size")
     if request.user.is_authenticated:
-        no_block = Post.objects.filter(down_vote__username=username, community__user=request.user)
+        no_block = Post.objects.filter(down_vote__username=username,
+                                       community__user=request.user)
         if no_block:
-            return get_paginated_queryset_response(no_block, request)
+            return get_paginated_queryset_response(no_block, request,
+                                                   page_size)
         return Response({Message.SC_NOT_FOUND}, status=400)
-    post = Post.objects.filter(down_vote__username=username, community__state=True)
+    post = Post.objects.filter(down_vote__username=username,
+                               community__state=True)
     if post:
-        return get_paginated_queryset_response(post, request)
+        return get_paginated_queryset_response(post, request, page_size)
     return Response({Message.SC_NOT_FOUND}, status=400)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def trending(request, days):
+    page_size = request.data.get("page_size")
     if days:
         past = timestamp_in_the_past_by_day(days)
-        post = Post.objects.filter(community__state=True, timestamp__gte=past,
-                                   timestamp__lte=datetime.datetime.now()).annotate(
-            user_count=Count("up_vote")
-        ).order_by('-user_count')
-        return get_paginated_queryset_response_5(post, request)
+        post = Post.objects.filter(
+            community__state=True,
+            timestamp__gte=past,
+            timestamp__lte=datetime.datetime.now()).annotate(
+                user_count=Count("up_vote")).order_by('-user_count')
+        return get_paginated_queryset_response(post, request, page_size)
     post = Post.objects.filter(community__state=True).annotate(
-        user_count=Count("up_vote")
-    ).order_by('-user_count')
-    return get_paginated_queryset_response_5(post, request)
+        user_count=Count("up_vote")).order_by('-user_count')
+    return get_paginated_queryset_response(post, request, page_size)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def hot(request):
-    post = Post.objects.filter(community__state=True, timestamp__gte=timestamp_in_the_past_by_day(1),
-                               timestamp__lte=datetime.datetime.now()).order_by('-point')
-    return get_paginated_queryset_response_5(post, request)
+    page_size = request.data.get("page_size")
+    post = Post.objects.filter(
+        community__state=True,
+        timestamp__gte=timestamp_in_the_past_by_day(1),
+        timestamp__lte=datetime.datetime.now()).order_by('-point')
+    return get_paginated_queryset_response(post, request, page_size)
 
 
 @api_view(['GET'])
 def recent(request):
+    page_size = request.data.get("page_size")
     post = Post.objects.filter(community__state=True).order_by('-timestamp')
-    return get_paginated_queryset_response_5(post, request)
+    return get_paginated_queryset_response(post, request, page_size)
 
 
 @api_view(['GET'])
 def get_type_list(request):
+    page_size = request.data.get("page_size")
     query = PostType.objects.all()
-    return get_paginated_queryset_response_post_type(query, request)
+    return get_paginated_queryset_response_post_type(query, request, page_size)
 
 
 def parent_comment(comment_list, level):
@@ -464,10 +478,14 @@ def get_post_by_time_interval(request):
     to_timestamp = request.data.get('to_timestamp')
     page_size = request.data.get('page_size')
     if from_timestamp is not None and to_timestamp is not None:
-        query = Post.objects.filter(timestamp__gte=from_timestamp, timestamp__lte=to_timestamp, user=request.user)
+        query = Post.objects.filter(timestamp__gte=from_timestamp,
+                                    timestamp__lte=to_timestamp,
+                                    user=request.user)
         return get_paginated_queryset_response_graph(query, request, page_size)
-    query = Post.objects.filter(timestamp__gte=timestamp_in_the_past_by_day(30), timestamp__lte=timezone.now(),
-                                user=request.user)
+    query = Post.objects.filter(
+        timestamp__gte=timestamp_in_the_past_by_day(30),
+        timestamp__lte=timezone.now(),
+        user=request.user)
     return get_paginated_queryset_response_graph(query, request, page_size)
 
 
@@ -486,6 +504,38 @@ def reset(request):
     return Response({Message.SC_OK}, status=200)
 
 
+def count_post_by_community(community):
+    count = 0
+    if Post.objects.filter(community__community_type=community):
+        count = Post.objects.filter(
+            community__community_type=community).count()
+    return count
+
+
+def get_paginated_queryset_response(query_set, request, page_size):
+    paginator = PageNumberPagination()
+    if not page_size:
+        page_size = 20
+    paginator.page_size = page_size
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = PostSerializer(paginated_qs,
+                                many=True,
+                                context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
+
+
+def get_paginated_queryset_response_post_type(query_set, request, page_size):
+    paginator = PageNumberPagination()
+    if not page_size:
+        page_size = 5
+    paginator.page_size = page_size
+    paginated_qs = paginator.paginate_queryset(query_set, request)
+    serializer = PostTypeSerializer(paginated_qs,
+                                    many=True,
+                                    context={"request": request})
+    return paginator.get_paginated_response(serializer.data)
+
+
 def get_paginated_queryset_response_graph(query_set, request, page_size):
     paginator = PageNumberPagination()
     if page_size:
@@ -493,7 +543,9 @@ def get_paginated_queryset_response_graph(query_set, request, page_size):
     else:
         paginator.page_size = 50
     paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = PostGraphSerializer(paginated_qs, many=True, context={"request": request})
+    serializer = PostGraphSerializer(paginated_qs,
+                                     many=True,
+                                     context={"request": request})
     return paginator.get_paginated_response(serializer.data)
 
 
@@ -522,12 +574,3 @@ def check_view(view, post, user):
             post.save()
         serializer = PostSerializer(post)
         return serializer
-    # if view.old_timestamp is not None:
-    #     difference = (timezone.now() - view.old_timestamp).total_seconds()
-    #     if difference >= 120:
-    #         post.view_count = post.view_count + 1
-    #         view.old_timestamp = timezone.now()
-    #         view.save()
-    #         post.save()
-    #     serializer = PostSerializer(post)
-    #     return serializer

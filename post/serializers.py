@@ -31,13 +31,11 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['user',
-                  'id',
-                  'title',
-                  'content',
-                  'parent',
-                  'timestamp',
-                  'image', 'timestamp', 'up_vote', 'down_vote', 'community_type', 'type', 'view_count']
+        fields = [
+            'user', 'id', 'title', 'content', 'parent', 'timestamp', 'image',
+            'timestamp', 'up_vote', 'down_vote', 'community_type', 'type',
+            'view_count'
+        ]
 
     @staticmethod
     def get_up_vote(obj):
@@ -73,7 +71,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['content', 'username', 'post', 'id', 'up_vote', 'down_vote', 'timestamp', 'point']
+        fields = [
+            'content', 'username', 'post', 'id', 'up_vote', 'down_vote',
+            'timestamp', 'point'
+        ]
 
     @staticmethod
     def get_username(obj):
@@ -113,8 +114,10 @@ class CommunitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Community
-        fields = ['id', 'community_type', 'is_following', 'is_main', 'avatar', 'background', 'description', 'follower',
-                  'timestamp', 'rule']
+        fields = [
+            'id', 'community_type', 'is_following', 'is_main', 'avatar',
+            'background', 'description', 'follower', 'timestamp', 'rule'
+        ]
 
     @staticmethod
     def get_id(obj):
@@ -164,6 +167,18 @@ class CommentGraphSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
+        fields = ['id', 'timestamp']
+
+    @staticmethod
+    def get_id(obj):
+        return obj.id
+
+
+class CommunityGraphSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Community
         fields = ['id', 'timestamp']
 
     @staticmethod

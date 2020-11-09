@@ -11,7 +11,6 @@ from redditv1.message import Message
 
 User = get_user_model()
 
-
 # Community view api view
 
 # @api_view(['GET', 'POST'])
@@ -40,12 +39,11 @@ def get_follow_community(request):
         communities = Community.objects.filter(user=request.user)
 
 
-
-
-
 def get_paginated_queryset_response(query_set, request):
     paginator = PageNumberPagination()
     paginator.page_size = 20
     paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = CommunitySerializer(paginated_qs, many=True, context={"request": request})
+    serializer = CommunitySerializer(paginated_qs,
+                                     many=True,
+                                     context={"request": request})
     return paginator.get_paginated_response(serializer.data)
