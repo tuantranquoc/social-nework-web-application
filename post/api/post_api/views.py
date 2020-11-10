@@ -68,9 +68,9 @@ def post_create_api(request):
                 positive_point.save()
                 if image:
                     if len(image) > len('data:,'):
-                        format, imgstr = image.split(';base64,')
+                        format, img_str = image.split(';base64,')
                         ext = format.split('/')[-1]
-                        image = ContentFile(base64.b64decode(imgstr),
+                        image = ContentFile(base64.b64decode(img_str),
                                             name='temp.' + ext)
                         current_post = Post.objects.create(
                             user=user,

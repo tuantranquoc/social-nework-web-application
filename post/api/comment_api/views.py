@@ -46,7 +46,7 @@ def comment_parent_list_view(request, comment_id, *args, **kwargs):
     else:
         comment.order_by('-commentpoint__point')
     if not comment:
-        return Response({}, status=204)
+        return Response({Message.SC_BAD_RQ}, status=204)
     return get_paginated_queryset_response(comment, request, page_size)
 
 
@@ -58,7 +58,7 @@ def child_comment_create_view(request, comment_id):
     if request.user.is_authenticated:
         comment = Comment.objects.filter(id=comment_id).first()
         if not comment:
-            return Response({}, status=204)
+            return Response({Message.SC_BAD_RQ}, status=204)
         content = request.data.get("content")
         comment = Comment.objects.create(parent=comment,
                                          content=content,
@@ -76,7 +76,6 @@ def comment_create_view(request, *args, **kwargs):
     if request.user.is_authenticated:
         content = request.data.get("content")
         post_id = request.data.get("id")
-
         if content and post_id:
             post = Post.objects.get(id=post_id)
             comment = Comment.objects.create(user=request.user,
@@ -132,6 +131,7 @@ def get_comment_by_id(request, comment_id):
 
 @api_view(["POST"])
 def check_vote(request):
+
     if request.user.is_authenticated:
         comment_id = request.data.get('id')
         if Comment.objects.filter(up_vote=request.user, id=comment_id):
