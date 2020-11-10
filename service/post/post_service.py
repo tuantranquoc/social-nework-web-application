@@ -229,13 +229,16 @@ def find_post_by_up_vote(request):
 def find_post_by_community(request, community_type):
     page_size = request.data.get("page_size")
     post = Post.objects.filter(community__community_type=community_type)
+    community = Community.objects.filter(community_type=community_type).first()
     if request.user.is_authenticated:
+        if community.state == True:
+            return get_paginated_queryset_response(post, request, page_size,
+                                                   ModelName.POST)
         post = post.filter(user=request.user)
         if post:
             return get_paginated_queryset_response(post, request, page_size,
                                                    ModelName.POST)
         return Response({Message.MUST_FOLLOW}, status=400)
-    community = Community.objects.filter(community_type=community_type).first()
     if community.state == False:
         return Response({Message.MUST_FOLLOW}, status=400)
     return get_paginated_queryset_response(post, request, page_size,
