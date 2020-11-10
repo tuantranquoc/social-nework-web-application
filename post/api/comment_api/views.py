@@ -3,13 +3,13 @@ from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from post import rank
-from post.api.post_api.views import timestamp_in_the_past_by_day
 from post.models import Post, Comment, CommentPoint
 from rest_framework.response import Response
 from post.serializers import CommentSerializer, CommentGraphSerializer
 from redditv1.message import Message
 from function.paginator import get_paginated_queryset_response
 from redditv1.name import ModelName
+from service.post.post_service import timestamp_in_the_past_by_day
 
 
 @api_view(['GET', 'POST'])
