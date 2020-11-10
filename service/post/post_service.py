@@ -1,7 +1,7 @@
 from community.models import Community
 from django.db.models.aggregates import Count
 from function.paginator import get_paginated_queryset_response
-from post.models import PositivePoint, Post, PostType, View
+from post.models import Comment, PositivePoint, Post, PostType, View
 from account.models import Profile
 from redditv1.name import ModelName
 from rest_framework.response import Response
@@ -10,6 +10,30 @@ from function.file import get_image
 from post import rank
 from post.serializers import PostSerializer
 from django.utils import timezone
+import datetime
+
+
+def count_post_by_community(community):
+    count = 0
+    if Post.objects.filter(community__community_type=community):
+        count = Post.objects.filter(
+            community__community_type=community).count()
+    return count
+
+
+def timestamp_in_the_past_by_day(days):
+    return timezone.now() - datetime.timedelta(days)
+
+
+def parent_comment(comment_list, level):
+    comments = []
+    if level == 3:
+        for level_3 in comment_list:
+            comments.append(level_3.parent.parent)
+    if level == 2:
+        for level_2 in comment_list:
+            comments.append(level_2.parent)
+    return comments
 
 
 def get_post_list(request):
@@ -230,6 +254,8 @@ def find_post_by_community(request, community_type):
     page_size = request.data.get("page_size")
     post = Post.objects.filter(community__community_type=community_type)
     community = Community.objects.filter(community_type=community_type).first()
+    if not community:
+        return Response({Message.SC_BAD_RQ}, status=400)
     if request.user.is_authenticated:
         if community.state == True:
             return get_paginated_queryset_response(post, request, page_size,
@@ -242,6 +268,51 @@ def find_post_by_community(request, community_type):
     if community.state == False:
         return Response({Message.MUST_FOLLOW}, status=400)
     return get_paginated_queryset_response(post, request, page_size,
+                                           ModelName.POST)
+
+
+def find_post_by_comment(request):
+    page_size = request.data.get("page_size")
+    if request.user.is_authenticated:
+        # level 1
+        comment_list = Comment.objects.filter(user=request.user,
+                                              parent__isnull=True)
+        # level 2 + 3
+        comment_list_level_3 = Comment.objects.filter(
+            parent__isnull=False).filter(parent__parent__isnull=False).filter(
+                parent__parent__parent__isnull=True, user=request.user)
+        comment_list_level_2 = Comment.objects.filter(
+            parent__isnull=False).filter(parent__parent__isnull=True,
+                                         user=request.user)
+        query = Post.objects.filter(comment__in=comment_list)
+        query_2 = Post.objects.filter(
+            comment__in=parent_comment(comment_list_level_2, 2))
+        query_3 = Post.objects.filter(
+            comment__in=parent_comment(comment_list_level_3, 3))
+        query_result = (query | query_2 | query_3).distinct()
+        return get_paginated_queryset_response(query_result, request,
+                                               page_size, ModelName.POST)
+    return Response({Message.SC_NO_AUTH}, status=401)
+
+
+def find_post_by_comment_with_username(request, username):
+    page_size = request.data.get("page_size")
+    # level 1
+    comment_list = Comment.objects.filter(user__username=username,
+                                          parent__isnull=True)
+    # level 2 + 3
+    comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(
+        parent__parent__isnull=False).filter(
+            parent__parent__parent__isnull=True, user__username=username)
+    comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(
+        parent__parent__isnull=True, user__username=username)
+    query = Post.objects.filter(comment__in=comment_list)
+    query_2 = Post.objects.filter(
+        comment__in=parent_comment(comment_list_level_2, 2))
+    query_3 = Post.objects.filter(
+        comment__in=parent_comment(comment_list_level_3, 3))
+    query_result = (query | query_2 | query_3).distinct()
+    return get_paginated_queryset_response(query_result, request, page_size,
                                            ModelName.POST)
 
 

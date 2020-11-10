@@ -149,49 +149,12 @@ def filter_by_up_vote(request):
 
 @api_view(["GET"])
 def get_post_by_comment(request):
-    page_size = request.data.get("page_size")
-    if request.user.is_authenticated:
-        # level 1
-        comment_list = Comment.objects.filter(user=request.user,
-                                              parent__isnull=True)
-        # level 2 + 3
-        comment_list_level_3 = Comment.objects.filter(
-            parent__isnull=False).filter(parent__parent__isnull=False).filter(
-                parent__parent__parent__isnull=True, user=request.user)
-        comment_list_level_2 = Comment.objects.filter(
-            parent__isnull=False).filter(parent__parent__isnull=True,
-                                         user=request.user)
-        query = Post.objects.filter(comment__in=comment_list)
-        query_2 = Post.objects.filter(
-            comment__in=parent_comment(comment_list_level_2, 2))
-        query_3 = Post.objects.filter(
-            comment__in=parent_comment(comment_list_level_3, 3))
-        query_result = (query | query_2 | query_3).distinct()
-        return get_paginated_queryset_response(query_result, request,
-                                               page_size, ModelName.POST)
-    return Response({Message.SC_NO_AUTH}, status=401)
+    return post_service.find_post_by_comment(request)
 
 
 @api_view(["GET"])
 def get_post_by_username_comment(request, username):
-    page_size = request.data.get("page_size")
-    # level 1
-    comment_list = Comment.objects.filter(user__username=username,
-                                          parent__isnull=True)
-    # level 2 + 3
-    comment_list_level_3 = Comment.objects.filter(parent__isnull=False).filter(
-        parent__parent__isnull=False).filter(
-            parent__parent__parent__isnull=True, user__username=username)
-    comment_list_level_2 = Comment.objects.filter(parent__isnull=False).filter(
-        parent__parent__isnull=True, user__username=username)
-    query = Post.objects.filter(comment__in=comment_list)
-    query_2 = Post.objects.filter(
-        comment__in=parent_comment(comment_list_level_2, 2))
-    query_3 = Post.objects.filter(
-        comment__in=parent_comment(comment_list_level_3, 3))
-    query_result = (query | query_2 | query_3).distinct()
-    return get_paginated_queryset_response(query_result, request, page_size,
-                                           ModelName.POST)
+    return post_service.find_post_by_comment_with_username(request, username)
 
 
 @api_view(["GET"])
@@ -352,9 +315,10 @@ def reset(request):
     return Response({Message.SC_OK}, status=200)
 
 
-@api_view(["GET","POST"])
+@api_view(["GET", "POST"])
 def find_post_by_community(request, community_type):
     return post_service.find_post_by_community(request, community_type)
+
 
 def count_post_by_community(community):
     count = 0
