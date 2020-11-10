@@ -61,9 +61,9 @@ def create_community(request):
             user=request.user).first()
         positive_point.point = positive_point.point - 10
         positive_point.save()
-        if background:
+        if len(background) > len('data:,'):
             community.background = get_image(background)
-        if avatar:
+        if len(avatar) > len('data:,'):
             community.avatar = get_image(background)
         community.save()
         serializer = CommunitySerializer(community)
@@ -203,5 +203,3 @@ def get_paginated_queryset_response_graph(query_set, request, page_size):
                                           many=True,
                                           context={"request": request})
     return paginator.get_paginated_response(serializer.data)
-
-

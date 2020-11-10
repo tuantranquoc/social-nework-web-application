@@ -9,3 +9,5 @@ class ModelName:
     POST = "Post"
     COMMUNITY_GRAPH = "Community graph"
     COMMENT_GRAPH = "Comment graph"
+    POST_TYPE = "Post type"
+    POST_GRAPH = "Post graph"

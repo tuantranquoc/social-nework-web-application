@@ -13,38 +13,35 @@ from account.serializers import PublicProfileSerializer
 from post.models import Post
 from post.serializers import PostSerializer
 from redditv1.message import Message
-
+from function.file import get_image
+from function.paginator import get_paginated_queryset_response
+from redditv1.name import ModelName
 User = get_user_model()
 
 
 @api_view(["GET"])
 def profile_list_view(request):
     profiles = Profile.objects.all()
-    return get_paginated_queryset_recommend_user_response(profiles, request)
-
-
-def get_paginated_queryset_recommend_user_response(query_set, request):
-    paginator = PageNumberPagination()
-    paginator.page_size = 10
-    paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = PublicProfileSerializer(paginated_qs,
-                                         many=True,
-                                         context={"request": request})
-    return paginator.get_paginated_response(serializer.data)
+    page_size = request.data.get('page_size')
+    return get_paginated_queryset_response(profiles, request, page_size,
+                                           ModelName.PROFILE)
 
 
 @api_view(["GET"])
 def profile_detail_view(request, username):
+    page_size = request.data.get('page_size')
     profiles = Profile.objects.filter(user__username=username)
-    return get_paginated_queryset_recommend_user_response(profiles, request)
+    return get_paginated_queryset_response(profiles, request, page_size,
+                                           ModelName.PROFILE)
 
 
 @api_view(["GET"])
 def profile_current_detail_view(request):
+    page_size = request.data.get('page_size')
     if request.user.is_authenticated:
         profiles = Profile.objects.filter(user__username=request.user.username)
-        return get_paginated_queryset_recommend_user_response(
-            profiles, request)
+        return get_paginated_queryset_response(profiles, request, page_size,
+                                               ModelName.PROFILE)
     return Response({}, status=400)
     # if not request.user.is_authenticated:
     #     profiles = Profile.objects.filter(user__username=request.user.username)
@@ -98,11 +95,8 @@ def profile_avatar_post(request, *args, **kwargs):
         profile = Profile.objects.filter(user=request.user).first()
         if request.data.get("img"):
             data = request.data.get("img")
-            format, img_str = data.split(';base64,')
-            ext = format.split('/')[-1]
-            image = ContentFile(base64.b64decode(img_str), name='temp.' + ext)
             # profile.background = image
-            profile.avatar = image
+            profile.avatar = get_image(data)
             profile.save()
             return Response({}, status=200)
         else:
@@ -117,11 +111,8 @@ def profile_background_post(request, *args, **kwargs):
         profile = Profile.objects.filter(user=request.user).first()
         if request.data.get("img"):
             data = request.data.get("img")
-            format, img_str = data.split(';base64,')
-            ext = format.split('/')[-1]
-            image = ContentFile(base64.b64decode(img_str), name='temp.' + ext)
             # profile.background = image
-            profile.background = image
+            profile.background = get_image(data)
             profile.save()
             return Response({}, status=200)
         else:
@@ -143,16 +134,10 @@ def profile_update_via_react_view(request, *args, **kwargs):
     email = request.data.get("email")
     background = request.data.get("background")
     avatar = request.data.get("avatar")
-    if request.data.get("background"):
-        format, img_str = background.split(';base64,')
-        ext = format.split('/')[-1]
-        image = ContentFile(base64.b64decode(img_str), name='temp.' + ext)
-        my_profile.background = image
-    if request.data.get("avatar"):
-        format, img_str = avatar.split(';base64,')
-        ext = format.split('/')[-1]
-        image = ContentFile(base64.b64decode(img_str), name='temp.' + ext)
-        my_profile.avatar = image
+    if len(background) > len('data:,'):
+        my_profile.background = get_image(background)
+    if len(avatar) > len('data:,'):
+        my_profile.avatar = get_image(avatar)
     user.first_name = first_name
     user.last_name = last_name
     user.email = email
@@ -166,13 +151,15 @@ def profile_update_via_react_view(request, *args, **kwargs):
 
 
 @api_view(['GET'])
-def get_following_profiles(request, username, *args, **kwargs):
+def get_following_profiles(request, username):
+    page_size = request.data.get('page_size')
     if request.user.is_authenticated:
         profile = Profile.objects.filter(user__username=username).first()
         if profile:
             following = profile.user.following.all()
-            return get_paginated_queryset_recommend_user_response(
-                following, request)
+            return get_paginated_queryset_response(following, request,
+                                                   page_size,
+                                                   ModelName.PROFILE)
         return Response({}, status=400)
     return Response({}, status=403)
 
@@ -251,13 +238,15 @@ def spilt_user_tag(hash_tag):
 
 @api_view(['POST', 'GET'])
 def search(request):
+    page_size = request.data.get('page_size')
     key_word = request.data.get('key_word')
     if key_word:
         if '@' in key_word:
             tags = spilt_user_tag(key_word)
             profiles = Profile.objects.filter(user__username__in=tags)
-            return get_paginated_queryset_recommend_user_response(
-                profiles, request)
+            return get_paginated_queryset_response(profiles, request,
+                                                   page_size,
+                                                   ModelName.PROFILE)
         if '#' in key_word:
             tags = spilt_content(key_word)
             query = Post.objects.filter(
@@ -266,17 +255,20 @@ def search(request):
                 query = Post.objects.filter(
                     reduce(operator.and_,
                            (Q(content__contains=x) for x in tags)))
-            return get_paginated_queryset_response(query, request, 10)
+            return get_paginated_queryset_response(query, request, page_size,
+                                                   ModelName.PROFILE)
         query = Post.objects.filter(content__contains=key_word)
-        return get_paginated_queryset_response(query, request, 10)
+        return get_paginated_queryset_response(query, request, page_size,
+                                               ModelName.PROFILE)
 
 
 @api_view(['GET'])
-def recommend_user_from_profile(request, username, *args, **kwargs):
+def recommend_user_from_profile(request, username):
     """
     get list follower from this acc
     profile -> follower acc -> max follower count okay >?
     """
+    page_size = request.data.get('page_size')
     if request.user.is_authenticated:
         user = request.user
         following = user.following.all()
@@ -286,7 +278,8 @@ def recommend_user_from_profile(request, username, *args, **kwargs):
             user__profile__in=profile_user_following)
         u = user_profile.annotate(count=Count('follower')).order_by("-count")
         u = u.exclude(user__profile__in=following).exclude(user=request.user)
-        return get_paginated_queryset_recommend_user_response(u, request)
+        return get_paginated_queryset_response(u, request, page_size,
+                                               ModelName.PROFILE)
 
 
 @api_view(['GET'])
@@ -295,6 +288,7 @@ def recommend_user_from_feed(request, *args, **kwargs):
     get all follower list from feed -> feed mean that all the tweet that user has follow
     get all the follower profile from em
     """
+    page_size = request.data.get('page_size')
     if request.user.is_authenticated:
         user = request.user
         # profiles that this user follow
@@ -312,21 +306,22 @@ def recommend_user_from_feed(request, *args, **kwargs):
         profile_list = Profile.objects.filter(
             user__profile__in=profiles_).annotate(
                 count=Count("follower")).order_by("-count")
-        return get_paginated_queryset_recommend_user_response(
-            profile_list, request)
+        return get_paginated_queryset_response(profile_list, request,
+                                               page_size, ModelName.PROFILE)
     return Response({}, status=400)
 
 
 @api_view(['GET'])
 def recommend_user_from_global(request, *args, **kwargs):
+    page_size = request.data.get('page_size')
     if request.user.is_authenticated:
         user = request.user
         following = user.following.all()
         profiles = Profile.objects.annotate(count=Count("follower")).exclude(
             user__profile__in=following).exclude(
                 user=request.user).order_by("-count")
-        return get_paginated_queryset_recommend_user_response(
-            profiles, request)
+        return get_paginated_queryset_response(profiles, request, page_size,
+                                               ModelName.PROFILE)
     return Response({}, status=400)
 
 
@@ -336,13 +331,3 @@ def spilt_content(hash_tag):
         hash_tag_list.pop(0)
         return hash_tag_list
     return hash_tag
-
-
-def get_paginated_queryset_response(query_set, request, page_size):
-    paginator = PageNumberPagination()
-    paginator.page_size = page_size
-    paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = PostSerializer(paginated_qs,
-                                many=True,
-                                context={"request": request})
-    return paginator.get_paginated_response(serializer.data)
