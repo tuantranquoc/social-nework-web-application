@@ -61,10 +61,12 @@ def create_community(request):
             user=request.user).first()
         positive_point.point = positive_point.point - 10
         positive_point.save()
-        if len(background) > len('data:,'):
-            community.background = get_image(background)
-        if len(avatar) > len('data:,'):
-            community.avatar = get_image(background)
+        if background:
+            if len(background) > len('data:,'):
+                community.background = get_image(background)
+        if avatar:
+            if len(avatar) > len('data:,'):
+                community.avatar = get_image(background)
         community.save()
         serializer = CommunitySerializer(community)
         return Response(serializer.data, status=201)

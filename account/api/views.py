@@ -134,10 +134,12 @@ def profile_update_via_react_view(request, *args, **kwargs):
     email = request.data.get("email")
     background = request.data.get("background")
     avatar = request.data.get("avatar")
-    if len(background) > len('data:,'):
-        my_profile.background = get_image(background)
-    if len(avatar) > len('data:,'):
-        my_profile.avatar = get_image(avatar)
+    if background:
+        if len(background) > len('data:,'):
+            my_profile.background = get_image(background)
+    if avatar:
+        if len(avatar) > len('data:,'):
+            my_profile.avatar = get_image(avatar)
     user.first_name = first_name
     user.last_name = last_name
     user.email = email
