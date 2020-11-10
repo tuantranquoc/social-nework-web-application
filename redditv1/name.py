@@ -1,0 +1,11 @@
+class ModelName:
+    COMMUNITY = "Community"
+    USER = "User"
+    COMMENT = "Comment"
+    CHAT = "CHAT"
+    POSITIVE_POINT = "Positive point"
+    VIEW = "View"
+    PROFILE = "Profile"
+    POST = "Post"
+    COMMUNITY_GRAPH = "Community graph"
+    COMMENT_GRAPH = "Comment graph"

@@ -447,7 +447,7 @@ def hot(request):
     return get_paginated_queryset_response(post, request, page_size)
 
 
-@api_view(['GET'])
+@api_view(['GET','POST'])
 def recent(request):
     page_size = request.data.get("page_size")
     post = Post.objects.filter(community__state=True).order_by('-timestamp')

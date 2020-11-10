@@ -15,16 +15,19 @@ def get_paginated_queryset_recommend_user_response(query_set, request):
     paginator = PageNumberPagination()
     paginator.page_size = 3
     paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = PublicProfileSerializer(paginated_qs, many=True, context={"request": request})
+    serializer = PublicProfileSerializer(paginated_qs,
+                                         many=True,
+                                         context={"request": request})
     return paginator.get_paginated_response(serializer.data)
 
 
 @api_view(['GET'])
-def create_chat_room(request, username, *args, **kwargs):
+def create_chat_room(request, username):
     if request.user.is_authenticated:
         user = request.user
         target_user = User.objects.filter(username=username).first()
-        chat_room = ChatRoom.objects.filter(user=user).filter(user=target_user).first()
+        chat_room = ChatRoom.objects.filter(user=user).filter(
+            user=target_user).first()
         if not chat_room:
             b = ChatRoom.objects.create()
             if b:
@@ -39,16 +42,19 @@ def create_chat_room(request, username, *args, **kwargs):
 
 
 @api_view(['POST'])
-def create_chat(request, username, *args, **kwargs):
+def create_chat(request, username):
     if request.user.is_authenticated:
         user = request.user
         target_user = User.objects.filter(username=username).first()
         content = request.data.get("content")
         if content:
-            chat_room = ChatRoom.objects.filter(user=user).filter(user=target_user).first()
+            chat_room = ChatRoom.objects.filter(user=user).filter(
+                user=target_user).first()
             print(chat_room.user.all())
             chat_room_id = chat_room.id
-            new_content = Content.objects.create(user=user, chat_room=chat_room, content=content)
+            new_content = Content.objects.create(user=user,
+                                                 chat_room=chat_room,
+                                                 content=content)
             serializer = ContentSerializer(new_content)
             print(serializer.data)
             return Response(serializer.data, status=201)
@@ -57,11 +63,12 @@ def create_chat(request, username, *args, **kwargs):
 
 
 @api_view(['GET'])
-def get_chat_view(request, username, *args, **kwargs):
+def get_chat_view(request, username):
     if request.user.is_authenticated:
         user = request.user
         target_user = User.objects.filter(username=username).first()
-        chat_room = ChatRoom.objects.filter(user=user).filter(user=target_user).first()
+        chat_room = ChatRoom.objects.filter(user=user).filter(
+            user=target_user).first()
         if not chat_room:
             chat_room = ChatRoom.objects.create()
             chat_room.user.add(user)

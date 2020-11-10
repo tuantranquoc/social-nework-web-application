@@ -13,6 +13,7 @@ from post.models import PositivePoint
 from post.serializers import CommunityGraphSerializer, CommunitySerializer
 from redditv1.message import Message
 from django.utils import timezone
+from function.file import get_image
 import datetime
 
 User = get_user_model()
@@ -39,8 +40,16 @@ def create_community(request):
         description = request.data.get("description")
         avatar = request.data.get("avatar")
         rule = request.data.get("rule")
-        if not Community.objects.filter(community_type=community):
+        if not Community.objects.filter(community_type=sub_community):
             return Response({Message.SC_NOT_FOUND}, status=400)
+        if not sub_community:
+            if community.objects.filter(community_type=community):
+                return Response({Message.SC_BAD_RQ}, status=400)
+            if not request.user.is_staff:
+                return Response({Message.SC_PERMISSION_DENIED}, status=403)
+            community = Community.objects.create(community_type=community,
+                                                 description=description,
+                                                 rule=rule)
         if request.user.positivepoint.point <= 10:
             return Response({Message.SC_NOT_ENOUGH_POINT}, status=400)
         parent = Community.objects.filter(community_type=community).first()
@@ -53,21 +62,15 @@ def create_community(request):
         positive_point.point = positive_point.point - 10
         positive_point.save()
         if background:
-            format, imgstr = background.split(';base64,')
-            ext = format.split('/')[-1]
-            image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-            community.background = image
+            community.background = get_image(background)
         if avatar:
-            format, imgstr = avatar.split(';base64,')
-            ext = format.split('/')[-1]
-            image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-            community.avatar = image
+            community.avatar = get_image(background)
         community.save()
         serializer = CommunitySerializer(community)
         return Response(serializer.data, status=201)
 
 
-@api_view(["POST","GET"])
+@api_view(["POST", "GET"])
 def get_community(request):
     page_size = request.data.get("page_size")
     community_type = request.data.get('community')
@@ -137,17 +140,9 @@ def community_update_via_react_view(request, *args, **kwargs):
     description = request.data.get("description")
     avatar = request.data.get("avatar")
     if background:
-        data = request.data.get("background")
-        format, imgstr = data.split(';base64,')
-        ext = format.split('/')[-1]
-        image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        community.background = image
+        community.background = get_image(background)
     if avatar:
-        data = request.data.get("avatar")
-        format, imgstr = data.split(';base64,')
-        ext = format.split('/')[-1]
-        image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        community.avatar = image
+        community.avatar = get_image(avatar)
     if description:
         community.description = description
     user.save()
@@ -208,3 +203,5 @@ def get_paginated_queryset_response_graph(query_set, request, page_size):
                                           many=True,
                                           context={"request": request})
     return paginator.get_paginated_response(serializer.data)
+
+
