@@ -213,3 +213,33 @@ def find_post_by_user(request):
         return get_paginated_queryset_response(query, request, page_size,
                                                ModelName.POST)
     return Response({Message.SC_NO_AUTH}, status=401)
+
+
+def find_post_by_up_vote(request):
+    page_size = request.data.get("page_size")
+    if request.user.is_authenticated:
+        query = Post.objects.filter(user=request.user).annotate(
+            user_count=Count("up_vote")).order_by("-user_count").filter(
+                community__user=request.user)
+        return get_paginated_queryset_response(query, request, page_size,
+                                               ModelName.POST)
+    return Response({Message.SC_NO_AUTH}, status=401)
+
+
+def find_post_by_community(request, community_type):
+    page_size = request.data.get("page_size")
+    post = Post.objects.filter(community__community_type=community_type)
+    if request.user.is_authenticated:
+        post = post.filter(user=request.user)
+        if post:
+            return get_paginated_queryset_response(post, request, page_size,
+                                                   ModelName.POST)
+        return Response({Message.MUST_FOLLOW}, status=400)
+    community = Community.objects.filter(community_type=community_type).first()
+    if community.state == False:
+        return Response({Message.MUST_FOLLOW}, status=400)
+    return get_paginated_queryset_response(post, request, page_size,
+                                           ModelName.POST)
+
+
+# def find_post_by_comment(request):

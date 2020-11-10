@@ -60,14 +60,7 @@ def get_list_post_by_user(request):
 
 @api_view(["GET"])
 def get_list_post_by_up_vote(request):
-    page_size = request.data.get("page_size")
-    if request.user.is_authenticated:
-        query = Post.objects.filter(user=request.user).annotate(
-            user_count=Count("up_vote")).order_by("-user_count").filter(
-                community__user=request.user)
-        return get_paginated_queryset_response(query, request, page_size,
-                                               ModelName.POST)
-    return Response({Message.SC_NO_AUTH}, status=401)
+    return post_service.find_post_by_up_vote(request)
 
 
 @api_view(["GET"])
@@ -358,6 +351,10 @@ def reset(request):
         p.save()
     return Response({Message.SC_OK}, status=200)
 
+
+@api_view(["GET","POST"])
+def find_post_by_community(request, community_type):
+    return post_service.find_post_by_community(request, community_type)
 
 def count_post_by_community(community):
     count = 0

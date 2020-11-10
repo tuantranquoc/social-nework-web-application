@@ -70,6 +70,8 @@ urlpatterns = [
     path('api/post/type', post_api_view.get_type_list),
     path('api/post/graph', post_api_view.get_post_by_time_interval),
     path('api/post/reset', post_api_view.reset),
+    path('api/post/community/<str:community_type>', post_api_view.find_post_by_community),
+
     # 31
     # comment api
     path('api/comment/<int:post_id>', comment_api_view.comment_api_view),
