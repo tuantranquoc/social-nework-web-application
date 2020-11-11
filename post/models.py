@@ -5,21 +5,33 @@ from community.models import Community
 
 User = get_user_model()
 
-
 # Create your models here.
 
 
 class Post(models.Model):
-    parent = models.ForeignKey("self", null=True, on_delete=models.SET_NULL, blank=True)
+    parent = models.ForeignKey("self",
+                               null=True,
+                               on_delete=models.SET_NULL,
+                               blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(blank=True, null=True)
-    up_vote = models.ManyToManyField(User, related_name="p_up_vote", blank=True)
-    down_vote = models.ManyToManyField(User, related_name="p_down_vote", blank=True)
+    up_vote = models.ManyToManyField(User,
+                                     related_name="p_up_vote",
+                                     blank=True)
+    down_vote = models.ManyToManyField(User,
+                                       related_name="p_down_vote",
+                                       blank=True)
     image = models.FileField(upload_to='images/', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    community = models.ForeignKey(Community, on_delete=models.CASCADE, blank=True, null=True)
+    community = models.ForeignKey(Community,
+                                  on_delete=models.CASCADE,
+                                  blank=True,
+                                  null=True)
     title = models.CharField(max_length=60, blank=True, null=True)
-    type = models.ForeignKey("PostType", blank=True, null=True, on_delete=models.CASCADE)
+    type = models.ForeignKey("PostType",
+                             blank=True,
+                             null=True,
+                             on_delete=models.CASCADE)
     view_count = models.IntegerField(default=0)
     point = models.FloatField(default=0)
 
@@ -60,7 +72,10 @@ class Post(models.Model):
 
 
 class PostPoint(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+    post = models.ForeignKey(Post,
+                             on_delete=models.CASCADE,
+                             blank=True,
+                             null=True)
     point = models.FloatField(default=0)
 
     class Meta:
@@ -75,7 +90,10 @@ class PostPoint(models.Model):
 
 class PositivePoint(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User,
+                                blank=True,
+                                null=True,
+                                on_delete=models.CASCADE)
     point = models.IntegerField(default=0)
 
     def __str__(self):
@@ -102,9 +120,16 @@ class Comment(models.Model):
     content = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
-    up_vote = models.ManyToManyField(User, related_name="c_up_vote", blank=True)
-    down_vote = models.ManyToManyField(User, related_name="c_down_vote", blank=True)
+    post = models.ForeignKey(Post,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    up_vote = models.ManyToManyField(User,
+                                     related_name="c_up_vote",
+                                     blank=True)
+    down_vote = models.ManyToManyField(User,
+                                       related_name="c_down_vote",
+                                       blank=True)
     point = models.FloatField(default=0)
 
     class Meta:
@@ -142,7 +167,10 @@ class Comment(models.Model):
 
 
 class CommentPoint(models.Model):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
+    comment = models.ForeignKey(Comment,
+                                on_delete=models.CASCADE,
+                                blank=True,
+                                null=True)
     point = models.FloatField(default=0)
 
     class Meta:
@@ -166,7 +194,10 @@ class PostType(models.Model):
 
 
 class View(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+    post = models.ForeignKey(Post,
+                             on_delete=models.CASCADE,
+                             blank=True,
+                             null=True)
     user = models.ManyToManyField(User)
     old_timestamp = models.DateTimeField(blank=True, null=True, default=None)
 

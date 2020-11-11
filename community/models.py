@@ -9,9 +9,16 @@ class Community(models.Model):
     id = models.AutoField(primary_key=True)
     community_type = models.CharField(max_length=255, blank=True, null=True)
     user = models.ManyToManyField(User, blank=True)
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
+    parent = models.ForeignKey("self",
+                               on_delete=models.CASCADE,
+                               null=True,
+                               blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="owner")
+    creator = models.ForeignKey(User,
+                                on_delete=models.CASCADE,
+                                blank=True,
+                                null=True,
+                                related_name="owner")
     state = models.BooleanField(default=True)
     description = models.TextField(default="")
     avatar = models.ImageField(upload_to='images/', blank=True, null=True)
