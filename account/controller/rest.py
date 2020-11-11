@@ -16,6 +16,7 @@ from redditv1.message import Message
 from function.file import get_image
 from function.paginator import get_paginated_queryset_response
 from redditv1.name import ModelName
+from community.models import Community
 User = get_user_model()
 
 
@@ -242,6 +243,11 @@ def spilt_user_tag(hash_tag):
 def search(request):
     page_size = request.data.get('page_size')
     key_word = request.data.get('key_word')
+    search_type = request.data.get('search_type')
+    if search_type == 'community':
+        query = Community.objects.filter(community_type__contains=key_word)
+        return get_paginated_queryset_response(query, request, page_size,
+                                               ModelName.COMMUNITY)
     if key_word:
         if '@' in key_word:
             tags = spilt_user_tag(key_word)
@@ -261,7 +267,7 @@ def search(request):
                                                    ModelName.PROFILE)
         query = Post.objects.filter(content__contains=key_word)
         return get_paginated_queryset_response(query, request, page_size,
-                                               ModelName.PROFILE)
+                                               ModelName.POST)
 
 
 @api_view(['GET'])
