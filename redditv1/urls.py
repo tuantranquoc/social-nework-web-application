@@ -23,6 +23,7 @@ from account.controller import rest as profile_api
 from community.controller import rest as community_api
 from rest_framework_simplejwt import views as jwt_views
 from chat.controller import rest as chat_api
+from account.controller import rest as profile_api
 from redditv1 import settings
 import account
 
