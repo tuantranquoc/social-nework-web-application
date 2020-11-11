@@ -47,7 +47,7 @@ def get_post_list(request):
         user_count=Count('user')).order_by('-user_count')
     if request.user.is_authenticated:
         top_community = Community.objects.filter(user=request.user).union(
-            Community.objects.filter(community__state=True)).distinct()
+            Community.objects.filter(community__state=True)).union(Community.objects.filter(creator=request.user)).distinct()
         query = Post.objects.filter(user=request.user).union(
             Post.objects.filter(community__user=request.user)).union(
                 Post.objects.filter(user__following=Profile.objects.filter(

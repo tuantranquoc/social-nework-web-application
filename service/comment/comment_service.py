@@ -12,8 +12,7 @@ from redditv1.name import ModelName
 from service.post.post_service import timestamp_in_the_past_by_day
 
 
-@api_view(['GET', 'POST'])
-def comment_parent_list_view(request, comment_id, *args, **kwargs):
+def comment_parent_list(request, comment_id, *args, **kwargs):
     sort = request.data.get("sort")
     page_size = request.data.get("page_size")
     comment = Comment.objects.filter(parent__id=comment_id)
@@ -27,8 +26,7 @@ def comment_parent_list_view(request, comment_id, *args, **kwargs):
                                            ModelName.COMMENT)
 
 
-@api_view(['POST'])
-def child_comment_create_view(request, comment_id):
+def child_comment_create(request, comment_id):
     """
     data = {"content":"CONTENT"}
     """
@@ -49,8 +47,7 @@ def child_comment_create_view(request, comment_id):
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
-@api_view(['POST'])  # http method client has send == POST
-def comment_create_view(request, *args, **kwargs):
+def comment_create(request):
     if request.user.is_authenticated:
         content = request.data.get("content")
         post_id = request.data.get("id")
@@ -67,18 +64,14 @@ def comment_create_view(request, *args, **kwargs):
         return Response({Message.SC_NO_AUTH}, status=403)
 
 
-@api_view(['GET'])  # http method client has send == POST
-def comment_api_view(request, post_id, *args, **kwargs):
+def get_list_comment_level_1_by_post(request, post_id):
     page_size = request.data.get("page_size")
     comment = Comment.objects.filter(
         post_id=post_id).order_by('-commentpoint__point')
-    if not comment:
-        return Response({}, status=204)
     return get_paginated_queryset_response(comment, request, page_size,
                                            ModelName.COMMENT)
 
 
-@api_view(['POST'])
 def comment_action(request):
     if not request.user.is_authenticated:
         return Response({Message.SC_NO_AUTH}, status=401)
@@ -99,18 +92,7 @@ def comment_action(request):
     return Response(Message.SC_BAD_RQ, status=400)
 
 
-@api_view(["GET"])
-def get_comment_by_id(request, comment_id):
-    comment = Comment.objects.filter(id=comment_id).first()
-    if comment:
-        serializer = CommentSerializer(comment)
-        return Response(serializer.data, status=200)
-    return Response(Message.SC_BAD_RQ, status=400)
-
-
-@api_view(["POST"])
 def check_vote(request):
-
     if request.user.is_authenticated:
         comment_id = request.data.get('id')
         if Comment.objects.filter(up_vote=request.user, id=comment_id):
@@ -120,7 +102,14 @@ def check_vote(request):
     return Response({"none"})
 
 
-@api_view(["GET"])
+def comment_point_update(comment):
+    if comment:
+        comment_point = CommentPoint.objects.filter(comment=comment).first()
+        comment_point.point = rank.confidence(comment.up_vote.count(),
+                                              comment.down_vote.count())
+        comment_point.save()
+
+
 def filter_by_up_vote(request):
     page_size = request.data.get("page_size")
     query = Comment.objects.annotate(
@@ -129,7 +118,6 @@ def filter_by_up_vote(request):
                                            ModelName.COMMENT)
 
 
-@api_view(["GET"])
 def count_comment_by_post(request, post_id):
     post = Post.objects.filter(id=post_id).first()
     if post:
@@ -144,15 +132,14 @@ def count_comment_by_post(request, post_id):
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
-@api_view(["GET"])
-def count_by_user_post(request, username):
-    comment = Comment.objects.filter(user__username=username)
+def get_comment_by_id(request, comment_id):
+    comment = Comment.objects.filter(id=comment_id).first()
     if comment:
-        return Response({"Total": comment.count()}, status=200)
-    return Response({Message.SC_NOT_FOUND}, status=400)
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data, status=200)
+    return Response(Message.SC_BAD_RQ, status=400)
 
 
-@api_view(["POST", "GET"])
 def get_comment_by_time_interval(request):
     from_timestamp = request.data.get('from_timestamp')
     to_timestamp = request.data.get('to_timestamp')
@@ -171,7 +158,13 @@ def get_comment_by_time_interval(request):
                                            ModelName.COMMENT_GRAPH)
 
 
-@api_view(["GET"])
+def count_post_by_user(request, username):
+    comment = Comment.objects.filter(user__username=username)
+    if comment:
+        return Response({"Total": comment.count()}, status=200)
+    return Response({Message.SC_NOT_FOUND}, status=400)
+
+
 def reset(request):
     query = Comment.objects.all()
     for comment in query:
@@ -183,11 +176,3 @@ def reset(request):
                                         comment.down_vote.count())
         comment.save()
     return Response({Message.SC_OK}, status=200)
-
-
-def comment_point_update(comment):
-    if comment:
-        comment_point = CommentPoint.objects.filter(comment=comment).first()
-        comment_point.point = rank.confidence(comment.up_vote.count(),
-                                              comment.down_vote.count())
-        comment_point.save()

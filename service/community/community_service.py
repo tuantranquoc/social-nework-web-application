@@ -14,24 +14,12 @@ from post.serializers import CommunityGraphSerializer, CommunitySerializer
 from redditv1.message import Message
 from django.utils import timezone
 from function.file import get_image
+from redditv1.name import ModelName
+from function.paginator import get_paginated_queryset_response
 import datetime
-
-User = get_user_model()
-
-
-def get_paginated_queryset_response(query_set, request, page_size):
-    paginator = PageNumberPagination()
-    if not page_size:
-        page_size = 20
-    paginator.page_size = page_size
-    paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = CommunitySerializer(paginated_qs,
-                                     many=True,
-                                     context={"request": request})
-    return paginator.get_paginated_response(serializer.data)
+from service.post.post_service import timestamp_in_the_past_by_day
 
 
-@api_view(["POST"])
 def create_community(request):
     if request.user.is_authenticated:
         community = request.data.get("community")
@@ -72,26 +60,26 @@ def create_community(request):
         return Response(serializer.data, status=201)
 
 
-@api_view(["POST", "GET"])
 def get_community(request):
     page_size = request.data.get("page_size")
     community_type = request.data.get('community')
+    print(community_type)
     if community_type:
         community = Community.objects.filter(community_type=community_type)
-        return get_paginated_queryset_response(community, request, page_size)
+        return get_paginated_queryset_response(community, request, page_size,
+                                               ModelName.COMMUNITY)
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
-@api_view(["GET"])
 def get_list_community_by_user(request):
     page_size = request.data.get("page_size")
     if request.user.is_authenticated:
         query = Community.objects.filter(user=request.user)
-        return get_paginated_queryset_response(query, request, page_size)
+        return get_paginated_queryset_response(query, request, page_size,
+                                               ModelName.COMMUNITY)
     return Response({Message.SC_LOGIN_REDIRECT}, status=200)
 
 
-@api_view(["POST"])
 def community_action(request):
     if request.user.is_authenticated:
         community_type = request.data.get('community')
@@ -108,14 +96,13 @@ def community_action(request):
     return Response({Message.SC_LOGIN_REDIRECT}, status=401)
 
 
-@api_view(["GET"])
 def get_list_community(request):
     page_size = request.data.get("page_size")
     query = Community.objects.all()
-    return get_paginated_queryset_response(query, request, page_size)
+    return get_paginated_queryset_response(query, request, page_size,
+                                           ModelName.COMMUNITY)
 
 
-@api_view(['GET'])
 def change_state(request, community_type):
     if request.user.is_authenticated:
         if community_type:
@@ -130,8 +117,7 @@ def change_state(request, community_type):
     return Response(Message.SC_LOGIN_REDIRECT, status=403)
 
 
-@api_view(['POST'])
-def community_update_via_react_view(request, *args, **kwargs):
+def community_update(request):
     if not request.user.is_authenticated:
         return Response({}, status=401)
     user = request.user
@@ -154,23 +140,22 @@ def community_update_via_react_view(request, *args, **kwargs):
     return Response({}, status=200)
 
 
-@api_view(['GET', 'POST'])
 def recommend_sub_community(request, community):
     page_size = request.data.get("page_size")
     sub_community = Community.objects.filter(
         parent__community_type=community).exclude(user=request.user)
-    return get_paginated_queryset_response(sub_community, request, page_size)
+    return get_paginated_queryset_response(sub_community, request, page_size,
+                                           ModelName.COMMUNITY)
 
 
-@api_view(['GET', 'POST'])
 def recommend_community(request):
     page_size = request.data.get("page_size")
     community = Community.objects.all().exclude(user=request.user).annotate(
         user_count=Count('user')).order_by('user_count')
-    return get_paginated_queryset_response(community, request, page_size)
+    return get_paginated_queryset_response(community, request, page_size,
+                                           ModelName.COMMUNITY)
 
 
-@api_view(['GET', 'POST'])
 def community_graph(request):
     from_timestamp = request.data.get('from_timestamp')
     to_timestamp = request.data.get('to_timestamp')
@@ -182,26 +167,11 @@ def community_graph(request):
             timestamp__gte=from_timestamp,
             timestamp__lte=to_timestamp,
         )
-        return get_paginated_queryset_response_graph(query, request, page_size)
+        return get_paginated_queryset_response(query, request, page_size,
+                                               ModelName.COMMUNITY_GRAPH)
     query = Community.objects.filter(
         timestamp__gte=timestamp_in_the_past_by_day(30),
         timestamp__lte=timezone.now(),
     )
-    return get_paginated_queryset_response_graph(query, request, page_size)
-
-
-def timestamp_in_the_past_by_day(days):
-    return timezone.now() - datetime.timedelta(days)
-
-
-def get_paginated_queryset_response_graph(query_set, request, page_size):
-    paginator = PageNumberPagination()
-    if page_size:
-        paginator.page_size = page_size
-    else:
-        paginator.page_size = 50
-    paginated_qs = paginator.paginate_queryset(query_set, request)
-    serializer = CommunityGraphSerializer(paginated_qs,
-                                          many=True,
-                                          context={"request": request})
-    return paginator.get_paginated_response(serializer.data)
+    return get_paginated_queryset_response(query, request, page_size,
+                                           ModelName.COMMUNITY_GRAPH)
