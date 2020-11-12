@@ -268,6 +268,7 @@ def search(request):
         query = Post.objects.filter(content__contains=key_word)
         return get_paginated_queryset_response(query, request, page_size,
                                                ModelName.POST)
+    return Response({Message.SC_NOT_FOUND}, status=404)
 
 
 @api_view(['GET'])
