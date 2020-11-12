@@ -65,7 +65,8 @@ def get_community(request):
     community_type = request.data.get('community')
     print(community_type)
     if community_type:
-        community = Community.objects.filter(community_type=community_type)
+        community = Community.objects.filter(
+            community_type__icontains=community_type)
         return get_paginated_queryset_response(community, request, page_size,
                                                ModelName.COMMUNITY)
     return Response({Message.SC_NOT_FOUND}, status=204)

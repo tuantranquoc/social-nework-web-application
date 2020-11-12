@@ -251,17 +251,19 @@ def search(request):
     if key_word:
         if '@' in key_word:
             tags = spilt_user_tag(key_word)
-            profiles = Profile.objects.filter(user__username__in=tags)
+            print('ley_word',tags)
+            profiles = Profile.objects.filter(
+                reduce(operator.or_, (Q(user__username__icontains=x) for x in tags)))
             return get_paginated_queryset_response(profiles, request,
                                                    page_size,
                                                    ModelName.PROFILE)
         if '#' in key_word:
             tags = spilt_content(key_word)
             query = Post.objects.filter(
-                reduce(operator.and_, (Q(title__icontains=x) for x in tags)))
+                reduce(operator.or_, (Q(title__icontains=x) for x in tags)))
             if not query:
                 query = Post.objects.filter(
-                    reduce(operator.and_,
+                    reduce(operator.or_,
                            (Q(content__icontains=x) for x in tags)))
             return get_paginated_queryset_response(query, request, page_size,
                                                    ModelName.POST)
