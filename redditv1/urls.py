@@ -1,18 +1,3 @@
-"""redditv1 URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -26,22 +11,26 @@ from chat.controller import rest as chat_api
 from account.controller import rest as profile_api
 from redditv1 import settings
 import account
+from community.controller import urls as community_urls
+from post.controller.post_controller import urls as post_urls
+from post.controller.comment_controller import urls as comment_urls
+from account.controller import urls as account_urls
 
 urlpatterns = [
     # admin urls
     path('admin/', admin.site.urls),
-    # post api
-    path('api/post/', include('post.controller.post_controller.urls')),
+    # post
+    path('api/post/', include(post_urls)),
     # 31
-    # comment api
-    path('api/comment/', include('post.controller.comment_controller.urls')),
+    # comment
+    path('api/comment/', include(comment_urls)),
     # 11
-    # profile api
-    path('api/profile/', include('account.controller.urls')),
+    # profile
+    path('api/profile/', include(account_urls)),
     # 10
-    # community api
-    path('api/community/', include('community.controller.urls')),
-    # 7
+    # community
+    path('api/community/', include(community_urls)),
+    # 7 community.controller.urls
     # char api
     path('api/chatroom/create/<str:username>', chat_api.create_chat_room),
     path('api/chatroom/chat/<str:username>', chat_api.create_chat),

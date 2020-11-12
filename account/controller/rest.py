@@ -264,8 +264,11 @@ def search(request):
                     reduce(operator.and_,
                            (Q(content__contains=x) for x in tags)))
             return get_paginated_queryset_response(query, request, page_size,
-                                                   ModelName.PROFILE)
-        query = Post.objects.filter(content__contains=key_word)
+                                                   ModelName.POST)
+
+        query = Post.objects.filter(title__contains=key_word)
+        if not query:
+            query = Post.objects.filter(content__contains=key_word)
         return get_paginated_queryset_response(query, request, page_size,
                                                ModelName.POST)
     return Response({Message.SC_NOT_FOUND}, status=404)

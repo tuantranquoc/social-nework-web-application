@@ -1,5 +1,5 @@
 from rest_framework.pagination import PageNumberPagination
-from post.serializers import CommentSerializer, CommunitySerializer, PostSerializer,PostGraphSerializer, CommentGraphSerializer, CommunityGraphSerializer, PostTypeSerializer
+from post.serializers import CommentSerializer, CommunitySerializer, PostSerializer, PostGraphSerializer, CommentGraphSerializer, CommunityGraphSerializer, PostTypeSerializer
 from redditv1.name import ModelName
 from account.serializers import ProfileSerializer, PublicProfileSerializer
 
@@ -19,6 +19,7 @@ def get_paginated_queryset_response(query_set, request, page_size, model):
         serializer = CommunityGraphSerializer(paginated_qs,
                                               many=True,
                                               context={"request": request})
+        return paginator.get_paginated_response(serializer.data)
     elif model == ModelName.PROFILE:
         serializer = PublicProfileSerializer(paginated_qs,
                                              many=True,
@@ -46,6 +47,6 @@ def get_paginated_queryset_response(query_set, request, page_size, model):
         return paginator.get_paginated_response(serializer.data)
     elif model == ModelName.POST_GRAPH:
         serializer = PostGraphSerializer(paginated_qs,
-                                        many=True,
-                                        context={"request": request})
+                                         many=True,
+                                         context={"request": request})
         return paginator.get_paginated_response(serializer.data)

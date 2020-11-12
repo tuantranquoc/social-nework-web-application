@@ -47,7 +47,8 @@ def get_post_list(request):
         user_count=Count('user')).order_by('-user_count')
     if request.user.is_authenticated:
         top_community = Community.objects.filter(user=request.user).union(
-            Community.objects.filter(community__state=True)).union(Community.objects.filter(creator=request.user)).distinct()
+            Community.objects.filter(community__state=True)).union(
+                Community.objects.filter(creator=request.user)).distinct()
         query = Post.objects.filter(user=request.user).union(
             Post.objects.filter(community__user=request.user)).union(
                 Post.objects.filter(user__following=Profile.objects.filter(
@@ -255,7 +256,7 @@ def find_post_by_community(request, community_type):
     post = Post.objects.filter(community__community_type=community_type)
     community = Community.objects.filter(community_type=community_type).first()
     if not community:
-        return Response({Message.SC_BAD_RQ}, status=400)
+        return Response({Message.SC_NOT_FOUND}, status=204)
     if request.user.is_authenticated:
         if community.state == True:
             return get_paginated_queryset_response(post, request, page_size,
@@ -264,9 +265,9 @@ def find_post_by_community(request, community_type):
         if post:
             return get_paginated_queryset_response(post, request, page_size,
                                                    ModelName.POST)
-        return Response({Message.MUST_FOLLOW}, status=400)
+        return Response({Message.MUST_FOLLOW}, status=403)
     if community.state == False:
-        return Response({Message.MUST_FOLLOW}, status=400)
+        return Response({Message.MUST_FOLLOW}, status=403)
     return get_paginated_queryset_response(post, request, page_size,
                                            ModelName.POST)
 

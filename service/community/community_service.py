@@ -68,7 +68,7 @@ def get_community(request):
         community = Community.objects.filter(community_type=community_type)
         return get_paginated_queryset_response(community, request, page_size,
                                                ModelName.COMMUNITY)
-    return Response({Message.SC_BAD_RQ}, status=400)
+    return Response({Message.SC_NOT_FOUND}, status=204)
 
 
 def get_list_community_by_user(request):
@@ -92,7 +92,7 @@ def community_action(request):
             if action == "un_follow":
                 community.user.remove(request.user)
             return Response({Message.SC_OK}, status=200)
-        return Response({Message.SC_BAD_RQ}, status=400)
+        return Response({Message.SC_NOT_FOUND}, status=204)
     return Response({Message.SC_LOGIN_REDIRECT}, status=401)
 
 
@@ -160,6 +160,7 @@ def community_graph(request):
     from_timestamp = request.data.get('from_timestamp')
     to_timestamp = request.data.get('to_timestamp')
     page_size = request.data.get('page_size')
+    print('detect')
     if from_timestamp:
         print("timestamp: ", from_timestamp)
     if from_timestamp is not None and to_timestamp is not None:
@@ -173,5 +174,6 @@ def community_graph(request):
         timestamp__gte=timestamp_in_the_past_by_day(30),
         timestamp__lte=timezone.now(),
     )
+    print(query)
     return get_paginated_queryset_response(query, request, page_size,
                                            ModelName.COMMUNITY_GRAPH)
