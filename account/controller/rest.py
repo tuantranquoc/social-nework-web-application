@@ -245,7 +245,7 @@ def search(request):
     key_word = request.data.get('key_word')
     search_type = request.data.get('search_type')
     if search_type == 'community':
-        query = Community.objects.filter(community_type__contains=key_word)
+        query = Community.objects.filter(community_type__icontains=key_word)
         return get_paginated_queryset_response(query, request, page_size,
                                                ModelName.COMMUNITY)
     if key_word:
@@ -258,17 +258,17 @@ def search(request):
         if '#' in key_word:
             tags = spilt_content(key_word)
             query = Post.objects.filter(
-                reduce(operator.and_, (Q(title__contains=x) for x in tags)))
+                reduce(operator.and_, (Q(title__icontains=x) for x in tags)))
             if not query:
                 query = Post.objects.filter(
                     reduce(operator.and_,
-                           (Q(content__contains=x) for x in tags)))
+                           (Q(content__icontains=x) for x in tags)))
             return get_paginated_queryset_response(query, request, page_size,
                                                    ModelName.POST)
 
-        query = Post.objects.filter(title__contains=key_word)
+        query = Post.objects.filter(title__icontains=key_word)
         if not query:
-            query = Post.objects.filter(content__contains=key_word)
+            query = Post.objects.filter(content__icontains=key_word)
         return get_paginated_queryset_response(query, request, page_size,
                                                ModelName.POST)
     return Response({Message.SC_NOT_FOUND}, status=404)
