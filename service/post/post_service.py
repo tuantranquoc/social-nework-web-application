@@ -39,6 +39,7 @@ def parent_comment(comment_list, level):
 def get_post_list(request):
     sort = request.data.get("sort")
     page_size = request.data.get("page_size")
+    # this algorithm
     if not sort:
         sort = '-point'
     if sort == 'timestamp':
@@ -427,3 +428,5 @@ def get_post_by_time_interval(request):
         user=request.user)
     return get_paginated_queryset_response(query, request, page_size,
                                            ModelName.POST_GRAPH)
+    
+    

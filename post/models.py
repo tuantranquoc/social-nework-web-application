@@ -209,3 +209,4 @@ class View(models.Model):
 
     def __old_timestamp__(self):
         return self.old_timestamp
+

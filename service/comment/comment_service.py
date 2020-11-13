@@ -20,8 +20,6 @@ def comment_parent_list(request, comment_id, *args, **kwargs):
         comment.order_by('-up_vote')
     else:
         comment.order_by('-commentpoint__point')
-    if not comment:
-        return Response({Message.SC_BAD_RQ}, status=204)
     return get_paginated_queryset_response(comment, request, page_size,
                                            ModelName.COMMENT)
 
