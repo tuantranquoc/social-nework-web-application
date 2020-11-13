@@ -28,13 +28,14 @@ class PostSerializer(serializers.ModelSerializer):
     down_vote = serializers.SerializerMethodField(read_only=True)
     community_type = serializers.SerializerMethodField(read_only=True)
     type = serializers.SerializerMethodField(read_only=True)
+    point = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
         fields = [
             'user', 'id', 'title', 'content', 'parent', 'timestamp', 'image',
             'timestamp', 'up_vote', 'down_vote', 'community_type', 'type',
-            'view_count'
+            'view_count', 'point'
         ]
 
     @staticmethod
@@ -62,6 +63,10 @@ class PostSerializer(serializers.ModelSerializer):
         if obj.type:
             return obj.type.type
         return None
+
+    @staticmethod
+    def get_point(obj):
+        return "%.2f" % obj.point
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -110,7 +115,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
 
 class CommunitySerializer(serializers.ModelSerializer):
-    #   count = serializers.SerializerMethodField(read_only=True)
+    member_count = serializers.SerializerMethodField(read_only=True)
     id = serializers.SerializerMethodField(read_only=True)
     community_type = serializers.SerializerMethodField(read_only=True)
     is_main = serializers.SerializerMethodField(read_only=True)
@@ -121,7 +126,8 @@ class CommunitySerializer(serializers.ModelSerializer):
         model = Community
         fields = [
             'id', 'community_type', 'is_following', 'is_main', 'avatar',
-            'background', 'description', 'follower', 'timestamp', 'rule'
+            'background', 'description', 'follower', 'timestamp', 'rule',
+            'member_count'
         ]
 
     @staticmethod
@@ -152,6 +158,10 @@ class CommunitySerializer(serializers.ModelSerializer):
             user = request.user
             is_following = user in obj.user.all()
         return is_following
+
+    @staticmethod
+    def get_member_count(obj):
+        return obj.user.all().count()
 
 
 class PostTypeSerializer(serializers.ModelSerializer):
