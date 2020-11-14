@@ -37,7 +37,7 @@ urlpatterns = [
     path('api/chatroom/view/<str:username>', chat_api.get_chat_view),
     # 6
     # token
-    path('api/search/', profile_api.search),
+    path('api/search/', profile_api.search_v0),
     path('api/token/',
          jwt_views.TokenObtainPairView.as_view(),
          name='token_obtain_pair'),

@@ -73,13 +73,12 @@ class CommentSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField(read_only=True)
     up_vote = serializers.SerializerMethodField(read_only=True)
     down_vote = serializers.SerializerMethodField(read_only=True)
-    point = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Comment
         fields = [
             'content', 'username', 'post', 'id', 'up_vote', 'down_vote',
-            'timestamp', 'point'
+            'timestamp'
         ]
 
     @staticmethod
@@ -94,9 +93,9 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_down_vote(obj):
         return obj.down_vote.count()
 
-    @staticmethod
-    def get_point(obj):
-        return "%.2f" % obj.point
+    # @staticmethod
+    # def get_point(obj):
+    #     return "%.2f" % obj.point
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):

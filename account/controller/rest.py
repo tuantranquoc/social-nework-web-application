@@ -251,9 +251,10 @@ def search(request):
     if key_word:
         if '@' in key_word:
             tags = spilt_user_tag(key_word)
-            print('ley_word',tags)
+            print('ley_word', tags)
             profiles = Profile.objects.filter(
-                reduce(operator.or_, (Q(user__username__icontains=x) for x in tags)))
+                reduce(operator.or_,
+                       (Q(user__username__icontains=x) for x in tags)))
             return get_paginated_queryset_response(profiles, request,
                                                    page_size,
                                                    ModelName.PROFILE)
@@ -274,6 +275,29 @@ def search(request):
         return get_paginated_queryset_response(query, request, page_size,
                                                ModelName.POST)
     return Response({Message.SC_NOT_FOUND}, status=404)
+
+
+@api_view(['POST', 'GET'])
+def search_v0(request):
+    page_size = request.data.get('page_size')
+    key_word = request.data.get('key_word')
+    search_type = request.data.get('search_type')
+    if key_word:
+        if search_type == 'community':
+            query = Community.objects.filter(
+                community_type__icontains=key_word)
+            return get_paginated_queryset_response(query, request, page_size,
+                                                   ModelName.COMMUNITY)
+        if search_type == 'user':
+            query = Profile.objects.filter(user__username__icontains=key_word)
+            return get_paginated_queryset_response(query, request, page_size,
+                                                   ModelName.PROFILE)
+        query = Post.objects.filter(title__icontains=key_word)
+        if not query:
+            query = Post.objects.filter(content__icontains=key_word)
+        return get_paginated_queryset_response(query, request, page_size,
+                                               ModelName.POST)
+    return Response({Message.SC_BAD_RQ}, status=400)
 
 
 @api_view(['GET'])
