@@ -80,7 +80,7 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = [
             'content', 'username', 'post', 'parent', 'id', 'up_vote',
-            'down_vote', 'timestamp', 'point'
+            'down_vote', 'timestamp', 'point','level'
         ]
 
     @staticmethod

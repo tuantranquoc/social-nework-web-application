@@ -30,17 +30,25 @@ def child_comment_create(request, comment_id):
     """
     page_size = request.data.get("page_size")
     if request.user.is_authenticated:
-        comment = Comment.objects.filter(id=comment_id).first()
-        if not comment:
+        parent = Comment.objects.filter(id=comment_id).first()
+        if not parent:
             return Response({Message.SC_BAD_RQ}, status=204)
         content = request.data.get("content")
-        comment = Comment.objects.create(parent=comment,
-                                         content=content,
-                                         user=request.user)
-        CommentPoint.objects.create(comment=comment)
-        if comment:
-            serializer = CommentSerializer(comment)
-            return Response(serializer.data, status=201)
+        level = parent.level
+        if content:
+            if level < 6:
+                level += 1
+            else:
+                parent = parent.parent
+            comment = Comment.objects.create(parent=parent,
+                                             content=content,
+                                             user=request.user,
+                                             level=level)
+            CommentPoint.objects.create(comment=comment)
+            if comment:
+                serializer = CommentSerializer(comment)
+                return Response(serializer.data, status=201)
+            return Response({Message.SC_BAD_RQ}, status=400)
         return Response({Message.SC_BAD_RQ}, status=400)
     return Response({Message.SC_NO_AUTH}, status=401)
 
@@ -58,6 +66,7 @@ def comment_create(request):
             comment = Comment.objects.filter(id=comment.id)
             serializer = CommentSerializer(comment, many=True)
             return Response(serializer.data, status=201)
+        return Response({Message.DETAIL: Message.SC_BAD_RQ}, status=201)
     else:
         return Response({Message.SC_NO_AUTH}, status=403)
 
@@ -120,12 +129,12 @@ def count_comment_by_post(request, post_id):
     post = Post.objects.filter(id=post_id).first()
     if post:
         comment_list = Comment.objects.filter(post=post)
-        return Response({"Total": loop_comment(comment_list, True)},
+        return Response({"Total": comment_count(comment_list, True)},
                         status=200)
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
-def loop_comment(comment_list, flag):
+def comment_count(comment_list, flag):
     count = 0
     if flag:
         count += comment_list.count()
@@ -134,7 +143,7 @@ def loop_comment(comment_list, flag):
             comment_list_with_parent_c = Comment.objects.filter(parent=c)
             if comment_list_with_parent_c:
                 count += comment_list_with_parent_c.count()
-                count += loop_comment(comment_list_with_parent_c, False)
+                count += comment_count(comment_list_with_parent_c, False)
     return count
 
 
@@ -174,11 +183,30 @@ def count_post_by_user(request, username):
 def reset(request):
     query = Comment.objects.all()
     for comment in query:
-        # comment_point = CommentPoint.objects.filter(comment=comment)
-        # if not comment_point:
-        #     CommentPoint.objects.create(comment=comment,
-        #                                 point=rank.confidence(comment.up_vote.count(), comment.down_vote.count()))
         comment.point = rank.confidence(comment.up_vote.count(),
                                         comment.down_vote.count())
         comment.save()
     return Response({Message.SC_OK}, status=200)
+
+
+# these function suppos to update level comment only
+def update_comment_level(request):
+    post = Post.objects.all()
+    for p in post:
+        comment = Comment.objects.filter(post=p)
+        update_level_test_only(comment, 1)
+    return Response({Message.DETAIL: Message.SC_OK}, status=200)
+
+
+def update_level_test_only(comment_list, level):
+    print(level, 'level')
+    if comment_list:
+        for c in comment_list:
+            comment_list_with_parent_c = Comment.objects.filter(parent=c)
+            if comment_list_with_parent_c:
+                level += 1
+                print(level, comment_list_with_parent_c.values('id'))
+                for c_ in comment_list_with_parent_c:
+                    c_.level = level
+                    c_.save()
+                update_level_test_only(comment_list_with_parent_c, level)

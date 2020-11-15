@@ -14,3 +14,4 @@ class Message:
     SC_PERMISSION_DENIED = "Permission denied"
     SC_BAD_IMG = "Image unknown format or damaged"
     MUST_FOLLOW = "You must follow this community to see this post"
+    DETAIL = 'detail'

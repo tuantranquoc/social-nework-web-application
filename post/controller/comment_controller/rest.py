@@ -77,3 +77,9 @@ def get_comment_by_time_interval(request):
 @api_view(["GET"])
 def reset(request):
     return comment_service.reset(request)
+
+@api_view(["GET","POST"])
+def update_comment_level(request):
+    return comment_service.update_comment_level(request)
+
+

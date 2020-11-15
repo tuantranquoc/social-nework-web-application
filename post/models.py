@@ -131,6 +131,7 @@ class Comment(models.Model):
                                        related_name="c_down_vote",
                                        blank=True)
     point = models.FloatField(default=0)
+    level = models.IntegerField(default=1)
 
     class Meta:
         ordering = ['-point']
@@ -164,6 +165,14 @@ class Comment(models.Model):
 
     def __point__(self):
         return self.point
+
+    def __level__(self):
+        return self.level
+    
+    def __parent__(self):
+        if self.parent:
+            return self.parent.id
+        return None
 
 
 class CommentPoint(models.Model):
@@ -209,4 +218,3 @@ class View(models.Model):
 
     def __old_timestamp__(self):
         return self.old_timestamp
-
