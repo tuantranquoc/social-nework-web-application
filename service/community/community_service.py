@@ -28,18 +28,24 @@ def create_community(request):
         description = request.data.get("description")
         avatar = request.data.get("avatar")
         rule = request.data.get("rule")
-        if not Community.objects.filter(community_type=sub_community):
-            return Response({Message.SC_NOT_FOUND}, status=400)
         if not sub_community:
-            if community.objects.filter(community_type=community):
-                return Response({Message.SC_BAD_RQ}, status=400)
+            if Community.objects.filter(community_type=community):
+                return Response({Message.SC_CM_EXIST}, status=200)
             if not request.user.is_staff:
                 return Response({Message.SC_PERMISSION_DENIED}, status=403)
             community = Community.objects.create(community_type=community,
                                                  description=description,
                                                  rule=rule)
+            serializer = CommunitySerializer(community)
+            return Response(serializer.data, status=201)
+        if not Community.objects.filter(community_type=community):
+            return Response({Message.SC_CM_NOT_FOUND}, status=204)
         if request.user.positivepoint.point <= 10:
             return Response({Message.SC_NOT_ENOUGH_POINT}, status=400)
+        community_exist = Community.objects.filter(
+            community_type=sub_community).first()
+        if community_exist:
+            return Response({Message.SC_CM_EXIST}, status=200)
         parent = Community.objects.filter(community_type=community).first()
         community = Community.objects.create(community_type=sub_community,
                                              parent=parent,

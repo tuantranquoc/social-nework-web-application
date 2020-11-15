@@ -120,14 +120,22 @@ def count_comment_by_post(request, post_id):
     post = Post.objects.filter(id=post_id).first()
     if post:
         comment_list = Comment.objects.filter(post=post)
-        count_1 = Comment.objects.filter(post=post).count()
-        count_2 = Comment.objects.filter(parent__isnull=False,
-                                         parent__in=comment_list).count()
-        count_3 = Comment.objects.filter(
-            parent__isnull=False, parent__parent__in=comment_list).count()
-        total = count_1 + count_2 + count_3
-        return Response({"Total": total}, status=200)
+        return Response({"Total": loop_comment(comment_list, True)},
+                        status=200)
     return Response({Message.SC_BAD_RQ}, status=400)
+
+
+def loop_comment(comment_list, flag):
+    count = 0
+    if flag:
+        count += comment_list.count()
+    if comment_list:
+        for c in comment_list:
+            comment_list_with_parent_c = Comment.objects.filter(parent=c)
+            if comment_list_with_parent_c:
+                count += comment_list_with_parent_c.count()
+                count += loop_comment(comment_list_with_parent_c, False)
+    return count
 
 
 def get_comment_by_id(request, comment_id):

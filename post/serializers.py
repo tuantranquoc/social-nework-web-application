@@ -73,12 +73,14 @@ class CommentSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField(read_only=True)
     up_vote = serializers.SerializerMethodField(read_only=True)
     down_vote = serializers.SerializerMethodField(read_only=True)
+    parent = serializers.SerializerMethodField(read_only=True)
+    point = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Comment
         fields = [
-            'content', 'username', 'post', 'id', 'up_vote', 'down_vote',
-            'timestamp'
+            'content', 'username', 'post', 'parent', 'id', 'up_vote',
+            'down_vote', 'timestamp', 'point'
         ]
 
     @staticmethod
@@ -93,9 +95,15 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_down_vote(obj):
         return obj.down_vote.count()
 
-    # @staticmethod
-    # def get_point(obj):
-    #     return "%.2f" % obj.point
+    @staticmethod
+    def get_point(obj):
+        return "%.2f" % obj.point
+
+    @staticmethod
+    def get_parent(obj):
+        if obj.parent:
+            return obj.parent.id
+        return None
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
@@ -120,13 +128,14 @@ class CommunitySerializer(serializers.ModelSerializer):
     is_main = serializers.SerializerMethodField(read_only=True)
     is_following = serializers.SerializerMethodField(read_only=True)
     follower = serializers.SerializerMethodField(read_only=True)
+    parent = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Community
         fields = [
-            'id', 'community_type', 'is_following', 'is_main', 'avatar',
-            'background', 'description', 'follower', 'timestamp', 'rule',
-            'member_count'
+            'id', 'community_type', 'parent', 'is_following', 'is_main',
+            'avatar', 'background', 'description', 'follower', 'timestamp',
+            'rule', 'member_count'
         ]
 
     @staticmethod
@@ -161,6 +170,12 @@ class CommunitySerializer(serializers.ModelSerializer):
     @staticmethod
     def get_member_count(obj):
         return obj.user.all().count()
+
+    @staticmethod
+    def get_parent(obj):
+        if obj.parent:
+            return obj.parent.community_type
+        return None
 
 
 class PostTypeSerializer(serializers.ModelSerializer):
