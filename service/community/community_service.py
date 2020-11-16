@@ -149,16 +149,22 @@ def community_update(request):
 
 def recommend_sub_community(request, community):
     page_size = request.data.get("page_size")
-    sub_community = Community.objects.filter(
-        parent__community_type=community).exclude(user=request.user)
+    sub_community = Community.objects.filter(parent__community_type=community)
+    if request.user.is_authenticated:
+        sub_community = Community.objects.filter(
+            parent__community_type=community).exclude(user=request.user)
     return get_paginated_queryset_response(sub_community, request, page_size,
                                            ModelName.COMMUNITY)
 
 
 def recommend_community(request):
     page_size = request.data.get("page_size")
-    community = Community.objects.all().exclude(user=request.user).annotate(
+    community = Community.objects.all().annotate(
         user_count=Count('user')).order_by('user_count')
+    if request.user.is_authenticated:
+        community = Community.objects.all().exclude(
+            user=request.user).annotate(
+                user_count=Count('user')).order_by('user_count')
     return get_paginated_queryset_response(community, request, page_size,
                                            ModelName.COMMUNITY)
 
@@ -181,6 +187,5 @@ def community_graph(request):
         timestamp__gte=timestamp_in_the_past_by_day(30),
         timestamp__lte=timezone.now(),
     )
-    print(query)
     return get_paginated_queryset_response(query, request, page_size,
                                            ModelName.COMMUNITY_GRAPH)

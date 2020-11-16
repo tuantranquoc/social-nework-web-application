@@ -24,6 +24,7 @@ class Community(models.Model):
     avatar = models.ImageField(upload_to='images/', blank=True, null=True)
     background = models.ImageField(upload_to='images/', blank=True, null=True)
     rule = models.TextField(blank=True, null=True)
+    background_color = models.TextField(default='#30363C')
 
     class Meta:
         ordering = ['id']
@@ -51,3 +52,6 @@ class Community(models.Model):
 
     def __rule__(self):
         return self.rule
+
+    def __color__(self):
+        return self.background_color

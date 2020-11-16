@@ -135,7 +135,7 @@ class CommunitySerializer(serializers.ModelSerializer):
         fields = [
             'id', 'community_type', 'parent', 'is_following', 'is_main',
             'avatar', 'background', 'description', 'follower', 'timestamp',
-            'rule', 'member_count'
+            'rule', 'member_count','background_color'
         ]
 
     @staticmethod

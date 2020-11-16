@@ -40,6 +40,7 @@ urlpatterns = [
     path('hot', post_api.hot),
     path('type', post_api.get_type_list),
     path('graph', post_api.get_post_by_time_interval),
+    path('top', post_api.get_post_by_time_interval),
     path('reset', post_api.reset),
     path('community/<str:community_type>',
          post_api.find_post_by_community),

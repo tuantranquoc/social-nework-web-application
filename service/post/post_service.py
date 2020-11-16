@@ -415,18 +415,30 @@ def get_post_by_time_interval(request):
     from_timestamp = request.data.get('from_timestamp')
     to_timestamp = request.data.get('to_timestamp')
     page_size = request.data.get('page_size')
-    if from_timestamp is not None and to_timestamp is not None:
-        query = Post.objects.filter(timestamp__gte=from_timestamp,
-                                    timestamp__lte=to_timestamp,
-                                    user=request.user)
+    type = request.data.get('type')
+    model = ModelName.POST
+    if type == 'graph':
+        model = ModelName.POST_GRAPH
+    if request.user.is_authenticated:
+        if from_timestamp is not None and from_timestamp != '' and to_timestamp != '' and to_timestamp is not None:
+            from_timestamp = datetime.datetime.fromtimestamp(
+                int(from_timestamp))
+            to_timestamp = datetime.datetime.fromtimestamp(int(to_timestamp))
+            query = Post.objects.filter(timestamp__gte=from_timestamp,
+                                        timestamp__lte=to_timestamp,
+                                        user=request.user)
+
+            return get_paginated_queryset_response(query, request, page_size,
+                                                   model)
+        if (from_timestamp is None or to_timestamp is None
+                or from_timestamp != ''
+                or to_timestamp != '') and (from_timestamp is not None
+                                            or to_timestamp is not None):
+            return Response({Message.DETAIL: Message.SC_BAD_RQ}, status=400)
+        query = Post.objects.filter(
+            timestamp__gte=timestamp_in_the_past_by_day(30),
+            timestamp__lte=timezone.now(),
+            user=request.user)
         return get_paginated_queryset_response(query, request, page_size,
-                                               ModelName.POST,
-                                               ModelName.POST_GRAPH)
-    query = Post.objects.filter(
-        timestamp__gte=timestamp_in_the_past_by_day(30),
-        timestamp__lte=timezone.now(),
-        user=request.user)
-    return get_paginated_queryset_response(query, request, page_size,
-                                           ModelName.POST_GRAPH)
-    
-    
+                                               model)
+    return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)

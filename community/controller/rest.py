@@ -70,5 +70,7 @@ def community_graph(request):
     return community_service.community_graph(request)
 
 
+
+
 def timestamp_in_the_past_by_day(days):
     return timezone.now() - datetime.timedelta(days)

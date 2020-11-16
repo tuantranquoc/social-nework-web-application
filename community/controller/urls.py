@@ -12,4 +12,5 @@ urlpatterns = [
     path('recommend/<str:community>', community_api.recommend_sub_community),
     path('recommend', community_api.recommend_community),
     path('graph', community_api.community_graph),
+
 ]
