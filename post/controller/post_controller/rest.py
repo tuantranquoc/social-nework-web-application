@@ -39,7 +39,7 @@ def post_delete_api(request, post_id):
 
 
 @api_view(["GET"])
-def post_find_by_id(request, post_id):
+def find_post_by_id(request, post_id):
     return post_service.find_post_by_id(request, post_id)
 
 

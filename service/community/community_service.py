@@ -16,6 +16,7 @@ from django.utils import timezone
 from function.file import get_image
 from redditv1.name import ModelName
 from function.paginator import get_paginated_queryset_response
+from function.file import isValidHexaCode
 import datetime
 from service.post.post_service import timestamp_in_the_past_by_day
 
@@ -28,6 +29,9 @@ def create_community(request):
         description = request.data.get("description")
         avatar = request.data.get("avatar")
         rule = request.data.get("rule")
+        background_color = request.data.get("background_color")
+        if request.user.positivepoint.point <= 10:
+            return Response({Message.SC_NOT_ENOUGH_POINT}, status=400)
         if not sub_community:
             if Community.objects.filter(community_type=community):
                 return Response({Message.SC_CM_EXIST}, status=200)
@@ -36,12 +40,24 @@ def create_community(request):
             community = Community.objects.create(community_type=community,
                                                  description=description,
                                                  rule=rule)
+            if isValidHexaCode(background_color):
+                community.background_color = background_color
+            if background:
+                if len(background) > len('data:,'):
+                    community.background = get_image(background)
+            if avatar:
+                if len(avatar) > len('data:,'):
+                    community.avatar = get_image(background)
+            community.save()
+            positive_point = PositivePoint.objects.filter(
+                user=request.user).first()
+            positive_point.point = positive_point.point - 10
+            positive_point.save()
             serializer = CommunitySerializer(community)
             return Response(serializer.data, status=201)
         if not Community.objects.filter(community_type=community):
             return Response({Message.SC_CM_NOT_FOUND}, status=204)
-        if request.user.positivepoint.point <= 10:
-            return Response({Message.SC_NOT_ENOUGH_POINT}, status=400)
+
         community_exist = Community.objects.filter(
             community_type=sub_community).first()
         if community_exist:
@@ -51,6 +67,8 @@ def create_community(request):
                                              parent=parent,
                                              description=description,
                                              rule=rule)
+        if isValidHexaCode(background_color):
+            community.background_color = background_color
         positive_point = PositivePoint.objects.filter(
             user=request.user).first()
         positive_point.point = positive_point.point - 10
@@ -134,12 +152,16 @@ def community_update(request):
     background = request.data.get("background")
     description = request.data.get("description")
     avatar = request.data.get("avatar")
+    background_color = request.data.get("background_color")
     if background:
         community.background = get_image(background)
     if avatar:
         community.avatar = get_image(avatar)
     if description:
         community.description = description
+    if background_color:
+        if isValidHexaCode(background_color):
+            community.background_color = background_color
     user.save()
     community.save()
     if not community.background or not community.avatar:

@@ -11,6 +11,10 @@ from post import rank
 from post.serializers import PostSerializer
 from django.utils import timezone
 import datetime
+from track.models import CommunityTrack, Track
+from functools import reduce
+import operator
+from django.db.models import Q
 
 
 def count_post_by_community(community):
@@ -40,12 +44,34 @@ def get_post_list(request):
     sort = request.data.get("sort")
     page_size = request.data.get("page_size")
     # this algorithm
-    if not sort:
+    if sort == 'best':
+        if request.user.is_authenticated:
+            track = Track.objects.filter(user=request.user).first()
+            community_track = CommunityTrack.objects.filter(
+                track=track).order_by('-timestamp')[0:3]
+            print(track.community_track.count())
+            list_community_track = []
+            for c in community_track:
+                list_community_track.append(c.community.community_type)
+            print(list_community_track[0])
+            community = Community.objects.filter(
+                community_type__in=list_community_track)
+            print('cm-count', community.count())
+            query = Post.objects.filter(
+                community__community_type__in=list_community_track).order_by(
+                    '-point')
+            print(query.count())
+            # top_community = Community.objects.filter(state=True).annotate(
+            #     user_count=Count('user')).order_by('-user_count')
+            # query = Post.objects.filter.all()
+            return get_paginated_queryset_response(query, request, page_size,
+                                                   ModelName.POST)
+    top_community = Community.objects.filter(state=True).annotate(
+        user_count=Count('user')).order_by('-user_count')
+    if not sort or sort == 'hot':
         sort = '-point'
     if sort == 'timestamp':
         sort = '-timestamp'
-    top_community = Community.objects.filter(state=True).annotate(
-        user_count=Count('user')).order_by('-user_count')
     if request.user.is_authenticated:
         top_community = Community.objects.filter(user=request.user).union(
             Community.objects.filter(community__state=True)).union(
@@ -109,6 +135,7 @@ def create_post(request):
                 serializer = PostSerializer(current_post)
                 return Response(serializer.data, status=201)
         return Response({Message.SC_BAD_RQ}, status=400)
+    return Response({Message.SC_BAD_RQ}, status=400)
 
 
 def delete_post(request, post_id):
@@ -124,6 +151,7 @@ def delete_post(request, post_id):
 
 
 def find_post_by_id(request, post_id):
+    print('filter')
     post = Post.objects.filter(id=post_id).first()
     if post:
         if post.community.state is True:
@@ -131,8 +159,12 @@ def find_post_by_id(request, post_id):
                 serializer = PostSerializer(post)
                 return Response(serializer.data, status=200)
             if post.user == request.user:
+                track = Track.objects.filter(user=request.user).first()
+                check_community_track(track, post.community, request.user)
                 serializer = PostSerializer(post)
                 return Response(serializer.data, status=200)
+            track = Track.objects.filter(user=request.user).first()
+            check_community_track(track, post.community, request.user)
             view = View.objects.filter(user=request.user, post=post).first()
             serializer = check_view(view, post, request.user)
             return Response(serializer.data, status=200)
@@ -169,6 +201,35 @@ def check_view(view, post, user):
             post.save()
         serializer = PostSerializer(post)
         return serializer
+
+
+def check_community_track(track, community, user):
+    community = Community.objects.filter(community_type=community).first()
+    print(community.community_type)
+    if community:
+        if not track:
+            track = Track.objects.create(user=user)
+            community_track = CommunityTrack.objects.create(
+                community=community, timestamp=datetime.datetime.now())
+            community_track.save()
+            track.community_track.add(community_track)
+            track.save()
+        else:
+            print('in else')
+            check_tracking_exist = Track.objects.filter(
+                user=user, community_track__community=community).first()
+            if not check_tracking_exist:
+                community_track = CommunityTrack.objects.create(
+                    community=community, timestamp=datetime.datetime.now())
+                community_track.save()
+                track.community_track.add(community_track)
+                track.save()
+            else:
+                community_track = CommunityTrack.objects.filter(
+                    track=check_tracking_exist, community=community).first()
+                community_track.timestamp = datetime.datetime.now()
+                community_track.save()
+                track.save()
 
 
 def re_post(request, post_id):

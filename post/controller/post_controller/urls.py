@@ -4,7 +4,7 @@ from post.controller.post_controller import rest as post_api
 urlpatterns = [
       path('', post_api.post_list_view),
     path('create', post_api.post_create_api),
-    path('<int:post_id>', post_api.post_find_by_id),
+    path('<int:post_id>', post_api.find_post_by_id),
     path('delete/<int:post_id>', post_api.post_delete_api),
     path('repost/<int:post_id>', post_api.re_post),
     path('action', post_api.post_action),
