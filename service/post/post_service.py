@@ -216,7 +216,6 @@ def check_community_track(track, community, user):
             track.community_track.add(community_track)
             track.save()
         else:
-            print('in else')
             check_tracking_exist = Track.objects.filter(
                 user=user, community_track__community=community).first()
             if not check_tracking_exist:
@@ -492,9 +491,23 @@ def get_post_by_time_interval(request):
             from_timestamp = datetime.datetime.fromtimestamp(
                 int(from_timestamp))
             to_timestamp = datetime.datetime.fromtimestamp(int(to_timestamp))
-            query = Post.objects.filter(timestamp__gte=from_timestamp,
-                                        timestamp__lte=to_timestamp,
-                                        user=request.user)
+
+            top_community = Community.objects.filter(user=request.user).union(
+                Community.objects.filter(community__state=True)).union(
+                    Community.objects.filter(creator=request.user)).distinct()
+            query = Post.objects.filter(user=request.user,timestamp__gte=from_timestamp,
+                                        timestamp__lte=to_timestamp).union(
+                Post.objects.filter(community__user=request.user,timestamp__gte=from_timestamp,
+                                        timestamp__lte=to_timestamp)).union(
+                    Post.objects.filter(user__following=Profile.objects.filter(
+                        user=request.user).first(),timestamp__gte=from_timestamp,
+                                        timestamp__lte=to_timestamp)).union(
+                            Post.objects.filter(community__state=True,timestamp__gte=from_timestamp,
+                                        timestamp__lte=to_timestamp).
+                            distinct()).distinct().order_by('-point')
+            # query = Post.objects.filter(timestamp__gte=from_timestamp,
+            #                             timestamp__lte=to_timestamp,
+            #                             user=request.user)
 
             return get_paginated_queryset_response(query, request, page_size,
                                                    model)
