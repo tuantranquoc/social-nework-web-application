@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from community.models import Community
 from django.db.models import Count
-
+from django.db.models.signals import post_save
 User = get_user_model()
 
 
@@ -49,3 +49,11 @@ class Track(models.Model):
 
     def __id__(self):
         return self.id
+
+
+def user_did_save(sender, instance, created, *args, **kwargs):
+    if created:
+        Track.objects.get_or_create(user=instance)
+
+
+post_save.connect(user_did_save, sender=User)

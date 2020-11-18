@@ -47,13 +47,14 @@ def get_post_list(request):
     if sort == 'best':
         if request.user.is_authenticated:
             track = Track.objects.filter(user=request.user).first()
+            if not track:
+                track = Track.objects.create(user=request.user)
+                track.save()
             community_track = CommunityTrack.objects.filter(
                 track=track).order_by('-timestamp')[0:3]
-            print(track.community_track.count())
             list_community_track = []
             for c in community_track:
                 list_community_track.append(c.community.community_type)
-            print(list_community_track[0])
             community = Community.objects.filter(
                 community_type__in=list_community_track)
             print('cm-count', community.count())
@@ -230,6 +231,12 @@ def check_community_track(track, community, user):
                 community_track.timestamp = datetime.datetime.now()
                 community_track.save()
                 track.save()
+
+
+def check_track(track, user):
+    if not track:
+        track = Track.objects.create(user=user)
+        track.save()
 
 
 def re_post(request, post_id):
