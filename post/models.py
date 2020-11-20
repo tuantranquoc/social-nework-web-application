@@ -34,6 +34,10 @@ class Post(models.Model):
                              on_delete=models.CASCADE)
     view_count = models.IntegerField(default=0)
     point = models.FloatField(default=0)
+    state = models.CharField(max_length=10,
+                             blank=False,
+                             null=True,
+                             default='public')
 
     class Meta:
         ordering = ['-point']
@@ -42,7 +46,7 @@ class Post(models.Model):
         return self.id
 
     def __str__(self):
-        return self.title or "NO_TITLE"
+        return str(self.id)
 
     def __time__(self):
         return self.timestamp
@@ -70,23 +74,11 @@ class Post(models.Model):
     def __point__(self):
         return self.point
 
+    def __community__(self):
+        return self.community
 
-class PostPoint(models.Model):
-    post = models.ForeignKey(Post,
-                             on_delete=models.CASCADE,
-                             blank=True,
-                             null=True)
-    point = models.FloatField(default=0)
-
-    class Meta:
-        ordering = ['-point']
-
-    def __id__(self):
-        return self.post.id
-
-    def __point__(self):
-        return self.point
-
+    def __state__(self):
+        return self.state
 
 class PositivePoint(models.Model):
     id = models.AutoField(primary_key=True)
@@ -119,7 +111,10 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey('self',
+                               null=True,
+                               on_delete=models.CASCADE,
+                               blank=True)
     post = models.ForeignKey(Post,
                              on_delete=models.CASCADE,
                              null=True,
@@ -132,6 +127,10 @@ class Comment(models.Model):
                                        blank=True)
     point = models.FloatField(default=0)
     level = models.IntegerField(default=1)
+    state = models.CharField(blank=False,
+                             null=True,
+                             max_length=10,
+                             default='public')
 
     class Meta:
         ordering = ['-point']
@@ -140,7 +139,7 @@ class Comment(models.Model):
         return self.id
 
     def __str__(self):
-        return self.content or "@!$"
+        return str(self.id)
 
     def __timestamp__(self):
         return self.timestamp
@@ -168,11 +167,14 @@ class Comment(models.Model):
 
     def __level__(self):
         return self.level
-    
+
     def __parent__(self):
         if self.parent:
             return self.parent.id
         return None
+
+    def __state__(self):
+        return self.state
 
 
 class CommentPoint(models.Model):
@@ -214,7 +216,7 @@ class View(models.Model):
         ordering = ['-id']
 
     def __user__(self):
-        return self.user
+        return self.user.count()
 
     def __old_timestamp__(self):
         return self.old_timestamp

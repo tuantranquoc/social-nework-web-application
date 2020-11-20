@@ -1,7 +1,9 @@
 {
     "python.formatting.provider": "yapf",
     "cSpell.words": [
+        "Commnunity",
         "Hexa",
-        "repost"
+        "repost",
+        "tuantran"
     ]
 }

@@ -11,3 +11,9 @@ class ModelName:
     COMMENT_GRAPH = "Comment graph"
     POST_TYPE = "Post type"
     POST_GRAPH = "Post graph"
+
+
+class CommentState:
+    PUBLIC = 'public'
+    HIDDEN = 'hidden'
+    DELETED = 'deleted'

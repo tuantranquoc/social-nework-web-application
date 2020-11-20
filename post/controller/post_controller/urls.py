@@ -5,7 +5,7 @@ urlpatterns = [
       path('', post_api.post_list_view),
     path('create', post_api.post_create_api),
     path('<int:post_id>', post_api.find_post_by_id),
-    path('delete/<int:post_id>', post_api.post_delete_api),
+    path('delete/', post_api.post_delete_api),
     path('repost/<int:post_id>', post_api.re_post),
     path('action', post_api.post_action),
     path('count/<str:community_type>',

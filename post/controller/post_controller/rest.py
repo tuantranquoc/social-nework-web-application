@@ -34,8 +34,8 @@ def post_create_api(request):
 
 
 @api_view(["POST"])
-def post_delete_api(request, post_id):
-    return post_service.delete_post(request, post_id)
+def post_delete_api(request):
+    return post_service.delete_post(request)
 
 
 @api_view(["GET"])

@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from post.serializers import CommentSerializer, CommentGraphSerializer
 from redditv1.message import Message
 from function.paginator import get_paginated_queryset_response
-from redditv1.name import ModelName
+from redditv1.name import ModelName, CommentState
 from service.post.post_service import timestamp_in_the_past_by_day
 
 
@@ -210,3 +210,36 @@ def update_level_test_only(comment_list, level):
                     c_.level = level
                     c_.save()
                 update_level_test_only(comment_list_with_parent_c, level)
+
+
+def delete_comment(request):
+    if request.user:
+        if request.user.is_authenticated:
+            id = request.data.get('id')
+            comment = Comment.objects.filter(id=id).first()
+            if comment:
+                if comment.user == request.user:
+                    child_list = Comment.objects.filter(parent=comment)
+                    comment.state = CommentState.DELETED
+                    comment.save()
+                    return Response({Message.DETAIL: Message.SC_OK},
+                                    status=200)
+                post = find_post_by_comment(comment)
+                if post:
+                    if post.community.creator == request.user:
+                        comment.state = CommentState.HIDDEN
+                        comment.save()
+                        return Response({Message.DETAIL: Message.SC_OK},
+                                        status=200)
+                return Response({Message.DETAIL: Message.SC_PERMISSION_DENIED},
+                                status=401)
+            return Response({Message.DETAIL: Message.SC_NOT_FOUND}, status=204)
+        return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
+    return Response({Message.DETAIL: Message.SC_BAD_RQ}, status=400)
+
+
+def find_post_by_comment(comment):
+    if comment:
+        while comment.parent:
+            comment = comment.parent
+        return comment.post

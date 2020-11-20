@@ -3,7 +3,7 @@ from rest_framework import serializers
 from account.serializers import PublicProfileSerializer
 from community.models import Community
 from post.models import Post, Comment, PostType
-
+from redditv1.name import CommentState
 MAX_CONTENT_LENGTH = 300
 
 
@@ -29,13 +29,15 @@ class PostSerializer(serializers.ModelSerializer):
     community_type = serializers.SerializerMethodField(read_only=True)
     type = serializers.SerializerMethodField(read_only=True)
     point = serializers.SerializerMethodField(read_only=True)
+    image = serializers.SerializerMethodField(read_only=True)
+    content = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
         fields = [
             'user', 'id', 'title', 'content', 'parent', 'timestamp', 'image',
             'timestamp', 'up_vote', 'down_vote', 'community_type', 'type',
-            'view_count', 'point'
+            'view_count', 'point', 'state'
         ]
 
     @staticmethod
@@ -68,6 +70,37 @@ class PostSerializer(serializers.ModelSerializer):
     def get_point(obj):
         return "%.2f" % obj.point
 
+    def get_content(self, obj):
+        print(obj.state)
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        if obj.state == CommentState.PUBLIC:
+            return obj.content
+        if obj.state == CommentState.HIDDEN:
+            if obj.community.creator == user:
+                return obj.content
+            return ["HIDDEN"]
+        if obj.state == CommentState.DELETED:
+            return ["Post has been delete by owner"]
+
+    def get_image(self, obj):
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        if obj.state == CommentState.PUBLIC:
+            if obj.image:
+                return obj.image
+        if obj.state == CommentState.HIDDEN:
+            if obj.image:
+                if obj.community.creator == user:
+                    return obj.image
+            return None
+        if obj.state == CommentState.DELETED:
+            return None
+
 
 class CommentSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField(read_only=True)
@@ -75,12 +108,13 @@ class CommentSerializer(serializers.ModelSerializer):
     down_vote = serializers.SerializerMethodField(read_only=True)
     parent = serializers.SerializerMethodField(read_only=True)
     point = serializers.SerializerMethodField(read_only=True)
+    content = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Comment
         fields = [
             'content', 'username', 'post', 'parent', 'id', 'up_vote',
-            'down_vote', 'timestamp', 'point','level'
+            'down_vote', 'timestamp', 'point', 'level', 'state'
         ]
 
     @staticmethod
@@ -104,6 +138,28 @@ class CommentSerializer(serializers.ModelSerializer):
         if obj.parent:
             return obj.parent.id
         return None
+
+    def get_content(self, obj):
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        post = find_post_by_comment(obj)
+        if obj.state == CommentState.PUBLIC:
+            return obj.content
+        if obj.state == CommentState.HIDDEN:
+            if post.community.creator == user:
+                return obj.content
+            return ["HIDDEN"]
+        if obj.state == CommentState.DELETED:
+            return ["Comment has been delete by owner"]
+
+
+def find_post_by_comment(comment):
+    if comment:
+        while comment.parent:
+            comment = comment.parent
+        return comment.post
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
@@ -135,7 +191,10 @@ class CommunitySerializer(serializers.ModelSerializer):
         fields = [
             'id', 'community_type', 'parent', 'is_following', 'is_main',
             'avatar', 'background', 'description', 'follower', 'timestamp',
-            'rule', 'member_count','background_color'
+            'rule', 'member_count', 'background_color',
+            'title_background_color', 'description_background_color',
+            'button_background_color', 'button_text_color', 'text_color',
+            'post_background_color'
         ]
 
     @staticmethod

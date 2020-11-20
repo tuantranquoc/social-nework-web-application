@@ -6,6 +6,7 @@ from account.models import Profile
 from redditv1.name import ModelName
 from rest_framework.response import Response
 from redditv1.message import Message
+from redditv1.name import CommentState
 from function.file import get_image
 from post import rank
 from post.serializers import PostSerializer
@@ -139,16 +140,16 @@ def create_post(request):
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
-def delete_post(request, post_id):
-    if not request.user.is_authenticated:
-        return Response({Message.SC_NO_AUTH}, status=401)
-    post = Post.objects.filter(id=post_id)
-    if not post:
-        return Response({Message.SC_NOT_FOUND}, status=400)
-    if not Post.objects.filter(user=request.user, id=post_id):
-        return Response({Message.SC_PERMISSION_DENIED}, status=401)
-    post.delete()
-    return Response({Message.SC_OK}, status=200)
+# def delete_post(request, post_id):
+#     if not request.user.is_authenticated:
+#         return Response({Message.SC_NO_AUTH}, status=401)
+#     post = Post.objects.filter(id=post_id)
+#     if not post:
+#         return Response({Message.SC_NOT_FOUND}, status=400)
+#     if not Post.objects.filter(user=request.user, id=post_id):
+#         return Response({Message.SC_PERMISSION_DENIED}, status=401)
+#     post.delete()
+#     return Response({Message.SC_OK}, status=200)
 
 
 def find_post_by_id(request, post_id):
@@ -270,6 +271,8 @@ def action(request):
                 post.point = rank.hot(post.up_vote.count(),
                                       post.down_vote.count(), post.timestamp)
                 post.save()
+                track = Track.objects.filter(user=request.user).first()
+                check_community_track(track, post.community, request.user)
                 return Response({Message.SC_OK}, status=200)
             post.up_vote.add(request.user)
             post.down_vote.remove(request.user)
@@ -278,6 +281,8 @@ def action(request):
             post.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
                                   post.timestamp)
             post.save()
+            track = Track.objects.filter(user=request.user).first()
+            check_community_track(track, post.community, request.user)
             return Response({Message.SC_OK}, status=200)
         if action == "down_vote":
             if Post.objects.filter(id=post_id, down_vote=request.user):
@@ -495,16 +500,24 @@ def get_post_by_time_interval(request):
             top_community = Community.objects.filter(user=request.user).union(
                 Community.objects.filter(community__state=True)).union(
                     Community.objects.filter(creator=request.user)).distinct()
-            query = Post.objects.filter(user=request.user,timestamp__gte=from_timestamp,
-                                        timestamp__lte=to_timestamp).union(
-                Post.objects.filter(community__user=request.user,timestamp__gte=from_timestamp,
-                                        timestamp__lte=to_timestamp)).union(
-                    Post.objects.filter(user__following=Profile.objects.filter(
-                        user=request.user).first(),timestamp__gte=from_timestamp,
-                                        timestamp__lte=to_timestamp)).union(
-                            Post.objects.filter(community__state=True,timestamp__gte=from_timestamp,
-                                        timestamp__lte=to_timestamp).
-                            distinct()).distinct().order_by('-point')
+            query = Post.objects.filter(
+                user=request.user,
+                timestamp__gte=from_timestamp,
+                timestamp__lte=to_timestamp).union(
+                    Post.objects.filter(
+                        community__user=request.user,
+                        timestamp__gte=from_timestamp,
+                        timestamp__lte=to_timestamp)).union(
+                            Post.objects.filter(
+                                user__following=Profile.objects.filter(
+                                    user=request.user).first(),
+                                timestamp__gte=from_timestamp,
+                                timestamp__lte=to_timestamp)).union(
+                                    Post.objects.filter(
+                                        community__state=True,
+                                        timestamp__gte=from_timestamp,
+                                        timestamp__lte=to_timestamp).distinct(
+                                        )).distinct().order_by('-point')
             # query = Post.objects.filter(timestamp__gte=from_timestamp,
             #                             timestamp__lte=to_timestamp,
             #                             user=request.user)
@@ -523,3 +536,38 @@ def get_post_by_time_interval(request):
         return get_paginated_queryset_response(query, request, page_size,
                                                model)
     return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
+
+
+def delete_post(request):
+    id = request.data.get('id')
+    check_community()
+    if request.user:
+        if request.user.is_authenticated:
+            post = Post.objects.filter(id=id).first()
+            print(post.id, post.title, post.content, post.user, post.community,
+                  post.point)
+            if post:
+                if post.user == request.user:
+                    post.state = CommentState.DELETED
+                    post.save()
+                    return Response({Message.DETAIL: Message.SC_OK},
+                                    status=200)
+                if post.community:
+                    if post.community.creator == request.user:
+                        post.state = CommentState.HIDDEN
+                        post.save()
+                        return Response({Message.DETAIL: Message.SC_OK},
+                                        status=200)
+                return Response({Message.DETAIL: Message.SC_PERMISSION_DENIED},
+                                status=403)
+            return Response({Message.DETAIL: Message.SC_NOT_FOUND}, status=204)
+        return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
+    return Response({Message.DETAIL: Message.SC_BAD_RQ}, status=400)
+
+
+def check_community():
+    community = Community.objects.all()
+    for c in community:
+        if not c.creator:
+            c.creator = Profile.objects.filter().first().user
+            c.save()

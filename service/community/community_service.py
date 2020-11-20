@@ -39,7 +39,7 @@ def create_community(request):
                 return Response({Message.SC_PERMISSION_DENIED}, status=403)
             community = Community.objects.create(community_type=community,
                                                  description=description,
-                                                 rule=rule)
+                                                 rule=rule, creator=request.user)
             if isValidHexaCode(background_color):
                 community.background_color = background_color
             if background:
@@ -66,7 +66,7 @@ def create_community(request):
         community = Community.objects.create(community_type=sub_community,
                                              parent=parent,
                                              description=description,
-                                             rule=rule)
+                                             rule=rule, creator=request.user)
         if isValidHexaCode(background_color):
             community.background_color = background_color
         positive_point = PositivePoint.objects.filter(
@@ -211,3 +211,5 @@ def community_graph(request):
     )
     return get_paginated_queryset_response(query, request, page_size,
                                            ModelName.COMMUNITY_GRAPH)
+
+

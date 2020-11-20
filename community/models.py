@@ -25,6 +25,12 @@ class Community(models.Model):
     background = models.ImageField(upload_to='images/', blank=True, null=True)
     rule = models.TextField(blank=True, null=True)
     background_color = models.TextField(default='#30363C')
+    title_background_color = models.TextField(default='#30363C')
+    description_background_color = models.TextField(default='#30363C')
+    button_background_color = models.TextField(default='#30363C')
+    button_text_color = models.TextField(default='#30363C')
+    text_color = models.TextField(default='#30363C')
+    post_background_color = models.TextField(default='#30363C')
 
     class Meta:
         ordering = ['id']

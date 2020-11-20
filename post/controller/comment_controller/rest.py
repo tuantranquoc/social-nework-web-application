@@ -33,6 +33,10 @@ def comment_create_view(request):
     """
     return comment_service.comment_create(request)
 
+@api_view(['POST'])
+def delete_comment(request):
+    return comment_service.delete_comment(request)
+
 
 @api_view(['GET'])  # http method client has send == POST
 def comment_api_view(request, post_id, *args, **kwargs):
