@@ -185,11 +185,12 @@ class CommunitySerializer(serializers.ModelSerializer):
     is_following = serializers.SerializerMethodField(read_only=True)
     follower = serializers.SerializerMethodField(read_only=True)
     parent = serializers.SerializerMethodField(read_only=True)
+    is_creator = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Community
         fields = [
-            'id', 'community_type', 'parent', 'is_following', 'is_main',
+            'id', 'community_type', 'parent', 'is_following', 'is_main','is_creator',
             'avatar', 'background', 'description', 'follower', 'timestamp',
             'rule', 'member_count', 'background_color',
             'title_background_color', 'description_background_color',
@@ -235,6 +236,13 @@ class CommunitySerializer(serializers.ModelSerializer):
         if obj.parent:
             return obj.parent.community_type
         return None
+
+    def get_is_creator(self, obj):
+        user = None
+        request = self.context.get("request")
+        if obj.creator == request.user:
+            return True
+        return False
 
 
 class PostTypeSerializer(serializers.ModelSerializer):
