@@ -92,7 +92,7 @@ class PostSerializer(serializers.ModelSerializer):
         if request and hasattr(request, "user"):
             user = request.user
         if obj.state == CommentState.PUBLIC:
-            if obj.image.url:
+            if obj.image:
                 return obj.image.url
         if obj.state == CommentState.HIDDEN:
             if obj.image:

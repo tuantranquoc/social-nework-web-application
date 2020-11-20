@@ -52,7 +52,7 @@ def get_post_list(request):
                 track = Track.objects.create(user=request.user)
                 track.save()
             community_track = CommunityTrack.objects.filter(
-                track=track).order_by('-timestamp')[0:3]
+                track=track).order_by('-timestamp')[0:4]
             list_community_track = []
             for c in community_track:
                 list_community_track.append(c.community.community_type)
