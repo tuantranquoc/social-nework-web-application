@@ -153,19 +153,20 @@ def community_update(request):
     description = request.data.get("description")
     avatar = request.data.get("avatar")
     background_color = request.data.get("background_color")
-    if background:
-        community.background = get_image(background)
-    if avatar:
-        community.avatar = get_image(avatar)
-    if description:
-        community.description = description
-    if background_color:
-        if isValidHexaCode(background_color):
-            community.background_color = background_color
-    user.save()
-    community.save()
-    if not community.background or not community.avatar:
-        return Response({Message.SC_BAD_IMG}, status=400)
+    if community:
+        if background:
+            community.background = get_image(background)
+        if avatar:
+            community.avatar = get_image(avatar)
+        if description:
+            community.description = description
+        if background_color:
+            if isValidHexaCode(background_color):
+                community.background_color = background_color
+        user.save()
+        community.save()
+        if not community.background or not community.avatar:
+            return Response({Message.SC_BAD_IMG}, status=400)
     return Response({}, status=200)
 
 
