@@ -17,3 +17,7 @@ class CommentState:
     PUBLIC = 'public'
     HIDDEN = 'hidden'
     DELETED = 'deleted'
+    
+    
+class ImagePath:
+    REMOVED = '/media/removed.png'

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from account.serializers import PublicProfileSerializer
 from community.models import Community
 from post.models import Post, Comment, PostType
-from redditv1.name import CommentState
+from redditv1.name import CommentState, ImagePath
 MAX_CONTENT_LENGTH = 300
 
 
@@ -29,7 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
     community_type = serializers.SerializerMethodField(read_only=True)
     type = serializers.SerializerMethodField(read_only=True)
     point = serializers.SerializerMethodField(read_only=True)
-    # image = serializers.SerializerMethodField(read_only=True)
+    image = serializers.SerializerMethodField(read_only=True)
     content = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -86,21 +86,21 @@ class PostSerializer(serializers.ModelSerializer):
         if obj.state == CommentState.DELETED:
             return ["Post has been delete by owner"]
 
-    # def get_image(self, obj):
-    #     user = None
-    #     request = self.context.get("request")
-    #     if request and hasattr(request, "user"):
-    #         user = request.user
-    #     if obj.state == CommentState.PUBLIC:
-    #         if obj.image:
-    #             return obj.image
-    #     if obj.state == CommentState.HIDDEN:
-    #         if obj.image:
-    #             if obj.community.creator == user:
-    #                 return obj.image
-    #         return None
-    #     if obj.state == CommentState.DELETED:
-    #         return None
+    def get_image(self, obj):
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        if obj.state == CommentState.PUBLIC:
+            if obj.image.url:
+                return obj.image.url
+        if obj.state == CommentState.HIDDEN:
+            if obj.image:
+                if obj.community.creator == user:
+                    return obj.image.url
+            return ImagePath.REMOVED
+        if obj.state == CommentState.DELETED:
+            return ImagePath.REMOVED
 
 
 class CommentSerializer(serializers.ModelSerializer):
