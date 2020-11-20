@@ -74,6 +74,7 @@ class PostSerializer(serializers.ModelSerializer):
         print(obj.state)
         user = None
         request = self.context.get("request")
+        print('image',obj.image)
         if request and hasattr(request, "user"):
             user = request.user
         if obj.state == CommentState.PUBLIC:

@@ -150,8 +150,6 @@ def profile_update_via_react_view(request):
     my_profile.bio = bio
     user.save()
     my_profile.save()
-    if not my_profile.background or not my_profile.avatar:
-        return Response({Message.SC_BAD_IMG}, status=400)
     return Response({}, status=200)
 
 

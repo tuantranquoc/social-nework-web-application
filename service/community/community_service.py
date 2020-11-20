@@ -39,7 +39,8 @@ def create_community(request):
                 return Response({Message.SC_PERMISSION_DENIED}, status=403)
             community = Community.objects.create(community_type=community,
                                                  description=description,
-                                                 rule=rule, creator=request.user)
+                                                 rule=rule,
+                                                 creator=request.user)
             if isValidHexaCode(background_color):
                 community.background_color = background_color
             if background:
@@ -66,7 +67,8 @@ def create_community(request):
         community = Community.objects.create(community_type=sub_community,
                                              parent=parent,
                                              description=description,
-                                             rule=rule, creator=request.user)
+                                             rule=rule,
+                                             creator=request.user)
         if isValidHexaCode(background_color):
             community.background_color = background_color
         positive_point = PositivePoint.objects.filter(
@@ -153,21 +155,41 @@ def community_update(request):
     description = request.data.get("description")
     avatar = request.data.get("avatar")
     background_color = request.data.get("background_color")
+    title_background_color = request.data.get("title_background_color")
+    description_background_color = request.data.get(
+        "description_background_color")
+    button_background_color = request.data.get("button_background_color")
+    button_text_color = request.data.get("button_text_color")
+    text_color = request.data.get("text_color")
+    post_background_color = request.data.get("post_background_color")
     if community:
         if background:
-            community.background = get_image(background)
+            if len(background) > len('data:,'):
+                community.background = get_image(background)
         if avatar:
-            community.avatar = get_image(avatar)
+            if len(avatar) > len('data:,'):
+                community.avatar = get_image(avatar)
         if description:
             community.description = description
         if background_color:
             if isValidHexaCode(background_color):
                 community.background_color = background_color
+        if description_background_color:
+            community.description_background_color = description_background_color
+        if title_background_color:
+            community.title_background_color = title_background_color
+        if button_background_color:
+            community.button_background_color = button_background_color
+        if button_text_color:
+            community.button_text_color = button_text_color
+        if text_color:
+            community.text_color = text_color
+        if post_background_color:
+            community.post_background_color = post_background_color
         user.save()
         community.save()
-        if not community.background or not community.avatar:
-            return Response({Message.SC_BAD_IMG}, status=400)
-    return Response({}, status=200)
+        return Response({Message.DETAIL:Message.SC_OK}, status=200)
+    return Response({Message.DETAIL: Message.SC_CM_NOT_FOUND}, status=400)
 
 
 def recommend_sub_community(request, community):
@@ -212,5 +234,3 @@ def community_graph(request):
     )
     return get_paginated_queryset_response(query, request, page_size,
                                            ModelName.COMMUNITY_GRAPH)
-
-
