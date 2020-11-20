@@ -29,7 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
     community_type = serializers.SerializerMethodField(read_only=True)
     type = serializers.SerializerMethodField(read_only=True)
     point = serializers.SerializerMethodField(read_only=True)
-    image = serializers.SerializerMethodField(read_only=True)
+    # image = serializers.SerializerMethodField(read_only=True)
     content = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -85,21 +85,21 @@ class PostSerializer(serializers.ModelSerializer):
         if obj.state == CommentState.DELETED:
             return ["Post has been delete by owner"]
 
-    def get_image(self, obj):
-        user = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            user = request.user
-        if obj.state == CommentState.PUBLIC:
-            if obj.image:
-                return obj.image
-        if obj.state == CommentState.HIDDEN:
-            if obj.image:
-                if obj.community.creator == user:
-                    return obj.image
-            return None
-        if obj.state == CommentState.DELETED:
-            return None
+    # def get_image(self, obj):
+    #     user = None
+    #     request = self.context.get("request")
+    #     if request and hasattr(request, "user"):
+    #         user = request.user
+    #     if obj.state == CommentState.PUBLIC:
+    #         if obj.image:
+    #             return obj.image
+    #     if obj.state == CommentState.HIDDEN:
+    #         if obj.image:
+    #             if obj.community.creator == user:
+    #                 return obj.image
+    #         return None
+    #     if obj.state == CommentState.DELETED:
+    #         return None
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -190,9 +190,9 @@ class CommunitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Community
         fields = [
-            'id', 'community_type', 'parent', 'is_following', 'is_main','is_creator',
-            'avatar', 'background', 'description', 'follower', 'timestamp',
-            'rule', 'member_count', 'background_color',
+            'id', 'community_type', 'parent', 'is_following', 'is_main',
+            'is_creator', 'avatar', 'background', 'description', 'follower',
+            'timestamp', 'rule', 'member_count', 'background_color',
             'title_background_color', 'description_background_color',
             'button_background_color', 'button_text_color', 'text_color',
             'post_background_color'
