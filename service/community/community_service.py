@@ -332,17 +332,13 @@ def mod_action(request):
             history = CommunityHistory.objects.create(user=request.user,
                                                       community=community,
                                                       target=user)
-        if request.user == community.creator:
-            history.role = Role.ADMIN
-        elif request.user in community.mod.all():
-            history.role = Role.MOD
         member = Member.objects.filter(user=user).first()
         if member:
             member_info = MemberInfo.objects.filter(
                 member=member, community=community).first()
             if member_info:
                 current_member = MemberInfo.objects.filter(
-                    member=member).first()
+                    member=member, community=community).first()
                 print('has member info, old role: ', current_member.role)
                 print('action:', action)
                 if action == 'add':
@@ -367,7 +363,7 @@ def mod_action(request):
                         community.save()
                         history.save()
                 current_member.save()
-            # history.timestamp = datetime.now()
+            history.timestamp = timezone.now()
             print(current_member.role, history.new_role, 'after update')
             return Response({Message.DETAIL: Message.SC_OK}, status=200)
         return Response({Message.DETAIL: Message.USER_MUST_BE_MEMBER},
