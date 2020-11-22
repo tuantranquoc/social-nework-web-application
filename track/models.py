@@ -31,7 +31,6 @@ class CommunityTrack(models.Model):
 class Track(models.Model):
     community_track = models.ManyToManyField(
         CommunityTrack,
-        null=True,
         blank=True,
     )
     user = models.OneToOneField(User,

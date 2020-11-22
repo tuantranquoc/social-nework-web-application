@@ -1,17 +1,18 @@
 import base64
 
 from django.core.files.base import ContentFile
-from django.db.models import Count
+from django.db.models import Count, Q
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 
 from account.models import Profile
-from community.models import Community
+from community.models import Community, CommunityHistory, Member, MemberInfo
 from post.models import PositivePoint
 from post.serializers import CommunityGraphSerializer, CommunitySerializer
 from redditv1.message import Message
+from redditv1.name import Role
 from django.utils import timezone
 from function.file import get_image
 from redditv1.name import ModelName
@@ -19,6 +20,10 @@ from function.paginator import get_paginated_queryset_response
 from function.file import isValidHexaCode
 import datetime
 from service.post.post_service import timestamp_in_the_past_by_day
+from functools import reduce
+import operator
+
+User = get_user_model()
 
 
 def create_community(request):
@@ -114,6 +119,10 @@ def community_action(request):
         community = Community.objects.filter(
             community_type=community_type).first()
         if community:
+            member = Member.objects.filter(user=request.user).first()
+            if not member:
+                member = Member.objects.create(user=request.user)
+            check_member(member, community, request.user, action)
             if action == "follow":
                 community.user.add(request.user)
             if action == "un_follow":
@@ -121,6 +130,43 @@ def community_action(request):
             return Response({Message.SC_OK}, status=200)
         return Response({Message.SC_NOT_FOUND}, status=204)
     return Response({Message.SC_LOGIN_REDIRECT}, status=401)
+
+
+def check_member(member, community, user, action):
+    if community:
+        if not member:
+            print('member not ex')
+            member = Member.objects.create(user=user)
+            if action == 'follow':
+                member_info = MemberInfo.objects.create(
+                    community=community, timestamp=datetime.datetime.now())
+                member_info.save()
+                member.member_info.add(member_info)
+                member.save()
+            if action == 'un_follow':
+                member.save()
+        else:
+            check_member_exist = Member.objects.filter(
+                user=user, member_info__community=community).first()
+            if not check_member_exist:
+                print('member info not ex')
+                member_info = MemberInfo.objects.create(
+                    community=community, timestamp=datetime.datetime.now())
+                if action == 'follow':
+                    member_info.save()
+                    member.member_info.add(member_info)
+                    member.save()
+            else:
+                print('member info ex')
+                member_info = MemberInfo.objects.filter(
+                    member=check_member_exist, community=community).first()
+                member_info.timestamp = datetime.datetime.now()
+                if action == 'un_follow':
+                    member_info.state = False
+                if action == 'follow':
+                    member_info.state = True
+                member_info.save()
+                member.save()
 
 
 def get_list_community(request):
@@ -162,6 +208,7 @@ def community_update(request):
     button_text_color = request.data.get("button_text_color")
     text_color = request.data.get("text_color")
     post_background_color = request.data.get("post_background_color")
+
     if community:
         if background:
             if len(background) > len('data:,'):
@@ -174,21 +221,48 @@ def community_update(request):
         if background_color:
             if isValidHexaCode(background_color):
                 community.background_color = background_color
+            else:
+                return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                                status=400)
         if description_background_color:
-            community.description_background_color = description_background_color
+            if isValidHexaCode(description_background_color):
+                community.description_background_color = description_background_color
+            else:
+                return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                                status=400)
         if title_background_color:
-            community.title_background_color = title_background_color
+            if isValidHexaCode(title_background_color):
+                community.title_background_color = title_background_color
+            else:
+                return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                                status=400)
         if button_background_color:
-            community.button_background_color = button_background_color
+            if isValidHexaCode(button_background_color):
+                community.button_background_color = button_background_color
+            else:
+                return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                                status=400)
         if button_text_color:
-            community.button_text_color = button_text_color
+            if isValidHexaCode(button_text_color):
+                community.button_text_color = button_text_color
+            else:
+                return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                                status=400)
         if text_color:
-            community.text_color = text_color
+            if isValidHexaCode(text_color):
+                community.text_color = text_color
+            else:
+                return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                                status=400)
         if post_background_color:
-            community.post_background_color = post_background_color
+            if isValidHexaCode(post_background_color):
+                community.post_background_color = post_background_color
+            else:
+                return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                                status=400)
         user.save()
         community.save()
-        return Response({Message.DETAIL:Message.SC_OK}, status=200)
+        return Response({Message.DETAIL: Message.SC_OK}, status=200)
     return Response({Message.DETAIL: Message.SC_CM_NOT_FOUND}, status=400)
 
 
@@ -234,3 +308,83 @@ def community_graph(request):
     )
     return get_paginated_queryset_response(query, request, page_size,
                                            ModelName.COMMUNITY_GRAPH)
+
+
+def mod_action(request):
+    community = request.data.get('community')
+    user_id = request.data.get('user_id')
+    action = request.data.get('action')
+    if not action:
+        return Response({Message.DETAIL: Message.SC_BAD_RQ}, status=400)
+    if request.user.is_authenticated:
+        user = User.objects.filter(id=user_id).first()
+        community = Community.objects.filter(community_type=community).first()
+        if not community or not user:
+            return Response({Message.DETAIL: Message.SC_NOT_FOUND}, status=204)
+        community_check = community.creator == request.user
+        if not community_check:
+            return Response({Message.DETAIL: Message.SC_PERMISSION_DENIED},
+                            status=403)
+        history = CommunityHistory.objects.filter(user=request.user,
+                                                  community=community,
+                                                  target=user).first()
+        if not history:
+            history = CommunityHistory.objects.create(user=request.user,
+                                                      community=community,
+                                                      target=user)
+        if request.user == community.creator:
+            history.role = Role.ADMIN
+        elif request.user in community.mod.all():
+            history.role = Role.MOD
+        member = Member.objects.filter(user=user).first()
+        if member:
+            member_info = MemberInfo.objects.filter(
+                member=member, community=community).first()
+            if member_info:
+                current_member = MemberInfo.objects.filter(
+                    member=member).first()
+                print('has member info, old role: ', current_member.role)
+                print('action:', action)
+                if action == 'add':
+                    print('current role',current_member.role, Role.MOD)
+                    if current_member.role == Role.MEMBER:
+                        history.old_role = current_member.role
+                        history.new_role = Role.MOD
+                        current_member.role = history.new_role
+                        print('new_role',history.new_role)
+                        community.mod.add(user)
+                        history.timestamp = timezone.now()
+                        history.save()
+                        community.save()
+                elif action == 'remove':
+                    if current_member.role == Role.MOD:
+                        print('demote')
+                        history.old_role = current_member.role
+                        history.new_role = Role.MEMBER
+                        current_member.role = history.new_role
+                        community.mod.remove(user)
+                        history.timestamp = timezone.now()
+                        community.save()
+                        history.save()
+                current_member.save()
+            # history.timestamp = datetime.now()
+            print(current_member.role, history.new_role, 'after update')
+            return Response({Message.DETAIL: Message.SC_OK}, status=200)
+        return Response({Message.DETAIL: Message.USER_MUST_BE_MEMBER},
+                        status=403)
+    return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
+
+
+def member_list(request):
+    page_size = request.data.get('page_size')
+    community = request.data.get('community')
+    if community:
+        community = Community.objects.filter(community_type=community).first()
+        if community:
+            member_info = MemberInfo.objects.filter(community=community)
+            member = Member.objects.filter(member_info__in=member_info)
+            profile = Profile.objects.filter(
+                reduce(operator.or_, (Q(user=x.user) for x in member)))
+            return get_paginated_queryset_response(profile, request, page_size,
+                                                   ModelName.PROFILE)
+    return Response({Message.DETAIL: Message.SC_OK})

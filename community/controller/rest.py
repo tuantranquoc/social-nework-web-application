@@ -70,7 +70,13 @@ def community_graph(request):
     return community_service.community_graph(request)
 
 
+@api_view(['GET', 'POST'])
+def community_mod_action(request):
+    return community_service.mod_action(request)
 
+@api_view(['GET', 'POST'])
+def get_member_list(request):
+    return community_service.member_list(request)
 
 def timestamp_in_the_past_by_day(days):
     return timezone.now() - datetime.timedelta(days)

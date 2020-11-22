@@ -1,4 +1,4 @@
-from community.models import Community
+from community.models import Community, Member, MemberInfo
 from django.db.models.aggregates import Count
 from function.paginator import get_paginated_queryset_response
 from post.models import Comment, PositivePoint, Post, PostType, View
@@ -6,7 +6,7 @@ from account.models import Profile
 from redditv1.name import ModelName
 from rest_framework.response import Response
 from redditv1.message import Message
-from redditv1.name import CommentState
+from redditv1.name import CommentState, Role
 from function.file import get_image
 from post import rank
 from post.serializers import PostSerializer
@@ -58,14 +58,9 @@ def get_post_list(request):
                 list_community_track.append(c.community.community_type)
             community = Community.objects.filter(
                 community_type__in=list_community_track)
-            print('cm-count', community.count())
             query = Post.objects.filter(
                 community__community_type__in=list_community_track).order_by(
                     '-point')
-            print(query.count())
-            # top_community = Community.objects.filter(state=True).annotate(
-            #     user_count=Count('user')).order_by('-user_count')
-            # query = Post.objects.filter.all()
             return get_paginated_queryset_response(query, request, page_size,
                                                    ModelName.POST)
     top_community = Community.objects.filter(state=True).annotate(
@@ -75,6 +70,7 @@ def get_post_list(request):
     if sort == 'timestamp':
         sort = '-timestamp'
     if request.user.is_authenticated:
+        # community need to be fix right here!
         top_community = Community.objects.filter(user=request.user).union(
             Community.objects.filter(community__state=True)).union(
                 Community.objects.filter(creator=request.user)).distinct()
@@ -140,20 +136,7 @@ def create_post(request):
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
-# def delete_post(request, post_id):
-#     if not request.user.is_authenticated:
-#         return Response({Message.SC_NO_AUTH}, status=401)
-#     post = Post.objects.filter(id=post_id)
-#     if not post:
-#         return Response({Message.SC_NOT_FOUND}, status=400)
-#     if not Post.objects.filter(user=request.user, id=post_id):
-#         return Response({Message.SC_PERMISSION_DENIED}, status=401)
-#     post.delete()
-#     return Response({Message.SC_OK}, status=200)
-
-
 def find_post_by_id(request, post_id):
-    print('filter')
     post = Post.objects.filter(id=post_id).first()
     if post:
         if post.community.state is True:
@@ -163,12 +146,12 @@ def find_post_by_id(request, post_id):
             if post.user == request.user:
                 track = Track.objects.filter(user=request.user).first()
                 check_community_track(track, post.community, request.user)
-                serializer = PostSerializer(post)
+                serializer = PostSerializer(post, context={"request": request})
                 return Response(serializer.data, status=200)
             track = Track.objects.filter(user=request.user).first()
             check_community_track(track, post.community, request.user)
             view = View.objects.filter(user=request.user, post=post).first()
-            serializer = check_view(view, post, request.user)
+            serializer = check_view(view, post, request.user, request)
             return Response(serializer.data, status=200)
         if post.community.state is False:
             if not request.user.is_authenticated:
@@ -176,13 +159,13 @@ def find_post_by_id(request, post_id):
             view = View.objects.filter(user=request.user, post=post).first()
             if Community.objects.filter(user=request.user,
                                         community_type=post.community):
-                serializer = check_view(view, post, request.user)
+                serializer = check_view(view, post, request.user, request)
                 return Response(serializer.data, status=200)
             return Response({Message.MUST_FOLLOW}, status=400)
     return Response({Message.SC_NOT_FOUND}, status=204)
 
 
-def check_view(view, post, user):
+def check_view(view, post, user, request):
     if not view:
         view = View.objects.create(post=post)
         view.user.add(user)
@@ -192,7 +175,7 @@ def check_view(view, post, user):
         view.save()
         post.view_count = post.view_count + 1
         post.save()
-        serializer = PostSerializer(post)
+        serializer = PostSerializer(post, context={"request": request})
         return serializer
     if view.old_timestamp is not None:
         difference = (timezone.now() - view.old_timestamp).total_seconds()
@@ -201,13 +184,12 @@ def check_view(view, post, user):
             view.old_timestamp = timezone.now()
             view.save()
             post.save()
-        serializer = PostSerializer(post)
+        serializer = PostSerializer(post, context={"request": request})
         return serializer
 
 
 def check_community_track(track, community, user):
     community = Community.objects.filter(community_type=community).first()
-    print(community.community_type)
     if community:
         if not track:
             track = Track.objects.create(user=user)
@@ -544,8 +526,6 @@ def delete_post(request):
     if request.user:
         if request.user.is_authenticated:
             post = Post.objects.filter(id=id).first()
-            print(post.id, post.title, post.content, post.user, post.community,
-                  post.point)
             if post:
                 if post.user == request.user:
                     post.state = CommentState.DELETED
@@ -553,6 +533,14 @@ def delete_post(request):
                     return Response({Message.DETAIL: Message.SC_OK},
                                     status=200)
                 if post.community:
+                    member = Member.objects.filter(user=request.user).first()
+                    if member:
+                        member_info = MemberInfo.objects.filter(member=member, community=post.community).first()
+                        if member_info.role == Role.MOD:
+                            post.state = CommentState.HIDDEN
+                            post.save()
+                            return Response({Message.DETAIL: Message.SC_OK},
+                                            status=200)
                     if post.community.creator == request.user:
                         post.state = CommentState.HIDDEN
                         post.save()

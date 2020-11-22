@@ -13,15 +13,13 @@ class TrackAdmin(admin.ModelAdmin):
     class Meta:
         model = Track
 
+
 class CommunityTrackAdmin(admin.ModelAdmin):
-    list_display = [
-        '__id__',
-        '__community__',
-        '__timestamp__'
-    ]
+    list_display = ['__id__', '__community__', '__timestamp__']
 
     class Meta:
         model = CommunityTrack
+
 
 admin.site.register(Track, TrackAdmin)
 admin.site.register(CommunityTrack, CommunityTrackAdmin)

@@ -17,7 +17,13 @@ class CommentState:
     PUBLIC = 'public'
     HIDDEN = 'hidden'
     DELETED = 'deleted'
-    
-    
+
+
 class ImagePath:
     REMOVED = '/media/removed.png'
+
+
+class Role:
+    MEMBER = 'MEMBER'
+    ADMIN = 'ADMIN'
+    MOD = 'MOD'

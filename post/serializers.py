@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
 from account.serializers import PublicProfileSerializer
-from community.models import Community
+from community.models import Community, Member, MemberInfo
 from post.models import Post, Comment, PostType
-from redditv1.name import CommentState, ImagePath
+from redditv1.name import CommentState, ImagePath, Role
 MAX_CONTENT_LENGTH = 300
 
 
@@ -71,17 +71,22 @@ class PostSerializer(serializers.ModelSerializer):
         return "%.2f" % obj.point
 
     def get_content(self, obj):
-        print(obj.state)
         user = None
         request = self.context.get("request")
-        print('image',obj.image)
         if request and hasattr(request, "user"):
             user = request.user
+        # user =  self.context['request'].user
         if obj.state == CommentState.PUBLIC:
             return obj.content
         if obj.state == CommentState.HIDDEN:
             if obj.community.creator == user:
                 return obj.content
+            member = Member.objects.filter(user=user).first()
+            member_info = MemberInfo.objects.filter(
+                member=member, community=obj.community).first()
+            if member_info:
+                if member_info.role == Role.MOD:
+                    return obj.content
             return ["HIDDEN"]
         if obj.state == CommentState.DELETED:
             return ["Post has been delete by owner"]

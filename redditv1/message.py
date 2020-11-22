@@ -15,3 +15,5 @@ class Message:
     SC_BAD_IMG = "Image unknown format or damaged"
     MUST_FOLLOW = "You must follow this community to see this post"
     DETAIL = 'detail'
+    WRONG_INPUT_COLOR = "Color input missing or incorrect"
+    USER_MUST_BE_MEMBER = "User must be member of this community"
