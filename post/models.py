@@ -27,7 +27,7 @@ class Post(models.Model):
                                   on_delete=models.CASCADE,
                                   blank=True,
                                   null=True)
-    title = models.CharField(max_length=60, blank=True, null=True)
+    title = models.CharField(max_length=255, blank=True, null=True)
     type = models.ForeignKey("PostType",
                              blank=True,
                              null=True,
