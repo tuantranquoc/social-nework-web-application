@@ -8,14 +8,14 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 
 from account.models import Profile
-from community.models import Community, CommunityHistory, Member, MemberInfo
+from community.models import Community, CommunityBlackList, CommunityHistory, Member, MemberInfo, CommunityBlackListDetail, BlackListType
 from post.models import PositivePoint
 from post.serializers import CommunityGraphSerializer, CommunitySerializer
 from redditv1.message import Message
 from redditv1.name import Role
 from django.utils import timezone
 from function.file import get_image
-from redditv1.name import ModelName
+from redditv1.name import ModelName, BLType
 from function.paginator import get_paginated_queryset_response
 from function.file import isValidHexaCode
 import datetime
@@ -59,7 +59,8 @@ def create_community(request):
                 user=request.user).first()
             positive_point.point = positive_point.point - 10
             positive_point.save()
-            serializer = CommunitySerializer(community)
+            serializer = CommunitySerializer(community,
+                                             context={'request': request})
             return Response(serializer.data, status=201)
         if not Community.objects.filter(community_type=community):
             return Response({Message.SC_CM_NOT_FOUND}, status=204)
@@ -87,7 +88,8 @@ def create_community(request):
             if len(avatar) > len('data:,'):
                 community.avatar = get_image(background)
         community.save()
-        serializer = CommunitySerializer(community)
+        serializer = CommunitySerializer(community,
+                                         context={"request": request})
         return Response(serializer.data, status=201)
 
 
@@ -342,12 +344,12 @@ def mod_action(request):
                 print('has member info, old role: ', current_member.role)
                 print('action:', action)
                 if action == 'add':
-                    print('current role',current_member.role, Role.MOD)
+                    print('current role', current_member.role, Role.MOD)
                     if current_member.role == Role.MEMBER:
                         history.old_role = current_member.role
                         history.new_role = Role.MOD
                         current_member.role = history.new_role
-                        print('new_role',history.new_role)
+                        print('new_role', history.new_role)
                         community.mod.add(user)
                         history.timestamp = timezone.now()
                         history.save()
@@ -384,3 +386,96 @@ def member_list(request):
             return get_paginated_queryset_response(profile, request, page_size,
                                                    ModelName.PROFILE)
     return Response({Message.DETAIL: Message.SC_OK})
+
+
+def add_use_to_community_blacklist(request):
+    user_id = request.data.get('user_id')
+    community = request.data.get('community')
+    type = request.data.get('type')
+    from_timestamp = request.data.get('from_timestamp')
+    to_timestamp = request.data.get('to_timestamp')
+    '''
+        mod and mod can not add another mod or admin into blacklist
+        default in black list is 1 day
+    '''
+    if request.user.is_authenticated:
+        if user_id and community and type:
+            changed_by = request.user
+            target_profile = Profile.objects.filter(user__id=user_id).first()
+            community = Community.objects.filter(
+                community_type=community).first()
+            if target_profile and community:
+                if target_profile.user == community.creator:
+                    return Response(
+                        {Message.DETAIL: Message.SC_PERMISSION_DENIED},
+                        status=403)
+ 
+                member = Member.objects.filter(user=request.user).first()
+                if request.user == community.creator:
+                    if not member:
+                        member = Member.objects.create(user=request.user)
+                        member_info = MemberInfo.objects.create(community=community, role=Role.ADMIN)
+                        member.member_info.add(member_info)
+                        member.save()
+                member_info = MemberInfo.objects.filter(
+                    member=member, community=community).first()
+                target_member = Member.objects.filter(
+                    user=target_profile.user).first()
+                target_member_info = MemberInfo.objects.filter(
+                    member=target_member, community=community).first()
+                print('change by',member_info.role, 'target',target_member_info.role)
+                if member_info and target_member_info:
+                    if member_info.role == Role.ADMIN or target_member_info.role == Role.MOD:
+                        blacklist = CommunityBlackList.objects.filter(
+                            community=community).first()
+                        if not blacklist:
+                            blacklist = CommunityBlackList.objects.create(
+                                community=community)
+                        blacklist_detail = CommunityBlackListDetail.objects.filter(
+                            user=target_profile.user,
+                            communityblacklist=blacklist).first()
+                        if not blacklist_detail:
+                            blacklist_detail = CommunityBlackListDetail.objects.create(communityblacklist=blacklist)
+                            blacklist_detail.user.add(target_profile.user)
+                        default_blacklist_type()
+                        blacklist_type = BlackListType.objects.filter(
+                            type=type).first()
+                        blacklist.blacklist_detail = blacklist_detail
+                        blacklist.save()
+                        blacklist_detail.user.add(target_profile.user)
+                        blacklist_detail.blacklist_type = blacklist_type
+                        if not from_timestamp or not to_timestamp:
+                            blacklist_detail.from_timestamp = timezone.now()
+                            blacklist_detail.to_timestamp = timestamp_in_the_past_by_day(
+                                1)
+                        else:
+                            blacklist_detail.from_timestamp = from_timestamp
+                            blacklist_detail.to_timestamp = to_timestamp
+                        blacklist_detail.save()
+                        return Response({Message.DETAIL:Message.SC_OK}, status=200)
+                return Response({Message.DETAIL: Message.SC_NOT_FOUND},
+                                status=204)
+            return Response({Message.DETAIL: Message.SC_CM_NOT_FOUND},
+                            status=204)
+        return Response({Message.DETAIL: Message.SC_BAD_RQ},
+                            status=400)
+    return Response({Message.DETAIL: Message.SC_NO_AUTH},
+                            status=401)
+
+
+def default_blacklist_type():
+    blacklist_type = BlackListType.objects.all()
+    if blacklist_type.count() == 0:
+        type_1 = BlackListType.objects.create(
+            type=BLType.VIEW_ONLY,
+            description=
+            'User can not search, see post, post on target community')
+        type_1.save()
+        type_2 = BlackListType.objects.create(
+            type=BLType.BLOCK,
+            description='User can not post in target community')
+        type_2.save()
+
+
+def timestamp_in_the_past_by_day(days):
+    return timezone.now() - datetime.timedelta(days)

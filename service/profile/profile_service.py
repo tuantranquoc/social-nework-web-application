@@ -8,12 +8,12 @@ from django.db.models import Q, Count
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from account.models import Profile
+from account.models import Profile, CustomColor
 from account.serializers import PublicProfileSerializer
 from post.models import Post
 from post.serializers import PostSerializer
 from redditv1.message import Message
-from function.file import get_image
+from function.file import get_image, isValidHexaCode
 from function.paginator import get_paginated_queryset_response
 from redditv1.name import ModelName
 from community.models import Community
@@ -32,15 +32,21 @@ def profile_list_view(request):
 
 def profile_detail_view(request, username):
     page_size = request.data.get('page_size')
-    profiles = Profile.objects.filter(user__username=username)
-    if profiles:
+    profile = Profile.objects.filter(user__username=username).first()
+    if profile:
+        custom_color = CustomColor.objects.filter(profile=profile).first()
+        if not custom_color:
+            custom_color = CustomColor.objects.create()
+            profile.custom_color = custom_color
+            profile.save()
         track = Track.objects.filter(user=request.user).first()
-        list_community = get_profile_top_community(profiles.first().user)
+        list_community = get_profile_top_community(profile.user)
         print('list', list_community)
         if list_community:
             for c in list_community:
                 check_community_track(track, c, request.user)
-    return get_paginated_queryset_response(profiles, request, page_size,
+        profile = Profile.objects.filter(user__username=username)
+    return get_paginated_queryset_response(profile, request, page_size,
                                            ModelName.PROFILE)
 
 
@@ -137,20 +143,82 @@ def profile_update_via_react_view(request):
     email = request.data.get("email")
     background = request.data.get("background")
     avatar = request.data.get("avatar")
+    background_color = request.data.get("background_color")
+    title_background_color = request.data.get("title_background_color")
+    description_background_color = request.data.get(
+        "description_background_color")
+    button_background_color = request.data.get("button_background_color")
+    button_text_color = request.data.get("button_text_color")
+    text_color = request.data.get("text_color")
+    post_background_color = request.data.get("post_background_color")
+    custom_color = CustomColor.objects.filter(profile=my_profile).first()
+    if not custom_color:
+        custom_color = CustomColor.objects.create()
+        my_profile.custom_color = custom_color
+        my_profile.save()
+    print(custom_color.background_color)
+    if background_color:
+        custom_color.background_color = background_color
     if background:
         if len(background) > len('data:,'):
             my_profile.background = get_image(background)
     if avatar:
         if len(avatar) > len('data:,'):
             my_profile.avatar = get_image(avatar)
-    user.first_name = first_name
-    user.last_name = last_name
-    user.email = email
+    if first_name:
+        user.first_name = first_name
+    if last_name:
+        user.last_name = last_name
+    if email:
+        user.email = email
+    if background_color:
+        if isValidHexaCode(background_color):
+            my_profile.custom_color.background_color = background_color
+        else:
+            return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                            status=400)
+    if description_background_color:
+        if isValidHexaCode(description_background_color):
+            my_profile.custom_color.description_background_color = description_background_color
+        else:
+            return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                            status=400)
+    if title_background_color:
+        if isValidHexaCode(title_background_color):
+            my_profile.custom_color.title_background_color = title_background_color
+        else:
+            return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                            status=400)
+    if button_background_color:
+        if isValidHexaCode(button_background_color):
+            my_profile.custom_color.button_background_color = button_background_color
+        else:
+            return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                            status=400)
+    if button_text_color:
+        if isValidHexaCode(button_text_color):
+            my_profile.custom_color.button_text_color = button_text_color
+        else:
+            return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                            status=400)
+    if text_color:
+        if isValidHexaCode(text_color):
+            my_profile.custom_color.text_color = text_color
+        else:
+            return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                            status=400)
+    if post_background_color:
+        if isValidHexaCode(post_background_color):
+            my_profile.custom_color.post_background_color = post_background_color
+        else:
+            return Response({Message.DETAIL: Message.WRONG_INPUT_COLOR},
+                            status=400)
     my_profile.location = location
     my_profile.bio = bio
     user.save()
+    custom_color.save()
     my_profile.save()
-    return Response({}, status=200)
+    return Response({Message.DETAIL:Message.SC_OK}, status=200)
 
 
 def get_following_profiles(request, username):

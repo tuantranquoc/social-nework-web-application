@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import Profile
+from .models import Profile, CustomColor
+
+
+class PublicCustomColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomColor
+        fields = '__all__'
 
 
 class PublicProfileSerializer(serializers.ModelSerializer):
@@ -10,18 +16,16 @@ class PublicProfileSerializer(serializers.ModelSerializer):
     following_count = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
     email = serializers.SerializerMethodField(read_only=True)
+    color = PublicCustomColorSerializer(source='custom_color',
+                                               read_only=True)
 
     class Meta:
         model = Profile
-        fields = ['first_name',
-                  'last_name', 'id',
-                  'location',
-                  'bio',
-                  'follower_count',
-                  'following_count',
-                  'is_following',
-                  'username',
-                  'background', 'avatar', 'timestamp', 'email']
+        fields = [
+            'first_name', 'last_name', 'id', 'location', 'bio', 'color',
+            'follower_count', 'following_count', 'is_following', 'username',
+            'background', 'avatar', 'timestamp', 'email'
+        ]
 
     def get_is_following(self, obj):
         is_following = False

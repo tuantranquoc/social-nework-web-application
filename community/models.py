@@ -173,3 +173,62 @@ class CommunityHistory(models.Model):
 
     def __target__(self):
         return self.target
+
+
+class BlackListType(models.Model):
+    type = models.CharField(max_length=25, default='VIEW_ONLY')
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.type
+
+    def __description__(self):
+        return self.description
+
+
+class CommunityBlackListDetail(models.Model):
+    user = models.ManyToManyField(User, blank=True)
+    blacklist_type = models.ForeignKey(BlackListType,
+                                       blank=True,
+                                       on_delete=models.CASCADE,
+                                       null=True)
+    from_timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    to_timestamp = models.DateTimeField(blank=True, null=True)
+
+    def __from_timestamp__(self):
+        return self.from_timestamp
+
+    def __to_timestamp__(self):
+        return self.timestamp
+
+
+class CommunityBlackList(models.Model):
+    community = models.ForeignKey(Community,
+                                  blank=True,
+                                  null=True,
+                                  on_delete=models.CASCADE)
+    blacklist_detail = models.OneToOneField(CommunityBlackListDetail,
+                                            blank=True,
+                                            null=True,
+                                            on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.id)
+
+    def __community__(self):
+        return self.community.community_type
+    
+    def __user__(self):
+        if self.blacklist_detail:
+            return ",".join([
+                str(p.username)
+                for p in self.blacklist_detail.user.all()
+            ])
+        return None
+
+def save_blacklist(sender, instance, created, *args, **kwargs):
+    if created:
+        CommunityBlackList.objects.get_or_create(community=instance)
+
+
+post_save.connect(save_blacklist, sender=Community)

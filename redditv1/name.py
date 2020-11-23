@@ -27,3 +27,8 @@ class Role:
     MEMBER = 'MEMBER'
     ADMIN = 'ADMIN'
     MOD = 'MOD'
+
+
+class BLType:
+    BLOCK = 'BLOCK'
+    VIEW_ONLY = 'VIEW_ONLY'

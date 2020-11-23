@@ -16,6 +16,7 @@ class Profile(models.Model):
     avatar = models.ImageField(null=True, blank=True, upload_to='avatar', default='user.png')
     timestamp = models.DateTimeField(auto_now_add=True)  # time created
     updated = models.DateTimeField(auto_now=True)  # time update profile
+    custom_color = models.OneToOneField('CustomColor', blank=True, null=True, on_delete=models.CASCADE)
     """
     profile_obj = Profile.objects.first() get all the user that following you
     follower = profile_obj.follower.all()
@@ -56,3 +57,22 @@ def user_did_save(sender, instance, created, *args, **kwargs):
 
 # user save will trigger profile save
 post_save.connect(user_did_save, sender=User)
+
+
+class CustomColor(models.Model):
+    background_color = models.CharField(default='#30363C', max_length=7)
+    title_background_color = models.CharField(default='#30363C', max_length=7)
+    description_background_color = models.CharField(default='#30363C',
+                                                    max_length=7)
+    button_background_color = models.CharField(default='#30363C', max_length=7)
+    button_text_color = models.CharField(default='#30363C', max_length=7)
+    text_color = models.CharField(default='#30363C', max_length=7)
+    post_background_color = models.CharField(default='#30363C', max_length=7)
+    
+def save_custom_color(sender, instance, created, *args, **kwargs):
+    if created:
+        Profile.objects.get_or_create(profile=instance)
+
+
+# user save will trigger profile save
+post_save.connect(save_custom_color, sender=Profile)

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Profile
+from .models import Profile, CustomColor
 from post.models import PositivePoint
 
 
@@ -17,7 +17,14 @@ class PointAdmin(admin.ModelAdmin):
 
     class Meta:
         model = PositivePoint
+        
+class CustomColorAdmin(admin.ModelAdmin):
+    list_display = ['__str__']
+
+    class Meta:
+        model = CustomColor
 
 
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(PositivePoint, PointAdmin)
+admin.site.register(CustomColor, CustomColorAdmin)

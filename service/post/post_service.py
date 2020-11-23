@@ -120,7 +120,8 @@ def create_post(request):
                         current_post.point = rank.hot(0, 0,
                                                       current_post.timestamp)
                         current_post.save()
-                        serializer = PostSerializer(current_post)
+                        serializer = PostSerializer(
+                            current_post, context={"request": request})
                         return Response(serializer.data, status=201)
                 current_post = Post.objects.create(
                     user=user,
@@ -130,7 +131,8 @@ def create_post(request):
                     type=PostType.objects.filter(type=type).first())
                 current_post.point = rank.hot(0, 0, current_post.timestamp)
                 current_post.save()
-                serializer = PostSerializer(current_post)
+                serializer = PostSerializer(current_post,
+                                            context={"request": request})
                 return Response(serializer.data, status=201)
         return Response({Message.SC_BAD_RQ}, status=400)
     return Response({Message.SC_BAD_RQ}, status=400)
@@ -141,7 +143,7 @@ def find_post_by_id(request, post_id):
     if post:
         if post.community.state is True:
             if not request.user.is_authenticated:
-                serializer = PostSerializer(post)
+                serializer = PostSerializer(post, context={"request": request})
                 return Response(serializer.data, status=200)
             if post.user == request.user:
                 track = Track.objects.filter(user=request.user).first()
@@ -227,7 +229,7 @@ def re_post(request, post_id):
     post = Post.objects.filter(id=post_id).first()
     if post:
         new_post = Post.objects.create(parent=post, user=request.user)
-        serializer = PostSerializer(new_post)
+        serializer = PostSerializer(new_post, context={"request": request})
         return Response(serializer.data, status=200)
     return Response({Message.SC_NOT_FOUND}, status=204)
 
@@ -535,7 +537,8 @@ def delete_post(request):
                 if post.community:
                     member = Member.objects.filter(user=request.user).first()
                     if member:
-                        member_info = MemberInfo.objects.filter(member=member, community=post.community).first()
+                        member_info = MemberInfo.objects.filter(
+                            member=member, community=post.community).first()
                         if member_info.role == Role.MOD:
                             post.state = CommentState.HIDDEN
                             post.save()

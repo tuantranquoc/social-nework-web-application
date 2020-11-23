@@ -78,5 +78,9 @@ def community_mod_action(request):
 def get_member_list(request):
     return community_service.member_list(request)
 
+@api_view(['GET', 'POST'])
+def blacklist(request):
+    return community_service.add_use_to_community_blacklist(request)
+
 def timestamp_in_the_past_by_day(days):
     return timezone.now() - datetime.timedelta(days)
