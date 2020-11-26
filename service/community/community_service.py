@@ -53,7 +53,7 @@ def create_community(request):
                     community.background = get_image(background)
             if avatar:
                 if len(avatar) > len('data:,'):
-                    community.avatar = get_image(background)
+                    community.avatar = get_image(avatar)
             community.save()
             positive_point = PositivePoint.objects.filter(
                 user=request.user).first()
