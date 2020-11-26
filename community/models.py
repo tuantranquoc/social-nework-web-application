@@ -26,13 +26,13 @@ class Community(models.Model):
     background = models.ImageField(upload_to='images/', blank=True, null=True)
     rule = models.TextField(blank=True, null=True)
     background_color = models.CharField(default='#30363C', max_length=7)
-    title_background_color = models.CharField(default='#30363C', max_length=7)
-    description_background_color = models.CharField(default='#30363C',
+    title_background_color = models.CharField(default='#f5c007', max_length=7)
+    description_background_color = models.CharField(default='#ffffff',
                                                     max_length=7)
-    button_background_color = models.CharField(default='#30363C', max_length=7)
-    button_text_color = models.CharField(default='#30363C', max_length=7)
-    text_color = models.CharField(default='#30363C', max_length=7)
-    post_background_color = models.CharField(default='#30363C', max_length=7)
+    button_background_color = models.CharField(default='#d7dadc', max_length=7)
+    button_text_color = models.CharField(default='#1a1a1b', max_length=7)
+    text_color = models.CharField(default='#000000', max_length=7)
+    post_background_color = models.CharField(default='#ffffff', max_length=7)
     mod = models.ManyToManyField(User, blank=True, related_name='mod')
 
     class Meta:
@@ -192,7 +192,9 @@ class CommunityBlackListDetail(models.Model):
                                        blank=True,
                                        on_delete=models.CASCADE,
                                        null=True)
-    from_timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    from_timestamp = models.DateTimeField(auto_now_add=True,
+                                          null=True,
+                                          blank=True)
     to_timestamp = models.DateTimeField(blank=True, null=True)
 
     def __from_timestamp__(self):
@@ -217,14 +219,13 @@ class CommunityBlackList(models.Model):
 
     def __community__(self):
         return self.community.community_type
-    
+
     def __user__(self):
         if self.blacklist_detail:
-            return ",".join([
-                str(p.username)
-                for p in self.blacklist_detail.user.all()
-            ])
+            return ",".join(
+                [str(p.username) for p in self.blacklist_detail.user.all()])
         return None
+
 
 def save_blacklist(sender, instance, created, *args, **kwargs):
     if created:
