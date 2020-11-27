@@ -39,12 +39,13 @@ def profile_detail_view(request, username):
             custom_color = CustomColor.objects.create()
             profile.custom_color = custom_color
             profile.save()
-        track = Track.objects.filter(user=request.user).first()
-        list_community = get_profile_top_community(profile.user)
-        print('list', list_community)
-        if list_community:
-            for c in list_community:
-                check_community_track(track, c, request.user)
+        if request.user.is_authenticated:
+            track = Track.objects.filter(user=request.user).first()
+            list_community = get_profile_top_community(profile.user)
+            print('list', list_community)
+            if list_community:
+                for c in list_community:
+                    check_community_track(track, c, request.user)
         profile = Profile.objects.filter(user__username=username)
     return get_paginated_queryset_response(profile, request, page_size,
                                            ModelName.PROFILE)

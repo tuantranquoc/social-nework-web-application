@@ -11,12 +11,20 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     location = models.CharField(max_length=200, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
-    follower = models.ManyToManyField(User, related_name='following', blank=True)
+    follower = models.ManyToManyField(User,
+                                      related_name='following',
+                                      blank=True)
     background = models.ImageField(null=True, blank=True)
-    avatar = models.ImageField(null=True, blank=True, upload_to='avatar', default='user.png')
+    avatar = models.ImageField(null=True,
+                               blank=True,
+                               upload_to='avatar',
+                               default='user.png')
     timestamp = models.DateTimeField(auto_now_add=True)  # time created
     updated = models.DateTimeField(auto_now=True)  # time update profile
-    custom_color = models.OneToOneField('CustomColor', blank=True, null=True, on_delete=models.CASCADE)
+    custom_color = models.OneToOneField('CustomColor',
+                                        blank=True,
+                                        null=True,
+                                        on_delete=models.CASCADE)
     """
     profile_obj = Profile.objects.first() get all the user that following you
     follower = profile_obj.follower.all()
@@ -24,7 +32,6 @@ class Profile(models.Model):
     following = user.following.all() get all the user that you follow
     user = Profile.objects.()
     """
-
     class Meta:
         ordering = ['-id']
 
@@ -68,7 +75,8 @@ class CustomColor(models.Model):
     button_text_color = models.CharField(default='#30363C', max_length=7)
     text_color = models.CharField(default='#30363C', max_length=7)
     post_background_color = models.CharField(default='#30363C', max_length=7)
-    
+
+
 def save_custom_color(sender, instance, created, *args, **kwargs):
     if created:
         Profile.objects.get_or_create(profile=instance)
@@ -76,3 +84,6 @@ def save_custom_color(sender, instance, created, *args, **kwargs):
 
 # user save will trigger profile save
 post_save.connect(save_custom_color, sender=Profile)
+
+
+
