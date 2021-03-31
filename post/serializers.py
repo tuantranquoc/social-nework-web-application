@@ -81,12 +81,13 @@ class PostSerializer(serializers.ModelSerializer):
         if obj.state == CommentState.HIDDEN:
             if obj.community.creator == user:
                 return obj.content
-            member = Member.objects.filter(user=user).first()
-            member_info = MemberInfo.objects.filter(
-                member=member, community=obj.community).first()
-            if member_info:
-                if member_info.role == Role.MOD:
-                    return obj.content
+            if user.is_authenticated:
+                member = Member.objects.filter(user=user).first()
+                member_info = MemberInfo.objects.filter(
+                    member=member, community=obj.community).first()
+                if member_info:
+                    if member_info.role == Role.MOD:
+                        return obj.content
             return ["HIDDEN"]
         if obj.state == CommentState.DELETED:
             return ["Post has been delete by owner"]

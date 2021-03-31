@@ -374,6 +374,9 @@ def mod_action(request):
 
 
 def member_list(request):
+    """
+        data = "community":"community"
+    """
     page_size = request.data.get('page_size')
     community = request.data.get('community')
     if community:
@@ -385,7 +388,7 @@ def member_list(request):
                 reduce(operator.or_, (Q(user=x.user) for x in member)))
             return get_paginated_queryset_response(profile, request, page_size,
                                                    ModelName.PROFILE)
-    return Response({Message.DETAIL: Message.SC_OK})
+    return Response({Message.DETAIL: Message.SC_BAD_RQ}, 400)
 
 
 def add_use_to_community_blacklist(request):

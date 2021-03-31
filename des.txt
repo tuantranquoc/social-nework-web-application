@@ -1,0 +1,31 @@
+When a user posts a message, a JavaScript function will transmit the message over WebSocket to a ChatConsumer. The ChatConsumer will receive that message and forward it to the group corresponding to the room name. Every ChatConsumer in the same group (and thus in the same room) will then receive the message from the group and forward it over WebSocket back to JavaScript, where it will be appended to the chat log.
+
+
+Tên nhóm chỉ có thể chứa các chữ cái, chữ số, dấu gạch ngang và dấu chấm. Do đó, mã ví dụ này sẽ không thành công trên các tên phòng có các ký tự khác. 
+
+Tên nhóm chỉ được giới hạn ở chữ và số ASCII, dấu gạch nối và dấu chấm câu. Vì mã này tạo tên nhóm trực tiếp từ tên phòng, nó sẽ không thành công nếu tên phòng chứa bất kỳ ký tự nào không hợp lệ trong tên nhóm. 
+
+docker run -p 6379:6379 -d redis:5
+kidzrancevn
+
+
+
+from restframework_simplejwt.tokens import AccessToken
+
+token_str = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNDU2LCJqdGkiOiJmZDJmOWQ1ZTFhN2M0MmU4OTQ5MzVlMzYyYmNhOGJjYSJ9.NHlztMGER7UADHZJlxNG0WSi22a2KaYSfd1S-AuT7lU'
+access_token = AccessToken(token_str)
+user = User.objects.get(access_token['user_id'])
+
+pass token to meessage
+
+https://stackoverflow.com/questions/9735578/building-a-notification-system
+
+https://adriennedomingus.medium.com/sending-notifications-to-a-django-application-using-websockets-d576e5e5acdf
+
+https://stackoverflow.com/questions/55534182/new-chat-message-notification-django-channels
+
+https://blog.osmosys.asia/2017/04/26/design-notification-system/
+
+questions: https://stackoverflow.com/questions/54052596/django-signals-channels-and-transactions    
+
+signal to channels layer

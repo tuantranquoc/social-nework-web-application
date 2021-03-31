@@ -29,7 +29,7 @@ def child_comment_create_view(request, comment_id):
 @api_view(['POST'])  # http method client has send == POST
 def comment_create_view(request):
     """
-    data = {"id":"comment_id","content":"content"}
+    data = {"id":"post_id","content":"content"}
     """
     return comment_service.comment_create(request)
 

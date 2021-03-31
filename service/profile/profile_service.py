@@ -57,7 +57,7 @@ def profile_current_detail_view(request):
         profiles = Profile.objects.filter(user__username=request.user.username)
         return get_paginated_queryset_response(profiles, request, page_size,
                                                ModelName.PROFILE)
-    return Response({}, status=400)
+    return Response({}, status=401)
     # if not request.user.is_authenticated:
     #     profiles = Profile.objects.filter(user__username=request.user.username)
     #     return get_paginated_queryset_recommend_user_response(profiles, request)
@@ -236,10 +236,13 @@ def get_following_profiles(request, username):
 
 
 def login_via_react_view(request):
+    print("we in")
     username = request.data.get("username")
     password = request.data.get("password")
     user = authenticate(username=username, password=password)
+   
     if user:
+        print("username", username, "password", password)
         login(request, user)
         request.session["username"] = request.user.username
         return Response({Message.SC_OK}, status=200)

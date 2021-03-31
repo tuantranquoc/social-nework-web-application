@@ -31,7 +31,7 @@ def profile_detail_view(request, username):
     return profile_service.profile_detail_view(request, username)
 
 
-@api_view(["GET"])
+@api_view(["GET","POST"])
 def profile_current_detail_view(request):
     return profile_service.profile_current_detail_view(request)
 

@@ -16,6 +16,7 @@ from track.models import CommunityTrack, Track
 from functools import reduce
 import operator
 from django.db.models import Q
+from notify.models import EntityType, Notification, NotificationChange, NotificationObject
 
 
 def count_post_by_community(community):
@@ -131,6 +132,18 @@ def create_post(request):
                     type=PostType.objects.filter(type=type).first())
                 current_post.point = rank.hot(0, 0, current_post.timestamp)
                 current_post.save()
+                if current_post:
+                    entity_type = EntityType.objects.filter(id=1).first()
+                    notification_object = NotificationObject.objects.create(entity_type=entity_type, post=current_post)
+                    notifycation_change = NotificationChange.objects.create(user=request.user, notification_object=notification_object)
+                    notification = Notification.objects.create(notification_object=notification_object)
+                    member_info = MemberInfo.objects.filter(community=_community)
+                    member = Member.objects.filter(member_info__in=member_info)
+                    profiles = Profile.objects.filter(
+                        reduce(operator.or_, (Q(user=x.user) for x in member)))
+                    for p in profiles:
+                        notification.user.add(p.user)
+                    notification.save()
                 serializer = PostSerializer(current_post,
                                             context={"request": request})
                 return Response(serializer.data, status=201)

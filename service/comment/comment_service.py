@@ -10,6 +10,7 @@ from redditv1.message import Message
 from function.paginator import get_paginated_queryset_response
 from redditv1.name import ModelName, CommentState
 from service.post.post_service import timestamp_in_the_past_by_day
+from notify.models import Notification, NotificationChange, NotificationObject, EntityType
 
 
 def comment_parent_list(request, comment_id, *args, **kwargs):
@@ -59,9 +60,20 @@ def comment_create(request):
         post_id = request.data.get("id")
         if content and post_id:
             post = Post.objects.get(id=post_id)
+            user = post.user
             comment = Comment.objects.create(user=request.user,
                                              post=post,
                                              content=content)
+            if comment:
+                entity_type = EntityType.objects.filter(id=4).first()
+                notification_object = NotificationObject.objects.create(
+                    entity_type=entity_type, post=post)
+                notifycation_change = NotificationChange.objects.create(
+                    user=request.user, notification_object=notification_object)
+                notification = Notification.objects.create(
+                    notification_object=notification_object)
+                notification.user.add(user)
+                notification.save()
             CommentPoint.objects.create(comment=comment)
             comment = Comment.objects.filter(id=comment.id)
             serializer = CommentSerializer(comment, many=True)

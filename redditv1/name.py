@@ -11,6 +11,7 @@ class ModelName:
     COMMENT_GRAPH = "Comment graph"
     POST_TYPE = "Post type"
     POST_GRAPH = "Post graph"
+    SIGNAL_ROOM = "Signal room"
 
 
 class CommentState:

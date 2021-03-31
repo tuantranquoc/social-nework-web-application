@@ -1,0 +1,8 @@
+{
+    "presets":[
+        "@barbel/preset-react"
+    ],
+    "plugins":[
+        "@barbel/plugin-proposal-class-properties"
+    ]
+}

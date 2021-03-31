@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes', 'django.contrib.sessions',
     'django.contrib.messages', 'django.contrib.staticfiles', 'account', 'post',
     'rest_framework', 'community', 'chat', 'corsheaders',
-    'rest_framework.authtoken','track'
+    'rest_framework.authtoken','track','chatv0','channels','notify'
 ]
 
 MIDDLEWARE = [
@@ -57,6 +57,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'redditv1.wsgi.application'
+ASGI_APPLICATION = 'redditv1.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
