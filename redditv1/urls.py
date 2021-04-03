@@ -32,10 +32,8 @@ urlpatterns = [
     # 10
     # community
     path('api/community/', include(community_urls)),
-    
     path('api/chatv0/', include(chatv0_urls)),
-    
-     path('api/signal/', include(notify_urls)),
+    path('api/notification/', include(notify_urls)),
     # 7 community.controller.urls
     # char api
     path('api/chatroom/create/<str:username>', chat_api.create_chat_room),
@@ -52,7 +50,7 @@ urlpatterns = [
          name='token_refresh'),
     path('api/login', profile_api.login_via_react_view),
     path('api/logout', profile_api.logout_view_js),
-     path('chat/', include('chatv0.urls')),
+    path('chat/', include('chatv0.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

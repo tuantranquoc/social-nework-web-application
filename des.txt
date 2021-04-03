@@ -8,7 +8,7 @@ Tên nhóm chỉ được giới hạn ở chữ và số ASCII, dấu gạch n�
 docker run -p 6379:6379 -d redis:5
 kidzrancevn
 
-
+git push -u reddit main
 
 from restframework_simplejwt.tokens import AccessToken
 
@@ -26,6 +26,8 @@ https://stackoverflow.com/questions/55534182/new-chat-message-notification-djang
 
 https://blog.osmosys.asia/2017/04/26/design-notification-system/
 
-questions: https://stackoverflow.com/questions/54052596/django-signals-channels-and-transactions    
+questions: https://stackoverflow.com/questions/54052596/django-signals-channels-and-transactions
 
 signal to channels layer
+
+We’re gonna make use of the leaky bucket algorithm (which apparently is a very common algorithm for networks to implement) for implementing rate limiting on our websockets.

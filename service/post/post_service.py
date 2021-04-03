@@ -16,7 +16,8 @@ from track.models import CommunityTrack, Track
 from functools import reduce
 import operator
 from django.db.models import Q
-from notify.models import EntityType, Notification, NotificationChange, NotificationObject
+import datetime
+from notify.models import EntityType, Notification, NotificationChange, NotificationObject, UserNotify, CommunityNotify
 
 
 def count_post_by_community(community):
@@ -89,6 +90,82 @@ def get_post_list(request):
                                            ModelName.POST)
 
 
+def handle_notification(post):
+    entity_type = EntityType.objects.filter(id=6).first()
+    community = post.community
+    notification_object = NotificationObject.objects.create(
+        entity_type=entity_type, post=post)
+    notifycation_change = NotificationChange.objects.create(
+        user=post.user, notification_object=notification_object)
+    notification = Notification.objects.filter(community=community).first()
+    if notification:
+        user_notify_list = notification.user_notify.all()
+        for n in user_notify_list:
+            print(n.user.username)
+            print(n.status)
+            if n.status == False:
+                split_message = "has created post in community " + community.community_type
+                n.notification_object.add(notification_object)
+                message = ""
+                parent = n.parent
+                while parent is not None:
+                    p = UserNotify.objects.filter(pk=parent.id).first()
+                    parent = p.parent
+                n_object_list = n.notification_object.order_by("-created_at")
+                for n_b in n_object_list:
+                    message += (n_b.post.user.username + " ")
+                message = message.split()
+                message = list(dict.fromkeys(message))
+                notify_message = ""
+                connect_message = " "
+                if len(message) > 3:
+                    connect_message += "and " + (len(message) - 3) + " others "
+                for i in range(len(message)):
+                    if i > 2:
+                        break;
+                    notify_message += (message[i] + " ")
+                print("message",notify_message + " " + split_message)
+                print("notify_id", n.id)
+                notify_message = notify_message + connect_message + split_message
+                n.message = notify_message
+                n.save()
+            if n.status == True:
+                new_notify = UserNotify.objects.create(user=n.user, parent=n)
+                notification.user_notify.remove(n)
+                notification.user_notify.add(new_notify)
+                notification.save()
+                new_notify.notification_object.add(notification_object)
+                n_object_list = new_notify.notification_object.order_by("-created_at")
+                message = ""
+                for n_b in n_object_list:
+                    message += (n_b.post.user.username + " ")
+                message = message.split()
+                message = list(dict.fromkeys(message))
+                print(len(message))
+                notify_message = ""
+                for i in range(len(message)):
+                    if i > 2:
+                        break;
+                    notify_message += (message[i] + " ")
+                print("message-status = 1",notify_message + " " + split_message)
+                notify_message = notify_message + " " + split_message
+                new_notify.message = notify_message
+                new_notify.save()
+                print("create new notify message")
+    else:
+        notification = Notification.objects.create(community=community)
+        member_info = MemberInfo.objects.filter(community=community)
+        member = Member.objects.filter(member_info__in=member_info)
+        profiles = Profile.objects.filter(
+            reduce(operator.or_, (Q(user=x.user) for x in member)))
+        for p in profiles:
+            user_notify = UserNotify.objects.create(user=p.user)
+            user_notify.notification_object.add(notification_object)
+            user_notify.save()
+            notification.user_notify.add(user_notify)
+        notification.save()
+
+
 def create_post(request):
     if not request.user.is_authenticated:
         return Response({Message.SC_LOGIN_REDIRECT}, status=401)
@@ -133,17 +210,47 @@ def create_post(request):
                 current_post.point = rank.hot(0, 0, current_post.timestamp)
                 current_post.save()
                 if current_post:
-                    entity_type = EntityType.objects.filter(id=1).first()
-                    notification_object = NotificationObject.objects.create(entity_type=entity_type, post=current_post)
-                    notifycation_change = NotificationChange.objects.create(user=request.user, notification_object=notification_object)
-                    notification = Notification.objects.create(notification_object=notification_object)
-                    member_info = MemberInfo.objects.filter(community=_community)
-                    member = Member.objects.filter(member_info__in=member_info)
-                    profiles = Profile.objects.filter(
-                        reduce(operator.or_, (Q(user=x.user) for x in member)))
-                    for p in profiles:
-                        notification.user.add(p.user)
-                    notification.save()
+                    handle_notification(current_post)
+                    # entity_type = EntityType.objects.filter(id=1).first()
+                    # notification_object = NotificationObject.objects.create(entity_type=entity_type, post=current_post)
+                    # notifycation_change = NotificationChange.objects.create(user=request.user, notification_object=notification_object)
+                    # notification = Notification.objects.create(notification_object=notification_object)
+                    # member_info = MemberInfo.objects.filter(community=_community)
+                    # member = Member.objects.filter(member_info__in=member_info)
+                    # profiles = Profile.objects.filter(
+                    #     reduce(operator.or_, (Q(user=x.user) for x in member)))
+                    # for p in profiles:
+                    #     user_notify = UserNotify.objects.create(user=p.user)
+                    #     notification.user_notify.add(user_notify)
+                    # notification.save()
+                    ############################################
+                    # notification_object = NotificationObject.objects.create(
+                    #     entity_type=entity_type, post=current_post)
+                    # notifycation_change = NotificationChange.objects.create(
+                    #     user=request.user,
+                    #     notification_object=notification_object)
+                    # notification = Notification.objects.filter(
+                    #     community=_community).first()
+                    # if notification:
+                    #     print("hello world")
+                    # else:
+                    #     notification = Notification.objects.create(
+                    #         community=_community)
+                    #     member_info = MemberInfo.objects.filter(
+                    #         community=_community)
+                    #     member = Member.objects.filter(
+                    #         member_info__in=member_info)
+                    #     profiles = Profile.objects.filter(
+                    #         reduce(operator.or_,
+                    #                (Q(user=x.user) for x in member)))
+                    #     for p in profiles:
+                    #         user_notify = UserNotify.objects.create(
+                    #             user=p.user)
+                    #         user_notify.notification_object.add(
+                    #             notification_object)
+                    #         user_notify.save()
+                    #         notification.user_notify.add(user_notify)
+                    #     notification.save()
                 serializer = PostSerializer(current_post,
                                             context={"request": request})
                 return Response(serializer.data, status=201)

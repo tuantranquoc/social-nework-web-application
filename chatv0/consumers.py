@@ -9,9 +9,15 @@ from channels.auth import login
 from channels.db import database_sync_to_async
 from rest_framework_simplejwt.tokens import AccessToken
 from django.db.models.signals import pre_save, post_save
-from notify.models import Notification, NotificationObject, NotificationChange, EntityType, SignalRoom
+from notify.models import EntityType, Notification, NotificationChange, NotificationObject, SignalRoom, UserNotify
+from post.models import Post
 from django.dispatch import receiver
 import channels.layers
+from functools import reduce
+import operator
+from django.db.models import Q
+from community.models import Member, MemberInfo
+from account.models import Profile
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -194,29 +200,77 @@ class SignalConsumer(WebsocketConsumer):
         self.send_chat_message(message)
 
 
-@receiver(post_save, sender=Notification)
-def my_handler(sender, instance, **kwargs):
-    notify_message = instance.notification_object.entity_type.notify_message
-    notifycation_change = NotificationChange.objects.filter(
-        notification_object=instance.notification_object).first()
-    notify_message = notify_message.replace(
-        "User A", "User " + notifycation_change.user.username)
+# @receiver(post_save, sender=Notification)
+# def my_handler(sender, instance, **kwargs):
+#     notify_message = instance.notification_object.entity_type.notify_message
+#     notifycation_change = NotificationChange.objects.filter(
+#         notification_object=instance.notification_object).first()
+#     notify_message = notify_message.replace(
+#         "User A", "User " + notifycation_change.user.username)
 
-    for u in instance.user.all():
-        print(u.username)
-        signal_room = SignalRoom.objects.filter(user=u).first()
-        print("message", notify_message)
+#     for u in instance.user_notify.all():
+#         print(u.user.username)
+#         signal_room = SignalRoom.objects.filter(user=u.user).first()
+#         print("message", notify_message)
+#         room_group_name = 'signal_%s' % signal_room.id
+#         # room_group_name = 'signal_%s' % 4
+#         print(room_group_name)
+#         message = {"message": notify_message, "type": "notification"}
+
+#         channel_layer = channels.layers.get_channel_layer()
+
+#         async_to_sync(channel_layer.group_send)(room_group_name, {
+#             'type': 'signal_message',
+#             'message': message
+#         })
+
+
+# @receiver(pre_save, sender=Post)
+# def post_create_handler(sender, instance, **kwargs):
+#     community = instance.community
+#     post = instance
+#     user = instance.user
+#     post_id = instance.id
+#     print("post_id", post_id)
+#     entity_type = EntityType.objects.filter(id=1).first()
+#     notification_object = NotificationObject.objects.create(
+#         entity_type=entity_type, post=post)
+#     notifycation_change = NotificationChange.objects.create(
+#         user=instance.user, notification_object=notification_object)
+#     notification = Notification.objects.filter(community=community).first()
+#     if notification:
+#         print("hello world")
+#     else:
+#         print("create new one")
+#         notification = Notification.objects.create(community=community)
+#         member_info = MemberInfo.objects.filter(community=community)
+#         member = Member.objects.filter(member_info__in=member_info)
+#         profiles = Profile.objects.filter(
+#             reduce(operator.or_, (Q(user=x.user) for x in member)))
+#         for p in profiles:
+#             user_notify = UserNotify.objects.create(user=p.user)
+#             user_notify.notification_object.add(notification_object)
+#             user_notify.save()
+#             notification.user_notify.add(user_notify)
+#         notification.save()
+
+
+@receiver(post_save, sender=UserNotify)
+def user_notify_create_handler(sender, instance, **kwargs):
+    message = instance.message
+    if message:
+        print("message from notify",message)
+        signal_room = SignalRoom.objects.filter(user=instance.user).first()
         room_group_name = 'signal_%s' % signal_room.id
         # room_group_name = 'signal_%s' % 4
         print(room_group_name)
-        message = {"message": notify_message, "type": "notification"}
-
+        message = {"message": message, "type": "notification"}
         channel_layer = channels.layers.get_channel_layer()
-
         async_to_sync(channel_layer.group_send)(room_group_name, {
             'type': 'signal_message',
             'message': message
         })
+
 
 
 def messages_to_json(messages):

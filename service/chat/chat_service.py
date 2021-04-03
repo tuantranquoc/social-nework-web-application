@@ -63,3 +63,7 @@ def get_rooms_by_user(request):
     rooms = Room.objects.filter(user=user)
     return get_paginated_queryset_response(rooms, request, page_size,
                                                    ModelName.CHAT)
+    
+# def get_room_by_user(request):
+#     if not request.user.is_authenticated:
+#         return Response({Message.SC_NO_AUTH}, status=401)

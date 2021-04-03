@@ -5,4 +5,5 @@ urlpatterns = [
     path('', chat_api.create_chat_room),
     path('find/', chat_api.find_room),
     path('all/', chat_api.get_all_room),
+    # path('get/room', chat_api.get_room_by_user),
 ]

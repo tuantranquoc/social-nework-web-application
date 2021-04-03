@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
@@ -10,7 +10,11 @@ from redditv1.message import Message
 from function.paginator import get_paginated_queryset_response
 from redditv1.name import ModelName, CommentState
 from service.post.post_service import timestamp_in_the_past_by_day
-from notify.models import Notification, NotificationChange, NotificationObject, EntityType
+from notify.models import Notification, NotificationChange, NotificationObject, EntityType, UserNotify
+from functools import reduce
+import operator
+from community.models import Member, MemberInfo
+from account.models import Profile
 
 
 def comment_parent_list(request, comment_id, *args, **kwargs):
@@ -54,6 +58,24 @@ def child_comment_create(request, comment_id):
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
+def handle_notification(post, source_user):
+    entity_type = EntityType.objects.filter(id=6).first()
+    notification_object = NotificationObject.objects.create(
+        entity_type=entity_type, post=post)
+    notifycation_change = NotificationChange.objects.create(
+        user=post.user, notification_object=notification_object)
+    notification = Notification.objects.create()
+    user_notify = UserNotify.objects.create(user=post.user)
+    user_notify.notification_object.add(notification_object)
+    message = "User " + source_user.username + " has created a comment to your post"
+    user_notify.message = message
+    user_notify.save()
+    print(user_notify.message)
+    notification.user_notify.add(user_notify)
+    notification.save()
+
+
+
 def comment_create(request):
     if request.user.is_authenticated:
         content = request.data.get("content")
@@ -64,16 +86,18 @@ def comment_create(request):
             comment = Comment.objects.create(user=request.user,
                                              post=post,
                                              content=content)
-            if comment:
-                entity_type = EntityType.objects.filter(id=4).first()
-                notification_object = NotificationObject.objects.create(
-                    entity_type=entity_type, post=post)
-                notifycation_change = NotificationChange.objects.create(
-                    user=request.user, notification_object=notification_object)
-                notification = Notification.objects.create(
-                    notification_object=notification_object)
-                notification.user.add(user)
-                notification.save()
+            handle_notification(post, request.user)
+            # if comment:
+            #     entity_type = EntityType.objects.filter(id=4).first()
+            #     notification_object = NotificationObject.objects.create(
+            #         entity_type=entity_type, post=post)
+            #     notifycation_change = NotificationChange.objects.create(
+            #         user=request.user, notification_object=notification_object)
+            #     user_notify = UserNotify.objects.create(user=user)
+            #     notification = Notification.objects.create(
+            #         notification_object=notification_object)
+            #     notification.user_notify.add(user_notify)
+            #     notification.save()
             CommentPoint.objects.create(comment=comment)
             comment = Comment.objects.filter(id=comment.id)
             serializer = CommentSerializer(comment, many=True)

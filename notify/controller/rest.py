@@ -24,3 +24,12 @@ User = get_user_model()
 def get_signal_room(request):
     return notify_service.get_signal_room(request)
 
+@api_view(["GET"])
+def get_notification_list(request):
+    return notify_service.get_notify_list(request)
+
+@api_view(["POST"])
+def change_notify_status(request):
+    return notify_service.change_notify_status(request)
+
+

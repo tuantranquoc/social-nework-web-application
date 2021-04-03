@@ -31,3 +31,7 @@ def find_room(request):
 @api_view(["GET","POST"])
 def get_all_room(request):
     return chat_service.get_rooms_by_user(request)
+
+# @api_view(["GET","POST"])
+# def get_room_by_user(request):
+#     return chat_service.get_rooms_by_user(request)
