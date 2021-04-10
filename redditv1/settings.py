@@ -43,7 +43,7 @@ ROOT_URLCONF = 'redditv1.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'reddiv1', 'templates', 'reddiv1')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

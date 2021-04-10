@@ -1,7 +1,7 @@
 from community.models import Community, Member, MemberInfo
 from django.db.models.aggregates import Count
 from function.paginator import get_paginated_queryset_response
-from post.models import Comment, PositivePoint, Post, PostType, View
+from post.models import Comment, PositivePoint, Post, PostType, View, UserVote
 from account.models import Profile
 from redditv1.name import ModelName
 from rest_framework.response import Response
@@ -18,7 +18,10 @@ import operator
 from django.db.models import Q
 import datetime
 from notify.models import EntityType, Notification, NotificationChange, NotificationObject, UserNotify, CommunityNotify
+from django.contrib.auth import get_user_model
+import random
 
+User = get_user_model()
 
 def count_post_by_community(community):
     count = 0
@@ -167,6 +170,12 @@ def handle_notification(post):
 
 
 def create_post(request):
+    """
+    data = {"title":"","content":"","community":"","type":"","image":"optional"}
+    ---
+    request_serializer: PostSerializer
+    response_serializer: PostSerializer
+    """
     if not request.user.is_authenticated:
         return Response({Message.SC_LOGIN_REDIRECT}, status=401)
     if request.method == "POST":
@@ -682,3 +691,13 @@ def check_community():
         if not c.creator:
             c.creator = Profile.objects.filter().first().user
             c.save()
+
+
+def get_rating_list(request):
+    if not request.user.is_authenticated:
+        return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
+    
+    
+    
+
+    

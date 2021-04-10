@@ -29,9 +29,9 @@ def get_signal_room(request):
 def get_notify_list(request):
     if request.user.is_authenticated:
         user= request.user
-        notify_list = Notification.objects.filter(user_notify__user=request.user)
+        notify_list = UserNotify.objects.filter(user=request.user)
         if notify_list:
-            return get_paginated_queryset_response(notify_list, request, 15, ModelName.NOTIFICATION)
+            return get_paginated_queryset_response(notify_list, request, 15, ModelName.USER_NOTIFY)
         return Response(Message.SC_NOT_FOUND,status=200)
     return Response(Message.SC_NO_AUTH, status=401)
 

@@ -44,4 +44,6 @@ urlpatterns = [
     path('reset', post_api.reset),
     path('community/<str:community_type>',
          post_api.find_post_by_community),
+     path('dataset',
+         post_api.get_item_rating_1),
 ]

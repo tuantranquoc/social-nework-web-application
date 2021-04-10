@@ -2,11 +2,25 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from community.models import Community
+from post import choice
 
 User = get_user_model()
 
 # Create your models here.
+class UserVote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    report = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    dislike = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    view = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    like = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    share = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
 
+    def __str__(self):
+        # return ("User ratting" + " "  + self.user.username)
+        return ("Vote id" + " " + str(self.id) + " " + self.user.username)
+    
+    def get_rating(self):
+        return 2 + self.view + self.like + self.share - self.dislike - self.report
 
 class Post(models.Model):
     parent = models.ForeignKey("self",
@@ -38,6 +52,7 @@ class Post(models.Model):
                              blank=False,
                              null=True,
                              default='public')
+    vote = models.ManyToManyField(UserVote, blank=True)
 
     class Meta:
         ordering = ['-point']
@@ -220,3 +235,8 @@ class View(models.Model):
 
     def __old_timestamp__(self):
         return self.old_timestamp
+
+
+
+
+

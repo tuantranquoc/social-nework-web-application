@@ -17,6 +17,8 @@ from post.controller.comment_controller import urls as comment_urls
 from account.controller import urls as account_urls
 from chatv0.controller import urls as chatv0_urls
 from notify.controller import urls as notify_urls
+from django.views.generic import TemplateView
+from rest_framework.schemas import get_schema_view
 
 urlpatterns = [
     # admin urls
@@ -51,6 +53,19 @@ urlpatterns = [
     path('api/login', profile_api.login_via_react_view),
     path('api/logout', profile_api.logout_view_js),
     path('chat/', include('chatv0.urls')),
+    path('api',
+         get_schema_view(title="SOCIAL NETWORK APPLICATION",
+                         description="API for all things …",
+                         version="1.0.0"),
+         name='openapi-schema'),
+    path('redoc/',
+         TemplateView.as_view(template_name='redoc.html',
+                              extra_context={'schema_url': 'openapi-schema'}),
+         name='redoc'),
+     path('swagger-ui/', TemplateView.as_view(
+        template_name='swagger-ui.html',
+        extra_context={'schema_url':'openapi-schema'}
+    ), name='swagger-ui'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

@@ -31,3 +31,12 @@ questions: https://stackoverflow.com/questions/54052596/django-signals-channels-
 signal to channels layer
 
 We’re gonna make use of the leaky bucket algorithm (which apparently is a very common algorithm for networks to implement) for implementing rate limiting on our websockets.
+
+
+We'll use both content based filtering and collaborative filtering for "BEST FOR YOU" & "POPULAR AMONG OTHER USER"
+
+now we use collaborative filtering (item - item)
+
+
+
+choses item has highest or fresh rating on this user then choese it for recommender list

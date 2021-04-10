@@ -1,7 +1,7 @@
 from rest_framework.pagination import PageNumberPagination
 from post.serializers import CommentSerializer, CommunitySerializer, PostSerializer, PostGraphSerializer, CommentGraphSerializer, CommunityGraphSerializer, PostTypeSerializer
 from redditv1.name import ModelName
-from notify.serializers import SignalRoomSerializer, NotificationSerializer
+from notify.serializers import SignalRoomSerializer, NotificationSerializer, UserNotifySerializers
 from account.serializers import ProfileSerializer, PublicProfileSerializer
 from chatv0.serializers import RoomSerializer
 
@@ -64,6 +64,11 @@ def get_paginated_queryset_response(query_set, request, page_size, model):
         return paginator.get_paginated_response(serializer.data)
     elif model == ModelName.NOTIFICATION:
         serializer = NotificationSerializer(paginated_qs,
+                                         many=True,
+                                         context={"request": request})
+        return paginator.get_paginated_response(serializer.data)
+    elif model == ModelName.USER_NOTIFY:
+        serializer = UserNotifySerializers(paginated_qs,
                                          many=True,
                                          context={"request": request})
         return paginator.get_paginated_response(serializer.data)

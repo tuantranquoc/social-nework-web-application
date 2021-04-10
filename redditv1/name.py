@@ -13,6 +13,7 @@ class ModelName:
     POST_GRAPH = "Post graph"
     SIGNAL_ROOM = "Signal room"
     NOTIFICATION = "Notification"
+    USER_NOTIFY = "User Notify"
 
 
 class CommentState:

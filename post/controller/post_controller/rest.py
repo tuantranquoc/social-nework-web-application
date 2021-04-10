@@ -9,7 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 from account.models import Profile
 from community.models import Community
 from post import rank
-from post.models import Post, PositivePoint, Comment, View, PostType
+from post.models import Comment, PositivePoint, Post, PostType, UserVote, View
 from rest_framework.response import Response
 from post.serializers import PostSerializer, PostTypeSerializer, PostGraphSerializer
 from django.contrib.auth import get_user_model
@@ -19,7 +19,8 @@ from function.file import get_image
 from redditv1.message import Message
 from redditv1.name import ModelName
 from service.post import post_service
-
+import random
+from scipy import spatial
 User = get_user_model()
 
 
@@ -28,18 +29,64 @@ def post_list_view(request):
     return post_service.get_post_list(request)
 
 
-@api_view(["GET", "POST"])
+@api_view(["POST"])
 def post_create_api(request):
+    """
+    .. code-block:: Example post submit
+
+         {
+             "title": new title,
+             "content": hello world,
+             "community": "anime",
+             "type":"content"
+             "image":"base64"
+         }
+    """
     return post_service.create_post(request)
 
 
 @api_view(["POST"])
 def post_delete_api(request):
+    """
+    data = {"id":"post_id"}
+    """
     return post_service.delete_post(request)
 
 
 @api_view(["GET"])
 def find_post_by_id(request, post_id):
+    """
+    ``GET`` lists all relations where an ``Organization`` is accessible by
+     a ``User``. Typically the user was granted specific permissions through
+     a ``Role``.
+
+    ``POST`` Generates a request to attach a user to a role on an organization
+
+     see :doc:`Flexible Security Framework `.
+
+     **Example request**:
+
+    .. code-block:: http
+
+        GET  /api/users/alice/accessibles/
+
+    **Example response**:
+
+    .. code-block:: json
+
+         {
+             "count": 1,
+             "previous": null,
+             "results": [
+                 {
+                    "created_at": "2018-01-01T00:00:00Z",
+                     "slug": "cowork",
+                     "printable_name": "ABC Corp.",
+                     "role_description": "manager",
+                  }
+             ]
+         }
+    """
     return post_service.find_post_by_id(request, post_id)
 
 
@@ -60,6 +107,9 @@ def get_list_post_by_user(request):
 
 @api_view(["GET"])
 def get_list_post_by_up_vote(request):
+    """
+    data = {"page_size":"page_size"}
+    """
     return post_service.find_post_by_up_vote(request)
 
 
@@ -220,6 +270,9 @@ def get_type_list(request):
 
 @api_view(["POST", "GET"])
 def get_post_by_time_interval(request):
+    """
+    data = {"from_timestamp":"from_timestamp","to_timestamp":"to_timestamp","page_size":"page_size","type":"type"}
+    """
     return post_service.get_post_by_time_interval(request)
 
 
@@ -251,15 +304,188 @@ def count_post_by_community(community):
     return count
 
 
-# def timestamp_in_the_past_by_day(days):
-#     return timezone.now() - datetime.timedelta(days)
+"""
+    create random rating dataset
+"""
+# @api_view(["GET"])
+# def create_ratting_dataset(request):
+#     if not request.user.is_authenticated:
+#         return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
+#     user_list = User.objects.all()
+#     post_list = Post.objects.all()
+#     for post in post_list:
+#         for user in user_list:
+#             report = random.randint(0,1)
+#             dislike = random.randint(0,1)
+#             view = random.randint(0,1)
+#             like = random.randint(0,1)
+#             share = random.randint(0,1)
+#             rate = UserVote.objects.create(user=user, report=report, dislike=dislike, view=view, like=like, share=share)
+#             post.vote.add(rate)
+#             post.save()
 
-# def parent_comment(comment_list, level):
-#     comments = []
-#     if level == 3:
-#         for level_3 in comment_list:
-#             comments.append(level_3.parent.parent)
-#     if level == 2:
-#         for level_2 in comment_list:
-#             comments.append(level_2.parent)
-#     return comments
+
+@api_view(["GET"])
+def get_rating_dict(request):
+    if not request.user.is_authenticated:
+        return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
+    rating_dict = {"user": [], "item": [], "rating": []}
+    post_list = Post.objects.all()
+    for post in post_list:
+        # rating_dict[1].add(post.id)
+        items = rating_dict["item"]
+        rating_dict.update(user=items.append(post.id))
+        users = rating_dict["user"]
+        rating_dict.update(user=items.append(post.id))
+    print(rating_dict["item"])
+
+
+from operator import itemgetter
+import pandas as pd
+from surprise import Dataset
+from surprise import Reader
+from surprise import KNNWithMeans
+
+
+def sum_average_list(a):
+    average = sum(a) / len(a)
+    for i in range(len(a)):
+        a[i] = a[i] - average
+    return a
+
+
+# @api_view(["GET"])
+# def get_item_rating(request):
+#     post_similarity = []
+#     post_list = Post.objects.all()
+#     user_list = User.objects.all()
+#     vector_list_p2 = []
+#     user_list_p2 = []
+#     item_list_p2 = []
+#     first_vector = []
+#     post_id = 140
+#     for p in Post.objects.filter(pk=post_id):
+#         for user in user_list:
+#             rating = UserVote.objects.filter(user=user, post__id=p.id).first()
+#             if rating:
+#                 first_vector.append(rating.get_rating())
+#             if not rating:
+#                 first_vector.append(2)
+#     count = 0
+#     current_vector = [2, 4, 2, 1, 2, 2, 1, 5, 1, 3, 2, 4]
+#     for post in post_list:
+#         vector = []
+#         for user in user_list:
+
+#             rating = UserVote.objects.filter(user=user,
+#                                              post__id=post.id).first()
+#             if rating:
+#                 vector.append(rating.get_rating())
+#             if not rating:
+#                 vector.append(2)
+#                 if post.id == 141:
+#                     print("append")
+#                     print(vector)
+#         count += 1
+#         rt_dict = {}
+#         print("s", vector)
+#         rt_dict["id"] = post.id
+#         rt_dict["similarity"] = 1 - spatial.distance.cosine(
+#             sum_average_list(first_vector), sum_average_list(vector))
+#         post_similarity.append(rt_dict)
+#     if len(vector_list_p2) == len(user_list_p2):
+#         print("we got what we want lol!")
+#     post_similarity.sort(key=lambda item: item.get("similarity"), reverse=True)
+#     print("kkk", post_similarity)
+#     item_list = []
+#     user_list_ = []
+#     rating_list = []
+#     post_similarity = post_similarity[:5]
+#     user_list = User.objects.all()
+#     for post in post_similarity:
+#         for u in user_list:
+#             item_list.append(post["id"])
+#             vote = UserVote.objects.filter(user=u, post__id=post["id"]).first()
+#             if vote:
+#                 rating_list.append(vote.get_rating())
+#             if not vote:
+#                 rating_list.append(2)
+#             user_list_.append(u.id)
+
+#     for p in post_similarity[:4]:
+#         post = Post.objects.filter(pk=p["id"]).first()
+#         if post:
+#             vote_list = post.vote.all()
+#             for v in vote_list:
+#                 vector_list_p2.append(v.get_rating())
+#                 user_list_p2.append(v.user.id)
+#                 item_list_p2.append(post.id)
+#     print(user_list_p2)
+#     print("======================")
+#     print(item_list_p2)
+#     print("======================")
+#     print(vector_list_p2)
+#     rating_dict = {
+#         "item": item_list_p2,
+#         "user": user_list_p2,
+#         "rating": vector_list_p2
+#     }
+#     df = pd.DataFrame(rating_dict)
+#     reader = Reader(rating_scale=(1, 5))
+#     # Loads Pandas dataframe
+#     data = Dataset.load_from_df(df[["user", "item", "rating"]], reader)
+#     sim_options = {
+#         "name": "cosine",
+#         "user_based": False,  # Compute  similarities between items
+#     }
+#     algo = KNNWithMeans(sim_options=sim_options)
+#     trainingSet = data.build_full_trainset()
+#     algo.fit(trainingSet)
+#     # prediction = algo.predict(4, 22)
+#     for c in list(dict.fromkeys(item_list_p2)):
+#         print(algo.predict(4, c))
+#     # print(prediction.est)
+#     return Response({Message.SC_OK}, status=200)
+
+
+@api_view(["GET"])
+def get_item_rating_1(request):
+    rating_list_p2 = []
+    user_list_p2 = []
+    item_list_p2 = []
+    recommend_list = []
+    post_list = Post.objects.all()
+    for post in post_list:
+        vote_list = post.vote.all()
+        for v in vote_list:
+            rating_list_p2.append(v.get_rating())
+            user_list_p2.append(v.user.id)
+            item_list_p2.append(post.id)
+    if len(item_list_p2) == len(user_list_p2) == len(rating_list_p2):
+            print("we got what we want lol!")
+    rating_dict = {
+        "item": item_list_p2,
+        "user": user_list_p2,
+        "rating": rating_list_p2
+    }
+    df = pd.DataFrame(rating_dict)
+    reader = Reader(rating_scale=(1, 5))
+    # Loads Pandas dataframe
+    data = Dataset.load_from_df(df[["user", "item", "rating"]], reader)
+    sim_options = {
+        "name": "cosine",
+        "user_based": False,  # Compute  similarities between items
+    }
+    algo = KNNWithMeans(sim_options=sim_options)
+    trainingSet = data.build_full_trainset()
+    algo.fit(trainingSet)
+    prediction = algo.predict(4, 34)
+    print(prediction)
+    for p in post_list:
+        rt_dict = {}
+        rt_dict["id"] = p.id
+        rt_dict["point"] = algo.predict(16, p.id).est
+        recommend_list.append(rt_dict)
+    recommend_list.sort(key=lambda item: item.get("point"), reverse=True)
+    print(recommend_list)
+    return Response({Message.SC_OK}, status=200)

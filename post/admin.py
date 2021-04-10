@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Post, PositivePoint, Comment, PostType, View, CommentPoint
+from .models import Post, PositivePoint, Comment, PostType, View, CommentPoint, UserVote
 
 
 class PostAdmin(admin.ModelAdmin):
@@ -51,6 +51,11 @@ class ViewAdmin(admin.ModelAdmin):
 
     class Meta:
         model = View
+        
+@admin.register(UserVote)
+class UserVoteAdmin(admin.ModelAdmin):
+    search_fields = ['id']
+    list_display = ['id', 'user', 'report','view','like','share','get_rating']
 
 
 admin.site.register(Post, PostAdmin)
