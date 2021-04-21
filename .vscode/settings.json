@@ -8,8 +8,10 @@
         "asgiref",
         "chatv",
         "psycopg",
+        "quoc",
         "repost",
         "scipy",
+        "tuan",
         "tuantran"
     ]
 }

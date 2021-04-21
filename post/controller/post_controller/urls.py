@@ -35,7 +35,7 @@ urlpatterns = [
     path('down_vote', post_api.find_post_by_down_vote),
     path('down_vote/<str:username>',
          post_api.find_post_by_username_down_vote),
-    path('trending/<int:days>', post_api.trending),
+    path('trending', post_api.trending),
     path('recent', post_api.recent),
     path('hot', post_api.hot),
     path('type', post_api.get_type_list),

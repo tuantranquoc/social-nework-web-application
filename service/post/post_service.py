@@ -551,8 +551,9 @@ def find_post_by_username_up_vote(request, username):
     return Response({Message.SC_NOT_FOUND}, status=400)
 
 
-def trending(request, days):
+def trending(request):
     page_size = request.data.get("page_size")
+    days = request.data.get("days")
     if days:
         past = timestamp_in_the_past_by_day(days)
         post = Post.objects.filter(
@@ -696,8 +697,3 @@ def check_community():
 def get_rating_list(request):
     if not request.user.is_authenticated:
         return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
-    
-    
-    
-
-    

@@ -22,14 +22,30 @@ User = get_user_model()
 
 @api_view(["GET"])
 def get_signal_room(request):
+    """
+    ``GET`` Return ``USER`` signal room
+    """
     return notify_service.get_signal_room(request)
 
 @api_view(["GET"])
 def get_notification_list(request):
+    """
+    ``GET`` Return list of notify of current user
+    """
     return notify_service.get_notify_list(request)
 
 @api_view(["POST"])
 def change_notify_status(request):
+    """
+    ``POST`` Change notify status
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "id":"notification_id"
+        }
+    """
     return notify_service.change_notify_status(request)
 
 

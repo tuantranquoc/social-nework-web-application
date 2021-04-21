@@ -20,16 +20,29 @@ from community.models import Community
 from service.chat import chat_service
 User = get_user_model()
 
-@api_view(["GET","POST"])
+@api_view(["POST"])
 def create_chat_room(request):
+    """
+    ``POST`` Create chatroom between user
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "target_user":"target_user_name"
+        }
+    """
     return chat_service.create_chat_room(request)
 
 @api_view(["GET","POST"])
 def find_room(request):
     return chat_service.find_room(request)
 
-@api_view(["GET","POST"])
+@api_view(["GET"])
 def get_all_room(request):
+    """
+    ``GET`` all chat room of current ``USER``
+    """
     return chat_service.get_rooms_by_user(request)
 
 # @api_view(["GET","POST"])

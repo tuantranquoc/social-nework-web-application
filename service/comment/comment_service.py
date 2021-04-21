@@ -30,10 +30,6 @@ def comment_parent_list(request, comment_id, *args, **kwargs):
 
 
 def child_comment_create(request, comment_id):
-    """
-    data = {"content":"CONTENT"}
-    """
-    page_size = request.data.get("page_size")
     if request.user.is_authenticated:
         parent = Comment.objects.filter(id=comment_id).first()
         if not parent:
@@ -142,7 +138,7 @@ def check_vote(request):
             return Response({"up_vote"})
         if Comment.objects.filter(down_vote=request.user, id=comment_id):
             return Response({"down_vote"})
-    return Response({"none"})
+    return Response(Message.SC_BAD_RQ, status=400)
 
 
 def comment_point_update(comment):

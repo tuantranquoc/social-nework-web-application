@@ -40,3 +40,8 @@ now we use collaborative filtering (item - item)
 
 
 choses item has highest or fresh rating on this user then choese it for recommender list
+
+
+    .. code-block:: http
+
+        GET  /api/users/alice/accessibles/

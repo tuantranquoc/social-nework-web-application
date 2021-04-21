@@ -22,26 +22,81 @@ User = get_user_model()
 
 @api_view(["POST"])
 def create_community(request):
+    """
+    ``POST`` ``CREATE_COMMUNITY``
+    
+    New ``Community`` require parent community to create
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "community": "parent_community_name",
+            "sub_community": "sub_community_name",
+            "description":"RSA",
+            "avatar":"optional",
+            "rule":"optional",
+            background_color:"optional-base64"
+        }
+    """
     return community_service.create_community(request)
 
 
 @api_view(["POST", "GET"])
 def get_community(request):
+    """
+    ``GET`` Return community info by ``community_name``
+
+    New ``Community`` require parent community to create
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "community": "community_name",
+        }
+    """
     return community_service.get_community(request)
 
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 def get_list_community_by_user(request):
+    """
+    ``GET``, ``POST`` Return list of community followed by current user.
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "page_size": "5",
+        }
+    """
     return community_service.get_list_community_by_user(request)
 
 
 @api_view(["POST"])
 def community_action(request):
+    """
+    ``POST`` ``Follow or UnFollow community``
+
+    ``Action`` can be ``follow`` or ``un_follow``
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "community": "community_name",
+            "action":"follow"
+        }
+    """
     return community_service.community_action(request)
 
 
 @api_view(["GET"])
 def get_list_community(request):
+    """
+    ``GET`` Return list community
+    """
     return community_service.get_list_community(request)
 
 
@@ -52,16 +107,57 @@ def change_state(request, community_type):
 
 @api_view(['POST'])
 def community_update_via_react_view(request):
+    """
+    ``POST`` ``UPDATE_COMMUNITY``
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "community_type": "community name",
+            "background": "sub_community_name",
+            "description":"optional-base64",
+            "avatar":"optional-base64",
+            "rule":"optional",
+            "background_color":"optional",
+           "title_background_color":"optional",
+           "description_background_color":"optional",
+           "button_background_color":"optional",
+           "button_text_color":"optional",
+           "text_color":"optional",
+           "post_background_color":"optional"
+        }
+    """
     return community_service.community_update(request)
 
 
 @api_view(['GET', 'POST'])
 def recommend_sub_community(request, community):
+    """
+    ``GET`` ``RECOMMEND SUB_COMMUNITY``
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "page_size": "5"
+        }
+    """
     return community_service.recommend_sub_community(request, community)
 
 
 @api_view(['GET', 'POST'])
 def recommend_community(request):
+    """
+    ``GET`` ``RECOMMEND SUB_COMMUNITY``
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "page_size": "5"
+        }
+    """
     return community_service.recommend_community(request)
 
 
@@ -74,13 +170,16 @@ def community_graph(request):
 def community_mod_action(request):
     return community_service.mod_action(request)
 
+
 @api_view(['GET', 'POST'])
 def get_member_list(request):
     return community_service.member_list(request)
 
+
 @api_view(['GET', 'POST'])
 def blacklist(request):
     return community_service.add_use_to_community_blacklist(request)
+
 
 def timestamp_in_the_past_by_day(days):
     return timezone.now() - datetime.timedelta(days)
