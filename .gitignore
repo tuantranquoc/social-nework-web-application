@@ -1,12 +1,13 @@
 # Environments
-.env
-.venv
-env/
-venv/
-/venv/
-ENV/
-env.bak/
-venv.bak/
-.xlsx
-.csv
+# .env
+# .venv
+# env/
+# venv/
+# /venv/
+# ENV/
+# env.bak/
+# venv.bak/
+# .xlsx
+# .csv
+# node_modules
 node_modules
