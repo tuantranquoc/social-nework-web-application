@@ -14,6 +14,7 @@ from chatv0.models import Room
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from function.paginator import get_paginated_queryset_response
+from account.models import Profile
 User = get_user_model()
 
 
@@ -67,3 +68,18 @@ def get_rooms_by_user(request):
 # def get_room_by_user(request):
 #     if not request.user.is_authenticated:
 #         return Response({Message.SC_NO_AUTH}, status=401)
+
+
+def get_user_info_by_room_id(request):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    room_id = request.data.get("id")
+    user = request.user
+    room = Room.objects.filter(pk=room_id).first()
+    if room:
+        target_user = room.user.all()
+        profile = Profile.objects.filter(user__in=target_user)
+        profile = profile.exclude(user=user)
+        return get_paginated_queryset_response(profile, request, 2,
+                                           ModelName.PROFILE)
+    return Response({Message.SC_NOT_FOUND}, status=401)

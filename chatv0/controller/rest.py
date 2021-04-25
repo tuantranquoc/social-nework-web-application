@@ -48,3 +48,17 @@ def get_all_room(request):
 # @api_view(["GET","POST"])
 # def get_room_by_user(request):
 #     return chat_service.get_rooms_by_user(request)
+
+@api_view(["POST"])
+def get_user_info_by_room_id(request):
+    """
+    ``GET`` get target profile info from room id
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "id":"room_id"
+        }
+    """
+    return chat_service.get_user_info_by_room_id(request)
