@@ -62,3 +62,18 @@ def get_user_info_by_room_id(request):
         }
     """
     return chat_service.get_user_info_by_room_id(request)
+
+
+@api_view(["POST"])
+def get_lasted_message(request):
+    """
+    ``GET`` get lasted message
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "id":"room_id"
+        }
+    """
+    return chat_service.get_lasted_message(request)

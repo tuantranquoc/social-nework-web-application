@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from function.paginator import get_paginated_queryset_response
 from account.models import Profile
+from chatv0.models import Message as ChatMessage
 User = get_user_model()
 
 
@@ -83,3 +84,15 @@ def get_user_info_by_room_id(request):
         return get_paginated_queryset_response(profile, request, 2,
                                            ModelName.PROFILE)
     return Response({Message.SC_NOT_FOUND}, status=401)
+
+def get_lasted_message(request):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    room_id = request.data.get("id")
+    user = request.user
+    room = Room.objects.filter(pk=room_id).first()
+    message_list = ChatMessage.objects.filter(room__id=room_id).order_by("-created_at").first()
+    if message_list:
+        return Response({"Lasted message":message_list.content}, status=200)
+    return Response({}, status=200)
+

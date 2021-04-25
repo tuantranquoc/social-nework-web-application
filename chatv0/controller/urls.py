@@ -7,4 +7,5 @@ urlpatterns = [
     path('all/', chat_api.get_all_room),
     # path('get/room', chat_api.get_room_by_user),
     path('room/detail', chat_api.get_user_info_by_room_id),
+    path('room/lasted/message', chat_api.get_lasted_message),
 ]
