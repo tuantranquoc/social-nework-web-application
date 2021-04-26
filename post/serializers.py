@@ -116,17 +116,24 @@ class CommentSerializer(serializers.ModelSerializer):
     parent = serializers.SerializerMethodField(read_only=True)
     point = serializers.SerializerMethodField(read_only=True)
     content = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Comment
         fields = [
             'content', 'username', 'post', 'parent', 'id', 'up_vote',
-            'down_vote', 'timestamp', 'point', 'level', 'state'
+            'down_vote', 'timestamp', 'point', 'level', 'state','avatar'
         ]
 
     @staticmethod
     def get_username(obj):
         return obj.user.username
+
+    @staticmethod
+    def get_avatar(obj):
+        if obj.user.profile.avatar:
+            return obj.user.profile.avatar.url
+        return None
 
     @staticmethod
     def get_up_vote(obj):
