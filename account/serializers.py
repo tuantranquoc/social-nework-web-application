@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Profile, CustomColor
+from django.contrib.auth.models import User
 
 
 class PublicCustomColorSerializer(serializers.ModelSerializer):
@@ -65,3 +66,21 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['bio', 'location']
+
+
+class ChatProfileSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = User
+        fields = ['username','avatar']
+    
+    @staticmethod
+    def get_username(obj):
+        return obj.username
+    
+    @staticmethod
+    def get_avatar(obj):
+        if obj.profile.avatar:
+            return obj.profile.avatar.url
+        return None
