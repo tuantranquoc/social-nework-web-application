@@ -24,6 +24,9 @@ def get_signal_room(request):
         if room:
             return get_paginated_queryset_response(room, request, page_size,
                                                ModelName.SIGNAL_ROOM)
+        room = SignalRoom.objects.create(user=request.user)
+        return get_paginated_queryset_response(room, request, page_size,
+                                               ModelName.SIGNAL_ROOM)
     return Response(Message.SC_NO_AUTH, status=401)
 
 def get_notify_list(request):
