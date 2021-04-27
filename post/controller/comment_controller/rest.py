@@ -165,3 +165,10 @@ def reset(request):
 @api_view(["GET", "POST"])
 def update_comment_level(request):
     return comment_service.update_comment_level(request)
+
+@api_view(["GET"])
+def count_comment_by_comment_parent(request, comment_id):
+    """
+    ``GET`` Return total number of comment by ``COMMENT_PARENT``.
+    """
+    return comment_service.count_comment_by_comment_parent(request, comment_id)

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, pre_save
+from notify.models import SignalRoom
 
 User = get_user_model()
 
@@ -66,6 +67,15 @@ def user_did_save(sender, instance, created, *args, **kwargs):
 post_save.connect(user_did_save, sender=User)
 
 
+def user_signal_save(sender, instance, created, *args, **kwargs):
+    if created:
+        SignalRoom.objects.get_or_create(user=instance)
+
+
+# user save will trigger profile save
+post_save.connect(user_signal_save, sender=User)
+
+
 class CustomColor(models.Model):
     background_color = models.CharField(default='#30363C', max_length=7)
     title_background_color = models.CharField(default='#30363C', max_length=7)
@@ -84,6 +94,3 @@ def save_custom_color(sender, instance, created, *args, **kwargs):
 
 # user save will trigger profile save
 post_save.connect(save_custom_color, sender=Profile)
-
-
-

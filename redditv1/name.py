@@ -35,3 +35,9 @@ class Role:
 class BLType:
     BLOCK = 'BLOCK'
     VIEW_ONLY = 'VIEW_ONLY'
+
+
+class NotificationOption:
+    COMMENT = "Comment"
+    POST = "Post"
+    REPLY = "Reply"

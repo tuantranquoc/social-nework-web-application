@@ -51,7 +51,7 @@ class ChatConsumer(WebsocketConsumer):
         user = User.objects.filter(pk=access_token['user_id']).first()
         if user:
             room = Room.objects.filter(pk=self.room_name, user=user).first()
-            messages = Message.objects.filter(room=room)
+            messages = Message.objects.filter(room=room)[:10]
             if room:
                 content = {
                     'messages': messages_to_json(messages),
@@ -59,14 +59,27 @@ class ChatConsumer(WebsocketConsumer):
                 }
                 self.send_chat_message(content)
 
-    def on_signal(self, data):
-        print('hello world aaa')
+    def on_load_more(self, data):
+        token = data['token']
+        access_token = AccessToken(str(token))
+        user = User.objects.filter(pk=access_token['user_id']).first()
+        page_size = data['page_size']
+        print('on_load_more')
+        if page_size:
+            room = Room.objects.filter(pk=self.room_name, user=user).first()
+            messages = Message.objects.filter(room=room)[:int(page_size)]
+            if room:
+                content = {
+                    'messages': messages_to_json(messages),
+                    'user': self.user.username
+                }
+                self.send_chat_message(content)
 
     command = {
         'fetch_message': fetch_message,
         'new_message': new_message,
         'on_connect': on_connect,
-        'on_signal': on_signal
+        'on_load_more': on_load_more
     }
 
     def connect(self):

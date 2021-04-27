@@ -17,8 +17,7 @@ class PublicProfileSerializer(serializers.ModelSerializer):
     following_count = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
     email = serializers.SerializerMethodField(read_only=True)
-    color = PublicCustomColorSerializer(source='custom_color',
-                                               read_only=True)
+    color = PublicCustomColorSerializer(source='custom_color', read_only=True)
 
     class Meta:
         model = Profile
@@ -71,14 +70,15 @@ class ProfileSerializer(serializers.ModelSerializer):
 class ChatProfileSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
-        fields = ['username','avatar']
-    
+        fields = ['username', 'avatar']
+
     @staticmethod
     def get_username(obj):
         return obj.username
-    
+
     @staticmethod
     def get_avatar(obj):
         if obj.profile.avatar:

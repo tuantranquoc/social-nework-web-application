@@ -23,21 +23,23 @@ def get_signal_room(request):
         room = SignalRoom.objects.filter(user=request.user)
         if room:
             return get_paginated_queryset_response(room, request, page_size,
-                                               ModelName.SIGNAL_ROOM)
+                                                   ModelName.SIGNAL_ROOM)
         SignalRoom.objects.create(user=request.user)
         room = SignalRoom.objects.filter(user=request.user)
         if room:
             return get_paginated_queryset_response(room, request, page_size,
-                                                ModelName.SIGNAL_ROOM)
+                                                   ModelName.SIGNAL_ROOM)
     return Response(Message.SC_NO_AUTH, status=401)
+
 
 def get_notify_list(request):
     if request.user.is_authenticated:
-        user= request.user
+        user = request.user
         notify_list = UserNotify.objects.filter(user=request.user)
         if notify_list:
-            return get_paginated_queryset_response(notify_list, request, 15, ModelName.USER_NOTIFY)
-        return Response(Message.SC_NOT_FOUND,status=200)
+            return get_paginated_queryset_response(notify_list, request, 15,
+                                                   ModelName.USER_NOTIFY)
+        return Response(Message.SC_NOT_FOUND, status=200)
     return Response(Message.SC_NO_AUTH, status=401)
 
 
@@ -47,12 +49,13 @@ def change_notify_status(request):
         notification_id = request.data.get("id")
         notification = Notification.objects.filter(pk=notification_id).first()
         if notification:
-            user_notify = notification.user_notify.all().filter(user=user).first()
+            user_notify = notification.user_notify.all().filter(
+                user=user).first()
             if user_notify:
                 user_notify.status = 1
                 user_notify.save()
                 return Response(Message.SC_OK, status=200)
-        return Response(Message.SC_BAD_RQ,status=400)
+        return Response(Message.SC_BAD_RQ, status=400)
     return Response(Message.SC_NO_AUTH, status=401)
 
 

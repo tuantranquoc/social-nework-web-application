@@ -21,23 +21,22 @@ class SignalRoom(models.Model):
         return self.user.username
 
 
-
-    
-
 class CommunityNotify(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              null=True,
                              blank=True)
     status = models.IntegerField(default=0)
-    community = models.ForeignKey(Community, on_delete=models.CASCADE, blank=True, null=True)
+    community = models.ForeignKey(Community,
+                                  on_delete=models.CASCADE,
+                                  blank=True,
+                                  null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_At = models.DateTimeField(auto_now=True, blank=True)
     message = models.TextField(blank=True)
 
     def __id__(self):
         return self.id
-    
 
 
 class EntityType(models.Model):
@@ -77,20 +76,22 @@ class UserNotify(models.Model):
                              on_delete=models.CASCADE,
                              null=True,
                              blank=True)
-    notification_object = models.ManyToManyField(NotificationObject, blank=True)
+    notification_object = models.ManyToManyField(NotificationObject,
+                                                 blank=True)
     status = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_At = models.DateTimeField(auto_now=True)
     message = models.TextField(blank=True)
-    parent = models.ForeignKey('self',on_delete=models.CASCADE, blank=True, null=True)
-
+    parent = models.ForeignKey('self',
+                               on_delete=models.CASCADE,
+                               blank=True,
+                               null=True)
 
     def __id__(self):
         return self.id
 
     def username(self):
         return self.user.username
-
 
 
 class Notification(models.Model):
@@ -104,7 +105,10 @@ class Notification(models.Model):
     #                                         null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_At = models.DateTimeField(auto_now=True)
-    community = models.ForeignKey(Community, on_delete=models.CASCADE, blank=True, null=True)
+    community = models.ForeignKey(Community,
+                                  on_delete=models.CASCADE,
+                                  blank=True,
+                                  null=True)
 
     def __id__(self):
         return self.id

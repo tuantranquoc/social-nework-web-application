@@ -219,7 +219,7 @@ def profile_update_via_react_view(request):
     user.save()
     custom_color.save()
     my_profile.save()
-    return Response({Message.DETAIL:Message.SC_OK}, status=200)
+    return Response({Message.DETAIL: Message.SC_OK}, status=200)
 
 
 def get_following_profiles(request, username):
@@ -240,7 +240,7 @@ def login_via_react_view(request):
     username = request.data.get("username")
     password = request.data.get("password")
     user = authenticate(username=username, password=password)
-   
+
     if user:
         print("username", username, "password", password)
         login(request, user)

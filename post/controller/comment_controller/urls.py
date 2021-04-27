@@ -17,4 +17,5 @@ urlpatterns = [
     path('graph', comment_api.get_comment_by_time_interval),
     path('reset', comment_api.reset),
     path('update', comment_api.update_comment_level),
+    path('parent/<int:comment_id>/count', comment_api.count_comment_by_comment_parent),
 ]

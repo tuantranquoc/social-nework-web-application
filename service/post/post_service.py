@@ -23,6 +23,7 @@ import random
 
 User = get_user_model()
 
+
 def count_post_by_community(community):
     count = 0
     if Post.objects.filter(community__community_type=community):
@@ -125,9 +126,9 @@ def handle_notification(post):
                     connect_message += "and " + (len(message) - 3) + " others "
                 for i in range(len(message)):
                     if i > 2:
-                        break;
+                        break
                     notify_message += (message[i] + " ")
-                print("message",notify_message + " " + split_message)
+                print("message", notify_message + " " + split_message)
                 print("notify_id", n.id)
                 notify_message = notify_message + connect_message + split_message
                 n.message = notify_message
@@ -138,7 +139,8 @@ def handle_notification(post):
                 notification.user_notify.add(new_notify)
                 notification.save()
                 new_notify.notification_object.add(notification_object)
-                n_object_list = new_notify.notification_object.order_by("-created_at")
+                n_object_list = new_notify.notification_object.order_by(
+                    "-created_at")
                 message = ""
                 for n_b in n_object_list:
                     message += (n_b.post.user.username + " ")
@@ -148,9 +150,10 @@ def handle_notification(post):
                 notify_message = ""
                 for i in range(len(message)):
                     if i > 2:
-                        break;
+                        break
                     notify_message += (message[i] + " ")
-                print("message-status = 1",notify_message + " " + split_message)
+                print("message-status = 1",
+                      notify_message + " " + split_message)
                 notify_message = notify_message + " " + split_message
                 new_notify.message = notify_message
                 new_notify.save()

@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from post.serializers import CommentSerializer, CommentGraphSerializer
 from redditv1.message import Message
 from function.paginator import get_paginated_queryset_response
-from redditv1.name import ModelName, CommentState
+from redditv1.name import CommentState, ModelName, NotificationOption
 from service.post.post_service import timestamp_in_the_past_by_day
 from notify.models import Notification, NotificationChange, NotificationObject, EntityType, UserNotify
 from functools import reduce
@@ -47,6 +47,9 @@ def child_comment_create(request, comment_id):
                                              level=level)
             CommentPoint.objects.create(comment=comment)
             if comment:
+                post = find_post_by_comment(parent)
+                handle_notification(post, request.user,
+                                    NotificationOption.REPLY, parent.user)
                 serializer = CommentSerializer(comment)
                 return Response(serializer.data, status=201)
             return Response({Message.SC_BAD_RQ}, status=400)
@@ -54,22 +57,34 @@ def child_comment_create(request, comment_id):
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
-def handle_notification(post, source_user):
+def handle_notification(post, source_user, ntf_type, dest_user):
     entity_type = EntityType.objects.filter(id=6).first()
-    notification_object = NotificationObject.objects.create(
-        entity_type=entity_type, post=post)
-    notifycation_change = NotificationChange.objects.create(
-        user=post.user, notification_object=notification_object)
-    notification = Notification.objects.create()
-    user_notify = UserNotify.objects.create(user=post.user)
-    user_notify.notification_object.add(notification_object)
-    message = "User " + source_user.username + " has created a comment to your post"
-    user_notify.message = message
-    user_notify.save()
-    print(user_notify.message)
-    notification.user_notify.add(user_notify)
-    notification.save()
-
+    if ntf_type == NotificationOption.COMMENT:
+        notification_object = NotificationObject.objects.create(
+            entity_type=entity_type, post=post)
+        notifycation_change = NotificationChange.objects.create(
+            user=source_user, notification_object=notification_object)
+        notification = Notification.objects.create()
+        user_notify = UserNotify.objects.create(user=post.user)
+        user_notify.notification_object.add(notification_object)
+        message = "User " + source_user.username + " has created a comment to your post"
+        user_notify.message = message
+        user_notify.save()
+        notification.user_notify.add(user_notify)
+        notification.save()
+    else:
+        notification_object = NotificationObject.objects.create(
+            entity_type=entity_type, post=post)
+        notifycation_change = NotificationChange.objects.create(
+            user=source_user, notification_object=notification_object)
+        notification = Notification.objects.create()
+        user_notify = UserNotify.objects.create(user=dest_user)
+        user_notify.notification_object.add(notification_object)
+        message = "User " + source_user.username + " has reply to your comment"
+        user_notify.message = message
+        user_notify.save()
+        notification.user_notify.add(user_notify)
+        notification.save()
 
 
 def comment_create(request):
@@ -82,7 +97,7 @@ def comment_create(request):
             comment = Comment.objects.create(user=request.user,
                                              post=post,
                                              content=content)
-            handle_notification(post, request.user)
+            handle_notification(post, request.user, NotificationOption.COMMENT)
             # if comment:
             #     entity_type = EntityType.objects.filter(id=4).first()
             #     notification_object = NotificationObject.objects.create(
@@ -211,6 +226,14 @@ def count_post_by_user(request, username):
         return Response({"Total": comment.count()}, status=200)
     return Response({Message.SC_NOT_FOUND}, status=400)
 
+
+def count_comment_by_comment_parent(request, comment_id):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    if comment_id:
+        comment = Comment.objects.filter(pk=comment_id)
+        return Response({"Total": comment_count(comment, False)}, status=200)
+    return Response({Message.SC_NOT_FOUND}, status=400)
 
 def reset(request):
     query = Comment.objects.all()

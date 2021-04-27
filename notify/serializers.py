@@ -15,6 +15,14 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 
 class UserNotifySerializers(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = UserNotify
-        fields = ['id', 'message', 'status']
+        fields = ['id', 'message', 'status','avatar']
+
+    @staticmethod
+    def get_avatar(obj):
+        if obj.user.profile.avatar:
+            return obj.user.profile.avatar.url
+        return None
+
