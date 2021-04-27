@@ -152,7 +152,7 @@ def post_action(request):
     return post_service.action(request)
 
 
-@api_view(["GET","POST"])
+@api_view(["GET", "POST"])
 def get_list_post_by_user(request):
     """
     ``GET`` Return list posted by current user.
@@ -280,7 +280,8 @@ def get_count_by_username_down_vote(request, username):
     ``GET`` Return total number of down_voted by current user
     """
     if request.user.is_authenticated:
-        down_vote_count = Post.objects.filter(down_vote__username=username).count()
+        down_vote_count = Post.objects.filter(
+            down_vote__username=username).count()
         return Response({"Total": down_vote_count})
     return Response({Message.SC_NO_AUTH}, status=401)
 
@@ -292,7 +293,8 @@ def get_count_by_user_vote(request, username):
     """
     if request.user.is_authenticated:
         up_vote_count = Post.objects.filter(up_vote__username=username).count()
-        down_vote_count = Post.objects.filter(down_vote__username=username).count()
+        down_vote_count = Post.objects.filter(
+            down_vote__username=username).count()
         return Response({"Total": up_vote_count + down_vote_count})
     return Response({Message.SC_NO_AUTH}, status=401)
 
@@ -309,19 +311,19 @@ def check_vote(request):
             "id": "5"
         }
     """
-    if request.user.is_authenticated:
-        post_id = request.data.get('id')
-        if post_id:
-            post = Post.objects.filter(id=post_id)
-            if not post:
-                return Response({Message.SC_NOT_FOUND}, status=400)
-            if Post.objects.filter(up_vote=request.user, id=post_id):
-                return Response({"up_vote"})
-            if Post.objects.filter(down_vote=request.user, id=post_id):
-                return Response({"down_vote"})
-            return Response({Message.USER_HAS_NOT_VOTE_POST}, status=200)
-        return Response({Message.SC_BAD_RQ}, status=400)
-    return Response({Message.SC_NO_AUTH}, status=401)
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    post_id = request.data.get('id')
+    if post_id:
+        post = Post.objects.filter(id=post_id)
+        if not post:
+            return Response({Message.SC_NOT_FOUND}, status=400)
+        if Post.objects.filter(up_vote=request.user, id=post_id):
+            return Response({"up_vote"})
+        if Post.objects.filter(down_vote=request.user, id=post_id):
+            return Response({"down_vote"})
+        return Response({Message.USER_HAS_NOT_VOTE_POST}, status=200)
+    return Response({Message.SC_BAD_RQ}, status=400)
 
 
 @api_view(["GET", "POST"])
@@ -342,11 +344,11 @@ def filter_by_up_vote(request):
             user_count=Count("up_vote")).order_by("-user_count").filter(
                 community__state=True)
         return get_paginated_queryset_response(query, request, page_size,
-                                            ModelName.POST)
+                                               ModelName.POST)
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
-@api_view(["GET","POST"])
+@api_view(["GET", "POST"])
 def get_post_by_comment(request):
     """
     ``GET`` Return list of post has commented by current user
@@ -364,7 +366,7 @@ def get_post_by_comment(request):
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
-@api_view(["GET","POST"])
+@api_view(["GET", "POST"])
 def get_post_by_username_comment(request, username):
     """
     ``GET, POST`` Return list of post has commented by provided user
@@ -378,12 +380,12 @@ def get_post_by_username_comment(request, username):
         }
     """
     if request.user.is_authenticated:
-       return post_service.find_post_by_comment_with_username(request, username)
+        return post_service.find_post_by_comment_with_username(
+            request, username)
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
-
-@api_view(["GET","POST"])
+@api_view(["GET", "POST"])
 def find_post_by_user(request, username):
     """
     ``GET`` Return list of posted post by provied user
@@ -398,15 +400,16 @@ def find_post_by_user(request, username):
     """
     if request.user.is_authenticated:
         page_size = request.data.get("page_size")
-        post = Post.objects.filter(user__username=username, community__state=True)
+        post = Post.objects.filter(user__username=username,
+                                   community__state=True)
         if post:
             return get_paginated_queryset_response(post, request, page_size,
-                                                ModelName.POST)
+                                                   ModelName.POST)
         return Response({Message.SC_NOT_FOUND}, status=400)
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
-@api_view(["GET","POST"])
+@api_view(["GET", "POST"])
 def count_post_by_user(request, username):
     """
     ``GET, POST`` Return total number of posted post by provied user
@@ -417,6 +420,7 @@ def count_post_by_user(request, username):
             return Response({"Total": count}, status=200)
         return Response({Message.SC_NOT_FOUND}, status=400)
     return Response({Message.SC_NO_AUTH}, status=401)
+
 
 @api_view(["GET"])
 def find_post_by_up_vote(request):
@@ -481,6 +485,7 @@ def trending(request):
         }
     """
     return post_service.trending(request)
+
 
 @api_view(['GET', 'POST'])
 def hot(request):
@@ -771,5 +776,6 @@ def get_item_rating_1(request):
         post_list_1 = []
         for r in recommend_list[0:10]:
             post_list_1.append(Post.objects.filter(pk=r["id"]).first())
-        return get_paginated_queryset_response(post_list_1,request, 10, ModelName.POST)
+        return get_paginated_queryset_response(post_list_1, request, 10,
+                                               ModelName.POST)
     return Response({Message.SC_NO_AUTH}, status=401)
