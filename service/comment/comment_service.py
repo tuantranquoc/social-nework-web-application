@@ -25,8 +25,6 @@ def comment_parent_list(request, comment_id, *args, **kwargs):
         comment.order_by('-up_vote')
     else:
         comment.order_by('-commentpoint__point')
-    if not page_size:
-        page_size = 5
     return get_paginated_queryset_response(comment, request, page_size,
                                            ModelName.COMMENT)
 
@@ -124,8 +122,6 @@ def get_list_comment_level_1_by_post(request, post_id):
     page_size = request.data.get("page_size")
     comment = Comment.objects.filter(
         post_id=post_id).order_by('-commentpoint__point')
-    if not page_size:
-        page_size = 10
     return get_paginated_queryset_response(comment, request, page_size,
                                            ModelName.COMMENT)
 
