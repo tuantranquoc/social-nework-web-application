@@ -166,10 +166,14 @@ def check_vote(request):
         comment = Comment.objects.filter(id=comment_id)
         if not comment:
             return Response(Message.SC_NOT_FOUND, status=400)
-        if Comment.objects.filter(up_vote=request.user, id=comment_id):
-            return Response({"up_vote"})
-        if Comment.objects.filter(down_vote=request.user, id=comment_id):
-            return Response({"down_vote"})
+        cm_up_vote = Comment.objects.filter(up_vote=request.user, id=comment_id)
+        if cm_up_vote:
+            number_of_up_vote = cm_up_vote.first().up_vote.all().count()
+            return Response({"current_vote":"up_vote","number_of_up_vote": number_of_up_vote})
+        cm_down_vote = Comment.objects.filter(down_vote=request.user, id=comment_id)
+        if cm_down_vote:
+            number_of_down_vote = cm_down_vote.first().down_vote.all().count()
+            return Response({"current_vote":"down_vote","number_of_down_vote": number_of_down_vote})
         return Response(Message.USER_HAS_NOT_VOTE_COMMENT, status=200)
     return Response(Message.SC_NO_AUTH, status=401)
 
