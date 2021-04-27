@@ -228,8 +228,6 @@ def count_post_by_user(request, username):
 
 
 def count_comment_by_comment_parent(request, comment_id):
-    if not request.user.is_authenticated:
-        return Response({Message.SC_NO_AUTH}, status=401)
     if comment_id:
         comment = Comment.objects.filter(pk=comment_id)
         return Response({"Total": comment_count(comment, False)}, status=200)
