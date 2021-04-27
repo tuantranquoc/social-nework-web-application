@@ -312,10 +312,15 @@ def check_vote(request):
     if request.user.is_authenticated:
         post_id = request.data.get('id')
         if post_id:
+            post = Post.objects.filter(id=post_id)
+            if not post:
+                return Response({Message.SC_NOT_FOUND}, status=400)
             if Post.objects.filter(up_vote=request.user, id=post_id):
                 return Response({"up_vote"})
             if Post.objects.filter(down_vote=request.user, id=post_id):
                 return Response({"down_vote"})
+            return Response({Message.USER_HAS_NOT_VOTE_POST}, status=200)
+        return Response({Message.SC_BAD_RQ}, status=400)
     return Response({Message.SC_NO_AUTH}, status=401)
 
 

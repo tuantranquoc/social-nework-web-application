@@ -153,11 +153,15 @@ def comment_action(request):
 def check_vote(request):
     if request.user.is_authenticated:
         comment_id = request.data.get('id')
+        comment = Comment.objects.filter(id=comment_id)
+        if not comment:
+            return Response(Message.SC_NOT_FOUND, status=400)
         if Comment.objects.filter(up_vote=request.user, id=comment_id):
             return Response({"up_vote"})
         if Comment.objects.filter(down_vote=request.user, id=comment_id):
             return Response({"down_vote"})
-    return Response(Message.SC_BAD_RQ, status=400)
+        return Response(Message.USER_HAS_NOT_VOTE_COMMENT, status=200)
+    return Response(Message.SC_NO_AUTH, status=401)
 
 
 def comment_point_update(comment):

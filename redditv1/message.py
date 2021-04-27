@@ -17,3 +17,5 @@ class Message:
     DETAIL = 'detail'
     WRONG_INPUT_COLOR = "Color input missing or incorrect"
     USER_MUST_BE_MEMBER = "User must be member of this community"
+    USER_HAS_NOT_VOTE_COMMENT = "User has not vote this comment yet"
+    USER_HAS_NOT_VOTE_POST = "User has not vote this post yet"
