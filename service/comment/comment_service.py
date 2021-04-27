@@ -138,11 +138,21 @@ def comment_action(request):
     if comment_id:
         comment = Comment.objects.filter(id=comment_id).first()
         if action == "up_vote":
+            if Comment.objects.filter(id=comment_id, up_vote=request.user):
+                comment.up_vote.remove(request.user)
+                comment_point_update(comment)
+                comment.save()
+                return Response({Message.SC_OK}, status=200)
             comment.up_vote.add(request.user)
             comment.down_vote.remove(request.user)
             comment_point_update(comment)
             return Response(Message.SC_OK, status=200)
         if action == "down_vote":
+            if Comment.objects.filter(id=comment_id, down_vote=request.user):
+                comment.down_vote.remove(request.user)
+                comment_point_update(comment)
+                comment.save()
+                return Response({Message.SC_OK}, status=200)
             comment.up_vote.remove(request.user)
             comment.down_vote.add(request.user)
             comment_point_update(comment)
