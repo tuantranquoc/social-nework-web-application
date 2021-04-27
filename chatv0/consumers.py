@@ -67,7 +67,7 @@ class ChatConsumer(WebsocketConsumer):
         print('on_load_more')
         if page_size:
             room = Room.objects.filter(pk=self.room_name, user=user).first()
-            messages = Message.objects.filter(room=room)[:int(page_size)]
+            messages = Message.objects.filter(room=room).order_by("-created_at")[:int(page_size)]
             if room:
                 content = {
                     'messages': messages_to_json(messages),
