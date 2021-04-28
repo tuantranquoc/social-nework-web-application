@@ -13,6 +13,8 @@ class Room(models.Model):
     
     def __str__(self):
         return "room_id " + str(self.id)
+    
+
 
 
 class Message(models.Model):
@@ -26,9 +28,17 @@ class Message(models.Model):
                              on_delete=models.CASCADE,
                              blank=True,
                              null=True)
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.author.username
 
     def last_10_messages(self):
         return Message.objects.order_by('-timestamp').all()[:10]
+    
+    def created_by(self):
+        return self.author.username
+    
+    def id(self):
+        return self.id

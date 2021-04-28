@@ -52,9 +52,10 @@ class ChatConsumer(WebsocketConsumer):
         if user:
             room = Room.objects.filter(pk=self.room_name, user=user).first()
             messages = Message.objects.filter(room=room)[:10]
+            last_ten_message = reversed(messages)
             if room:
                 content = {
-                    'messages': messages_to_json(messages),
+                    'messages': messages_to_json(last_ten_message),
                     'user': self.user.username
                 }
                 self.send_chat_message(content)
@@ -67,10 +68,11 @@ class ChatConsumer(WebsocketConsumer):
         print('on_load_more')
         if page_size:
             room = Room.objects.filter(pk=self.room_name, user=user).first()
-            messages = Message.objects.filter(room=room)[-int(page_size):]
+            messages = Message.objects.filter(room=room)[:int(page_size)]
+            last_ten_message = reversed(messages)
             if room:
                 content = {
-                    'messages': messages_to_json(messages),
+                    'messages': messages_to_json(last_ten_message),
                     'user': self.user.username
                 }
                 self.send_chat_message(content)

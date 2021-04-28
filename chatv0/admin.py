@@ -20,7 +20,7 @@ class MessageForm(forms.ModelForm):
 
 # Register your models here.
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'created_at', 'updated_at']
+    list_display = ['id','created_by','content', 'created_at', 'updated_at']
     raw_id_fields = ('room', )
     form = MessageForm
 
