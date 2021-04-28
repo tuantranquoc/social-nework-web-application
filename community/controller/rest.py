@@ -42,10 +42,10 @@ def create_community(request):
     return community_service.create_community(request)
 
 
-@api_view(["POST", "GET"])
+@api_view(["POST"])
 def get_community(request):
     """
-    ``GET`` Return community info by ``community_name``
+    ``POST`` Return community info by ``community_name``
 
     New ``Community`` require parent community to create
 
