@@ -68,7 +68,7 @@ class ChatConsumer(WebsocketConsumer):
         print('on_load_more')
         if page_size:
             room = Room.objects.filter(pk=self.room_name, user=user).first()
-            messages = Message.objects.filter(room=room)[:int(page_size)]
+            messages = Message.objects.filter(room=room).reverse()[:int(page_size)]
             last_ten_message = reversed(messages)
             if room:
                 content = {

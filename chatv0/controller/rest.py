@@ -77,3 +77,19 @@ def get_lasted_message(request):
         }
     """
     return chat_service.get_lasted_message(request)
+
+
+@api_view(["POST"])
+def get_message_f(request):
+    """
+    ``GET`` get lasted message
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "id":"room_id",
+            "page_size":"page_size"
+        }
+    """
+    return chat_service.get_message_f(request)
