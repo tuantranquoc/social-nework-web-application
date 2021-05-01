@@ -38,7 +38,7 @@ def create_chat_room(request):
 def find_room(request):
     return chat_service.find_room(request)
 
-@api_view(["GET"])
+@api_view(["GET","POST"])
 def get_all_room(request):
     """
     ``GET`` all chat room of current ``USER``
