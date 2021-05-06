@@ -379,10 +379,8 @@ def get_post_by_username_comment(request, username):
             "page_size": "5"
         }
     """
-    if request.user.is_authenticated:
-        return post_service.find_post_by_comment_with_username(
+    return post_service.find_post_by_comment_with_username(
             request, username)
-    return Response({Message.SC_NO_AUTH}, status=401)
 
 
 @api_view(["GET", "POST"])
@@ -398,15 +396,13 @@ def find_post_by_user(request, username):
             "page_size": "5"
         }
     """
-    if request.user.is_authenticated:
-        page_size = request.data.get("page_size")
-        post = Post.objects.filter(user__username=username,
-                                   community__state=True)
-        if post:
-            return get_paginated_queryset_response(post, request, page_size,
-                                                   ModelName.POST)
-        return Response({Message.SC_NOT_FOUND}, status=400)
-    return Response({Message.SC_NO_AUTH}, status=401)
+
+    page_size = request.data.get("page_size")
+    post = Post.objects.filter(user__username=username, community__state=True)
+    if post:
+        return get_paginated_queryset_response(post, request, page_size,
+                                               ModelName.POST)
+    return Response({Message.SC_NOT_FOUND}, status=400)
 
 
 @api_view(["GET", "POST"])

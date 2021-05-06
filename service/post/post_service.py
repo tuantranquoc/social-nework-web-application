@@ -525,16 +525,14 @@ def find_post_by_username_down_vote(request, username):
     if request.user.is_authenticated:
         no_block = Post.objects.filter(down_vote__username=username,
                                        community__user=request.user)
-        if no_block:
-            return get_paginated_queryset_response(no_block, request,
+
+        return get_paginated_queryset_response(no_block, request,
                                                    page_size, ModelName.POST)
-        return Response({Message.SC_NOT_FOUND}, status=400)
     post = Post.objects.filter(down_vote__username=username,
                                community__state=True)
-    if post:
-        return get_paginated_queryset_response(post, request, page_size,
+    return get_paginated_queryset_response(post, request, page_size,
                                                ModelName.POST)
-    return Response({Message.SC_NOT_FOUND}, status=400)
+
 
 
 def find_post_by_username_up_vote(request, username):
