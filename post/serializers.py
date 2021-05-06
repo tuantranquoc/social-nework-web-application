@@ -53,10 +53,11 @@ class PostSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             user = request.user
-        if Post.objects.filter(up_vote=user, id=obj.id):
-            return "up_vote"
-        if Post.objects.filter(down_vote=user, id=obj.id):
-            return "down_vote"
+        if request.user.is_authenticated:
+            if Post.objects.filter(up_vote=user, id=obj.id):
+                return "up_vote"
+            if Post.objects.filter(down_vote=user, id=obj.id):
+                return "down_vote"
         return "None"
     
     @staticmethod
