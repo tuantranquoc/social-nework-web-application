@@ -4,6 +4,7 @@ from account.serializers import PublicProfileSerializer
 from community.models import Community, Member, MemberInfo
 from post.models import Post, Comment, PostType
 from redditv1.name import CommentState, ImagePath, Role
+import datetime
 MAX_CONTENT_LENGTH = 300
 
 
@@ -31,22 +32,40 @@ class PostSerializer(serializers.ModelSerializer):
     point = serializers.SerializerMethodField(read_only=True)
     image = serializers.SerializerMethodField(read_only=True)
     content = serializers.SerializerMethodField(read_only=True)
+    unix_timestamp = serializers.SerializerMethodField(read_only=True)
+    unix_timestamp = serializers.SerializerMethodField(read_only=True)
+    current_vote = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
         fields = [
             'user', 'id', 'title', 'content', 'parent', 'timestamp', 'image',
-            'timestamp', 'up_vote', 'down_vote', 'community_type', 'type',
-            'view_count', 'point', 'state'
+            'timestamp','unix_timestamp', 'up_vote', 'down_vote', 'community_type', 'type',
+            'view_count', 'point', 'state','current_vote'
         ]
 
     @staticmethod
     def get_up_vote(obj):
         return obj.up_vote.count()
-
+    
+    def get_current_vote(self, obj):
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        if Post.objects.filter(up_vote=user, id=obj.id):
+            return "up_vote"
+        if Post.objects.filter(down_vote=user, id=obj.id):
+            return "down_vote"
+        return "None"
+    
     @staticmethod
     def get_down_vote(obj):
         return obj.down_vote.count()
+
+    @staticmethod
+    def get_unix_timestamp(obj):
+        return obj.timestamp.timestamp()
 
     @staticmethod
     def get_community_type(obj):

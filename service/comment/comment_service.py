@@ -99,7 +99,7 @@ def comment_create(request):
             comment = Comment.objects.create(user=request.user,
                                              post=post,
                                              content=content)
-            handle_notification(post, request.user, NotificationOption.COMMENT)
+            handle_notification(post, request.user, NotificationOption.COMMENT, post.user)
             # if comment:
             #     entity_type = EntityType.objects.filter(id=4).first()
             #     notification_object = NotificationObject.objects.create(
@@ -112,8 +112,7 @@ def comment_create(request):
             #     notification.user_notify.add(user_notify)
             #     notification.save()
             CommentPoint.objects.create(comment=comment)
-            comment = Comment.objects.filter(id=comment.id)
-            serializer = CommentSerializer(comment, many=True)
+            serializer = CommentSerializer(comment)
             return Response(serializer.data, status=201)
         return Response({Message.DETAIL: Message.SC_BAD_RQ}, status=201)
     else:
