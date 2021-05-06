@@ -510,10 +510,8 @@ def find_post_by_down_vote(request):
     page_size = request.data.get("page_size")
     if request.user.is_authenticated:
         post = Post.objects.filter(down_vote=request.user)
-        if post:
-            return get_paginated_queryset_response(post, request, page_size,
+        return get_paginated_queryset_response(post, request, page_size,
                                                    ModelName.POST)
-        return Response({Message.SC_NOT_FOUND}, status=400)
     return Response({Message.SC_LOGIN_REDIRECT}, status=401)
 
 
