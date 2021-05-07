@@ -335,7 +335,7 @@ def check_vote(request):
             })
         return Response(
             {
-                "current_vote": Message.USER_HAS_NOT_VOTE_COMMENT,
+                "current_vote": "",
                 "number_of_up_vote": number_of_up_vote,
                 "number_of_down_vote": number_of_down_vote
             },
