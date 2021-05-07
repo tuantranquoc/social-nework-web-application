@@ -299,7 +299,7 @@ def get_count_by_user_vote(request, username):
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 def check_vote(request):
     """
     ``POST`` Check if user has up_vote or down_vote post provide
@@ -315,14 +315,31 @@ def check_vote(request):
         return Response({Message.SC_NO_AUTH}, status=401)
     post_id = request.data.get('id')
     if post_id:
-        post = Post.objects.filter(id=post_id)
+        post = Post.objects.filter(id=post_id).first()
+        number_of_up_vote = post.up_vote.count()
+        number_of_down_vote = post.down_vote.count()
+        print("post_id", post_id)
         if not post:
-            return Response({Message.SC_NOT_FOUND}, status=400)
+            return Response({Message.SC_NOT_FOUND}, status=200)
         if Post.objects.filter(up_vote=request.user, id=post_id):
-            return Response({"up_vote"})
+            return Response({
+                "current_vote": "up_vote",
+                "number_of_up_vote": number_of_up_vote,
+                "number_of_down_vote": number_of_down_vote
+            })
         if Post.objects.filter(down_vote=request.user, id=post_id):
-            return Response({"down_vote"})
-        return Response({Message.USER_HAS_NOT_VOTE_POST}, status=200)
+            return Response({
+                "current_vote": "down_vote",
+                "number_of_up_vote": number_of_up_vote,
+                "number_of_down_vote": number_of_down_vote
+            })
+        return Response(
+            {
+                "current_vote": Message.USER_HAS_NOT_VOTE_COMMENT,
+                "number_of_up_vote": number_of_up_vote,
+                "number_of_down_vote": number_of_down_vote
+            },
+            status=200)
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
@@ -379,8 +396,7 @@ def get_post_by_username_comment(request, username):
             "page_size": "5"
         }
     """
-    return post_service.find_post_by_comment_with_username(
-            request, username)
+    return post_service.find_post_by_comment_with_username(request, username)
 
 
 @api_view(["GET", "POST"])
@@ -399,10 +415,8 @@ def find_post_by_user(request, username):
 
     page_size = request.data.get("page_size")
     post = Post.objects.filter(user__username=username, community__state=True)
-    if post:
-        return get_paginated_queryset_response(post, request, page_size,
-                                               ModelName.POST)
-    return Response({Message.SC_NOT_FOUND}, status=400)
+    return get_paginated_queryset_response(post, request, page_size,
+                                           ModelName.POST)
 
 
 @api_view(["GET", "POST"])
