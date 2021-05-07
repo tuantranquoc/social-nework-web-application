@@ -143,7 +143,7 @@ class CommunityHistory(models.Model):
                              blank=True,
                              null=True,
                              on_delete=models.CASCADE,
-                             related_name='user')
+                             related_name='community_history_user')
     old_role = models.CharField(default='MEMBER', max_length=20)
     new_role = models.CharField(default='MEMBER', max_length=20)
 
