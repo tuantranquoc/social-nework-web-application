@@ -50,7 +50,7 @@ class ChatConsumer(WebsocketConsumer):
         room_group_name = 'signal_%s' % signal_room.id
         print("message signal room", room_group_name)
         notify_message = "You have a new message from " + dest_user.username
-        message = {"message": notify_message, "type": "notification"}
+        message = {"message": notify_message, "type": "message"}
         channel_layer = channels.layers.get_channel_layer()
         async_to_sync(channel_layer.group_send)(room_group_name, {
             'type': 'signal_message',
