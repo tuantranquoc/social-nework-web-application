@@ -25,19 +25,19 @@ class ChatConsumer(WebsocketConsumer):
         messages = Message.last_10_messages()
         print("count message")
         content = {'messages': messages_to_json(messages)}
-        self.send_chat_message(content)
+        return self.send_chat_message(content)
 
     def new_message(self, data):
         dest = data['to']
         room = Room.objects.filter(pk=self.room_name).first()
         dest_user = User.objects.filter(username=dest).first()
         author_user = room.user.filter(~Q(username=dest)).first()
-        message = Message.objects.create(author=author_user,
+        message = Message.objects.create(author=dest_user,
                                          content=data['message'],
                                          room=room)
         content = {
             'command': 'new_message',
-            'message': message_to_json(message)
+            'message': dest_message_to_json(message, author_user.username)
         }
         signal_room = SignalRoom.objects.filter(user=dest_user).first()
         room_group_name = 'signal_%s' % signal_room.id
@@ -307,3 +307,13 @@ def message_to_json(message):
             'content': message.content,
             'created_at': str(message.created_at)
         }
+        
+        
+def dest_message_to_json(message, author):
+    if message:
+        return {
+            'author': author,
+            'content': message.content,
+            'created_at': str(message.created_at)
+        }
+
