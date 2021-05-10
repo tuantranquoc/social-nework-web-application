@@ -45,3 +45,5 @@ choses item has highest or fresh rating on this user then choese it for recommen
     .. code-block:: http
 
         GET  /api/users/alice/accessibles/
+
+adb reverse tcp:8000 tcp:8000

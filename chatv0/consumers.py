@@ -28,27 +28,20 @@ class ChatConsumer(WebsocketConsumer):
         self.send_chat_message(content)
 
     def new_message(self, data):
-        author = data['to']
+        dest = data['to']
         room = Room.objects.filter(pk=self.room_name).first()
-        print("author receive the message", author)
-        author_user = User.objects.filter(username=author).first()
-        print("data", data['message'])
+        dest_user = User.objects.filter(username=dest).first()
+        author_user = room.user.filter(~Q(username=dest)).first()
         message = Message.objects.create(author=author_user,
                                          content=data['message'],
                                          room=room)
-        print("token", data['token'])
-        print('new message in room', self.room_name)
         content = {
             'command': 'new_message',
             'message': message_to_json(message)
         }
-        print("dest-user", self.room_name)
-        print("author", author_user)
-        dest_user = room.user.filter(~Q(username=author)).first()
-        print("user in room", dest_user)
         signal_room = SignalRoom.objects.filter(user=author_user).first()
         room_group_name = 'signal_%s' % signal_room.id
-        print("message signal room", room_group_name)
+
         notify_message = "You have a new message from " + dest_user.username
         message = {"message": notify_message, "type": "message"}
         channel_layer = channels.layers.get_channel_layer()
@@ -253,7 +246,6 @@ class SignalConsumer(WebsocketConsumer):
 #             'message': message
 #         })
 
-
 # @receiver(pre_save, sender=Post)
 # def post_create_handler(sender, instance, **kwargs):
 #     community = instance.community
@@ -288,7 +280,7 @@ class SignalConsumer(WebsocketConsumer):
 def user_notify_create_handler(sender, instance, **kwargs):
     message = instance.message
     if message:
-        print("message from notify",message)
+        print("message from notify", message)
         signal_room = SignalRoom.objects.filter(user=instance.user).first()
         room_group_name = 'signal_%s' % signal_room.id
         # room_group_name = 'signal_%s' % 4
@@ -299,7 +291,6 @@ def user_notify_create_handler(sender, instance, **kwargs):
             'type': 'signal_message',
             'message': message
         })
-
 
 
 def messages_to_json(messages):
