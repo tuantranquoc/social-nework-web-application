@@ -39,7 +39,7 @@ class ChatConsumer(WebsocketConsumer):
             'command': 'new_message',
             'message': message_to_json(message)
         }
-        signal_room = SignalRoom.objects.filter(user=author_user).first()
+        signal_room = SignalRoom.objects.filter(user=dest_user).first()
         room_group_name = 'signal_%s' % signal_room.id
 
         notify_message = "You have a new message from " + dest_user.username
