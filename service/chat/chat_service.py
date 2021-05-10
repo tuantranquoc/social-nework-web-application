@@ -63,7 +63,7 @@ def get_rooms_by_user(request):
     page_size = request.data.get("page_size")
     user = request.user
     rooms = Room.objects.filter(user=user)
-    print(user.profile.location)
+    print("count room", rooms.count(), user)
     return get_paginated_queryset_response(rooms, request, page_size,
                                                    ModelName.CHAT)
 

@@ -181,5 +181,10 @@ def blacklist(request):
     return community_service.add_use_to_community_blacklist(request)
 
 
+@api_view(['GET'])
+def get_followed_community_by_username(request, username):
+    return community_service.get_followed_community_by_username(request, username)
+
+
 def timestamp_in_the_past_by_day(days):
     return timezone.now() - datetime.timedelta(days)

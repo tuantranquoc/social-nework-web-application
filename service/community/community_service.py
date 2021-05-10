@@ -107,11 +107,12 @@ def get_community(request):
 
 def get_list_community_by_user(request):
     page_size = request.data.get("page_size")
-    if request.user.is_authenticated:
-        query = Community.objects.filter(user=request.user)
-        return get_paginated_queryset_response(query, request, page_size,
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    query = Community.objects.filter(user=request.user)
+    return get_paginated_queryset_response(query, request, page_size,
                                                ModelName.COMMUNITY)
-    return Response({Message.SC_LOGIN_REDIRECT}, status=200)
+    
 
 
 def community_action(request):
@@ -479,6 +480,13 @@ def default_blacklist_type():
             description='User can not post in target community')
         type_2.save()
 
+def get_followed_community_by_username(request, username):
+    if username:
+        community_list = Community.objects.filter(user__username=username)
+        return get_paginated_queryset_response(community_list, request, 10,
+                                               ModelName.COMMUNITY)
+    return Response({Message.DETAIL: Message.SC_BAD_RQ},
+                            status=400)
 
 def timestamp_in_the_past_by_day(days):
     return timezone.now() - datetime.timedelta(days)

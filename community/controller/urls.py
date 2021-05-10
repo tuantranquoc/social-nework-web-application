@@ -15,4 +15,6 @@ urlpatterns = [
     path('mod/action', community_api.community_mod_action),
     path('member/list', community_api.get_member_list),
     path('blacklist', community_api.blacklist),
+    path('user/list/<str:username>',
+         community_api.get_followed_community_by_username),
 ]
