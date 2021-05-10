@@ -32,17 +32,17 @@ class ChatConsumer(WebsocketConsumer):
         room = Room.objects.filter(pk=self.room_name).first()
         dest_user = User.objects.filter(username=dest).first()
         author_user = room.user.filter(~Q(username=dest)).first()
-        message = Message.objects.create(author=dest_user,
+        message = Message.objects.create(author=author_user,
                                          content=data['message'],
                                          room=room)
         content = {
             'command': 'new_message',
-            'message': dest_message_to_json(message, author_user.username)
+            'message': dest_message_to_json(message)
         }
         signal_room = SignalRoom.objects.filter(user=dest_user).first()
         room_group_name = 'signal_%s' % signal_room.id
 
-        notify_message = "You have a new message from " + dest_user.username
+        notify_message = "You have a new message from " + author_user.username
         message = {"message": notify_message, "type": "message"}
         channel_layer = channels.layers.get_channel_layer()
         async_to_sync(channel_layer.group_send)(room_group_name, {
@@ -309,10 +309,10 @@ def message_to_json(message):
         }
         
         
-def dest_message_to_json(message, author):
+def dest_message_to_json(message):
     if message:
         return {
-            'author': author,
+            'author': message.author.username,
             'content': message.content,
             'created_at': str(message.created_at)
         }
