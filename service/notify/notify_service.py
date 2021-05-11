@@ -43,18 +43,32 @@ def get_notify_list(request):
     return Response(Message.SC_NO_AUTH, status=401)
 
 
+# def change_notify_status(request):
+#     if request.user.is_authenticated:
+#         user = request.user
+#         notification_id = request.data.get("id")
+#         notification = UserNotify.objects.filter(pk=notification_id).first()
+#         if notification:
+#             user_notify = notification.user_notify.all().filter(
+#                 user=user).first()
+#             if user_notify:
+#                 user_notify.status = 1
+#                 user_notify.save()
+#                 return Response(Message.SC_OK, status=200)
+#         return Response(Message.SC_BAD_RQ, status=400)
+#     return Response(Message.SC_NO_AUTH, status=401)
+
+
 def change_notify_status(request):
     if request.user.is_authenticated:
         user = request.user
         notification_id = request.data.get("id")
-        notification = Notification.objects.filter(pk=notification_id).first()
+        notification = UserNotify.objects.filter(id=notification_id).first()
+        print(notification.status)
         if notification:
-            user_notify = notification.user_notify.all().filter(
-                user=user).first()
-            if user_notify:
-                user_notify.status = 1
-                user_notify.save()
-                return Response(Message.SC_OK, status=200)
+            notification.status = True
+            notification.save()
+            return Response(Message.SC_OK, status=200)
         return Response(Message.SC_BAD_RQ, status=400)
     return Response(Message.SC_NO_AUTH, status=401)
 

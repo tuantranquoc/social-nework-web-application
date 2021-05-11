@@ -39,6 +39,7 @@ class SignalRoomTypeAdmin(admin.ModelAdmin):
         
 class UserNotifyAdmin(admin.ModelAdmin):
     list_display = ['__id__', 'username', 'created_at']
+    search_fields = ['id']
 
     class Meta:
         model = UserNotify

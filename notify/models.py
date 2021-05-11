@@ -92,6 +92,10 @@ class UserNotify(models.Model):
 
     def username(self):
         return self.user.username
+    class Meta:
+        ordering = [
+            '-created_at',
+        ]
 
 
 class Notification(models.Model):
