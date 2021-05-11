@@ -5,7 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from post import rank
 from post.models import Post, Comment, CommentPoint
 from rest_framework.response import Response
-from notify.serializers import SignalRoomSerializer
+from notify.serializers import SignalRoomSerializer, UserNotifySerializers
 from redditv1.message import Message
 from function.paginator import get_paginated_queryset_response
 from redditv1.name import ModelName, CommentState
@@ -66,9 +66,12 @@ def change_notify_status(request):
         notification = UserNotify.objects.filter(id=notification_id).first()
         print(notification.status)
         if notification:
+            if notification.user != request.user:
+                return Response(Message.SC_PERMISSION_DENIED, status=403)
             notification.status = True
             notification.save()
-            return Response(Message.SC_OK, status=200)
+            serializer = UserNotifySerializers(notification)
+            return Response(serializer.data, status=200)
         return Response(Message.SC_BAD_RQ, status=400)
     return Response(Message.SC_NO_AUTH, status=401)
 
