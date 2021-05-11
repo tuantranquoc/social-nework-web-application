@@ -42,8 +42,8 @@ class ChatConsumer(WebsocketConsumer):
         signal_room = SignalRoom.objects.filter(user=dest_user).first()
         room_group_name = 'signal_%s' % signal_room.id
 
-        notify_message = "You have a new message from " + author_user.username
-        message = {"message": notify_message, "type": "message"}
+        # notify_message = "You have a new message from " + author_user.username
+        message = {"message": message_to_json(message), "type": "message"}
         channel_layer = channels.layers.get_channel_layer()
         async_to_sync(channel_layer.group_send)(room_group_name, {
             'type': 'signal_message',
@@ -307,8 +307,8 @@ def message_to_json(message):
             'content': message.content,
             'created_at': str(message.created_at)
         }
-        
-        
+
+
 def dest_message_to_json(message):
     if message:
         return {
