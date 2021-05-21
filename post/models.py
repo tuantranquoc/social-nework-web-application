@@ -6,9 +6,13 @@ from post import choice
 
 User = get_user_model()
 
+
 # Create your models here.
 class UserVote(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
     report = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
     dislike = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
     view = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
@@ -18,9 +22,10 @@ class UserVote(models.Model):
     def __str__(self):
         # return ("User ratting" + " "  + self.user.username)
         return ("Vote id" + " " + str(self.id) + " " + self.user.username)
-    
+
     def get_rating(self):
         return 2 + self.view + self.like + self.share - self.dislike - self.report
+
 
 class Post(models.Model):
     parent = models.ForeignKey("self",
@@ -52,6 +57,8 @@ class Post(models.Model):
                              blank=False,
                              null=True,
                              default='public')
+    hidden = models.BooleanField(default=False)
+    hidden_in_community= models.BooleanField(default=False)
     vote = models.ManyToManyField(UserVote, blank=True)
 
     class Meta:
@@ -94,6 +101,13 @@ class Post(models.Model):
 
     def __state__(self):
         return self.state
+
+    # def hidden(self):
+    #     return self.hidden
+
+
+
+
 
 class PositivePoint(models.Model):
     id = models.AutoField(primary_key=True)
@@ -235,8 +249,3 @@ class View(models.Model):
 
     def __old_timestamp__(self):
         return self.old_timestamp
-
-
-
-
-

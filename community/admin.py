@@ -32,8 +32,9 @@ class MemberAdmin(admin.ModelAdmin):
 
 
 class MemberInfoAdmin(admin.ModelAdmin):
+    search_fields = ['community__community_type', 'member__user__username']
     list_display = [
-        '__id__', '__community__', '__timestamp__', '__state__', '__role__'
+        '__id__','member_name','member_id', '__community__', '__timestamp__', '__state__', '__role__',
     ]
 
     class Meta:

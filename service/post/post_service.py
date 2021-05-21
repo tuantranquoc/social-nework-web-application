@@ -89,7 +89,7 @@ def get_post_list(request):
         return get_paginated_queryset_response(query, request, page_size,
                                                ModelName.POST)
     query = Post.objects.filter(community__state=True,
-                                community__in=top_community)
+                                community__in=top_community, hidden=False)
     return get_paginated_queryset_response(query, request, page_size,
                                            ModelName.POST)
 
@@ -442,7 +442,7 @@ def find_post_by_up_vote(request):
 
 def find_post_by_community(request, community_type):
     page_size = request.data.get("page_size")
-    post = Post.objects.filter(community__community_type=community_type)
+    post = Post.objects.filter(community__community_type=community_type, hidden_in_community=False, hidden=False)
     community = Community.objects.filter(community_type=community_type).first()
     if not community:
         return Response({Message.SC_NOT_FOUND}, status=204)

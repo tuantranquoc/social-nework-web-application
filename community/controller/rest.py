@@ -166,8 +166,19 @@ def community_graph(request):
     return community_service.community_graph(request)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def community_mod_action(request):
+    """
+    ``POST`` promote or demote user from provide community
+    ``action`` can be ``promote`` or ``demote``
+    **Example request**:
+    .. code-block:: json
+        {
+            "community": "anime",
+            "user_id":"user_id",
+            "action":"promote"
+        }
+    """
     return community_service.mod_action(request)
 
 
@@ -180,10 +191,26 @@ def get_member_list(request):
 def blacklist(request):
     return community_service.add_use_to_community_blacklist(request)
 
+@api_view(['POST'])
+def hidden_post(request):
+    """
+    ``POST`` hidden post in community
+    ``PERMISSION`` require are ``author, mod and admin``
+    ``action`` can be ``promote`` or ``demote``
+    **Example request**:
+    .. code-block:: json
+        {
+            "post_id":"post_id"
+        }
+    """
+    return community_service.hidden_post(request)
+
+
 
 @api_view(['GET'])
 def get_followed_community_by_username(request, username):
-    return community_service.get_followed_community_by_username(request, username)
+    return community_service.get_followed_community_by_username(
+        request, username)
 
 
 def timestamp_in_the_past_by_day(days):

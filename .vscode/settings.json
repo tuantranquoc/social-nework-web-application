@@ -1,5 +1,5 @@
 {
-    "python.formatting.provider": "yapf",
+    "python.formatting.provider": "autopep8",
     "cSpell.words": [
         "Commnunity",
         "Hexa",
@@ -7,11 +7,14 @@
         "asgi",
         "asgiref",
         "chatv",
+        "libnum",
         "psycopg",
         "quoc",
+        "randfunc",
         "repost",
         "scipy",
         "tuan",
-        "tuantran"
+        "tuantran",
+        "vect"
     ]
 }

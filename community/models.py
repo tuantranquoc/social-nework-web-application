@@ -4,8 +4,12 @@ from django.template.defaultfilters import truncatechars
 from django.db.models.signals import post_save
 User = get_user_model()
 
-
 # Create your models here.
+
+
+
+
+
 class Community(models.Model):
     id = models.AutoField(primary_key=True)
     community_type = models.CharField(max_length=255, blank=True, null=True)
@@ -34,6 +38,7 @@ class Community(models.Model):
     text_color = models.CharField(default='#000000', max_length=7)
     post_background_color = models.CharField(default='#ffffff', max_length=7)
     mod = models.ManyToManyField(User, blank=True, related_name='mod')
+
 
     class Meta:
         ordering = ['id']
@@ -94,6 +99,18 @@ class MemberInfo(models.Model):
     def __role__(self):
         return self.role
 
+    def member_name(self):
+        member = Member.objects.filter(member_info__id=self.id).first()
+        if member:
+            return member.user.username
+        return "$NOT_FOUND$"
+
+    def member_id(self):
+        member = Member.objects.filter(member_info__id=self.id).first()
+        if member:
+            return str(member.user.id)
+        return "$NOT_FOUND$"
+
 
 class Member(models.Model):
     user = models.OneToOneField(User,
@@ -104,12 +121,6 @@ class Member(models.Model):
 
     def __user__(self):
         return self.user.username
-
-    # def __community__(self):
-    #     return ",".join([
-    #         str(p.community.community_type)
-    #         for p in self.member_info.all().order_by('-timestamp')
-    #     ])
 
     def __community__(self):
         return ",".join([

@@ -5,7 +5,6 @@ Tên nhóm chỉ có thể chứa các chữ cái, chữ số, dấu gạch ngan
 
 Tên nhóm chỉ được giới hạn ở chữ và số ASCII, dấu gạch nối và dấu chấm câu. Vì mã này tạo tên nhóm trực tiếp từ tên phòng, nó sẽ không thành công nếu tên phòng chứa bất kỳ ký tự nào không hợp lệ trong tên nhóm. 
 
-docker run -p 6379:6379 -d redis:5
 kidzrancevn
 
 git push -u reddit main
@@ -47,3 +46,22 @@ choses item has highest or fresh rating on this user then choese it for recommen
         GET  /api/users/alice/accessibles/
 
 adb reverse tcp:8000 tcp:8000
+docker run -p 6379:6379 -d redis:5
+
+
+message encrypt in WebSocket
+
+It is wrong. You must first encrypt the message and then send it via a socket.
+Please follow the following steps.
+1. Pass plain messages between the systems to make sure that your communication is working fine.
+2. Encrypt a message on one system and then decrypt it (on the same system) to make sure that your encryption/decryption algorithm is working fine.
+Once you are sure that your communication and encryption/decryption is working fine, do the following:
+1. Create a message
+2. Encrypt it
+3. Send the encrypted message
+4. Receive the encrypted message on the other end
+5. Decrypt the message
+I hope it helps.
+
+
+e, d client < 105 for better precision

@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 
 from account.models import Profile
 from community.models import Community, CommunityBlackList, CommunityHistory, Member, MemberInfo, CommunityBlackListDetail, BlackListType
-from post.models import PositivePoint
+from post.models import PositivePoint, Post
 from post.serializers import CommunityGraphSerializer, CommunitySerializer
 from redditv1.message import Message
 from redditv1.name import Role
@@ -22,6 +22,7 @@ import datetime
 from service.post.post_service import timestamp_in_the_past_by_day
 from functools import reduce
 import operator
+
 
 User = get_user_model()
 
@@ -344,7 +345,7 @@ def mod_action(request):
                     member=member, community=community).first()
                 print('has member info, old role: ', current_member.role)
                 print('action:', action)
-                if action == 'add':
+                if action == 'promote':
                     print('current role', current_member.role, Role.MOD)
                     if current_member.role == Role.MEMBER:
                         history.old_role = current_member.role
@@ -355,7 +356,7 @@ def mod_action(request):
                         history.timestamp = timezone.now()
                         history.save()
                         community.save()
-                elif action == 'remove':
+                elif action == 'demote':
                     if current_member.role == Role.MOD:
                         print('demote')
                         history.old_role = current_member.role
@@ -487,6 +488,30 @@ def get_followed_community_by_username(request, username):
                                                ModelName.COMMUNITY)
     return Response({Message.DETAIL: Message.SC_BAD_RQ},
                             status=400)
+
+def hidden_post(request):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    post_id = request.data.get('post_id')
+    post = Post.objects.filter(id=post_id).first()
+    if post:
+        author = post.user
+        if request.user == author:
+            post.hidden = True
+            post.save()
+            return Response({Message.SC_OK}, status=200)
+        community = post.community
+        member = Member.objects.filter(user=request.user).first()
+        member_info = member.member_info.filter(community=community).first()
+        if member_info:
+            if member_info.role == "MOD" or member_info.role == "ADMIN":
+                post.hidden_in_community = True
+                post.save()
+                return Response({Message.SC_OK}, status=200)
+        return Response({Message.SC_PERMISSION_DENIED}, status=403)
+    return Response({Message.SC_NOT_FOUND}, status=400)
+
+
 
 def timestamp_in_the_past_by_day(days):
     return timezone.now() - datetime.timedelta(days)

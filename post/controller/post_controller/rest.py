@@ -182,6 +182,14 @@ def get_list_post_by_up_vote(request):
 
 
 @api_view(["GET"])
+def get_post_vote(request, post_id):
+    post = Post.objects.filter(id=post_id).first()
+    if post:
+        return Response({"up_vote": post.up_vote.count(), "down_vote": post.down_vote.count()})
+    return Response({Message.SC_NOT_FOUND}, status=200)
+
+
+@api_view(["GET"])
 def user_comment_post(request):
     """
     ``GET`` Return list commented by current user

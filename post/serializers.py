@@ -40,14 +40,15 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             'user', 'id', 'title', 'content', 'parent', 'timestamp', 'image',
-            'timestamp','unix_timestamp', 'up_vote', 'down_vote', 'community_type', 'type',
-            'view_count', 'point', 'state','current_vote'
+            'timestamp', 'unix_timestamp', 'up_vote', 'down_vote',
+            'community_type', 'type', 'view_count', 'point', 'state',
+            'current_vote'
         ]
 
     @staticmethod
     def get_up_vote(obj):
         return obj.up_vote.count()
-    
+
     def get_current_vote(self, obj):
         user = None
         request = self.context.get("request")
@@ -59,7 +60,7 @@ class PostSerializer(serializers.ModelSerializer):
             if Post.objects.filter(down_vote=user, id=obj.id):
                 return "down_vote"
         return "None"
-    
+
     @staticmethod
     def get_down_vote(obj):
         return obj.down_vote.count()
@@ -142,7 +143,7 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = [
             'content', 'username', 'post', 'parent', 'id', 'up_vote',
-            'down_vote', 'timestamp', 'point', 'level', 'state','avatar'
+            'down_vote', 'timestamp', 'point', 'level', 'state', 'avatar'
         ]
 
     @staticmethod
@@ -220,6 +221,9 @@ class CommunitySerializer(serializers.ModelSerializer):
     follower = serializers.SerializerMethodField(read_only=True)
     parent = serializers.SerializerMethodField(read_only=True)
     is_creator = serializers.SerializerMethodField(read_only=True)
+    last_active = serializers.SerializerMethodField(read_only=True)
+    # background = serializers.SerializerMethodField(read_only=True)
+    # avatar = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Community
@@ -229,7 +233,7 @@ class CommunitySerializer(serializers.ModelSerializer):
             'timestamp', 'rule', 'member_count', 'background_color',
             'title_background_color', 'description_background_color',
             'button_background_color', 'button_text_color', 'text_color',
-            'post_background_color'
+            'post_background_color', 'last_active'
         ]
 
     @staticmethod
@@ -251,6 +255,18 @@ class CommunitySerializer(serializers.ModelSerializer):
         if obj.user:
             return obj.user.count()
         return 0
+    
+    # @staticmethod
+    # def get_background(obj):
+    #     if obj.background:
+    #         return obj.background.url
+    #     return "/media/white_image.jpg"
+
+    # @staticmethod
+    # def get_avatar(obj):
+    #     if obj.avatar:
+    #         return obj.avatar.url
+    #     return "/media/user.png"
 
     def get_is_following(self, obj):
         is_following = False
@@ -277,6 +293,15 @@ class CommunitySerializer(serializers.ModelSerializer):
         if obj.creator == request.user:
             return True
         return False
+
+    @staticmethod
+    def get_last_active(obj):
+        # post = Post.objects.filter(community=obj).latest('timestamp')
+        post = Post.objects.filter(community__community_type=obj.community_type
+                                   ).order_by('timestamp').first()
+        if post:
+            return post.timestamp
+        return obj.timestamp
 
 
 class PostTypeSerializer(serializers.ModelSerializer):
