@@ -299,12 +299,12 @@ def get_count_by_user_vote(request, username):
     """
     ``GET`` Return total number of voted by current user
     """
-    if request.user.is_authenticated:
-        up_vote_count = Post.objects.filter(up_vote__username=username).count()
-        down_vote_count = Post.objects.filter(
+
+    up_vote_count = Post.objects.filter(up_vote__username=username).count()
+    down_vote_count = Post.objects.filter(
             down_vote__username=username).count()
-        return Response({"Total": up_vote_count + down_vote_count})
-    return Response({Message.SC_NO_AUTH}, status=401)
+    return Response({"Total": up_vote_count + down_vote_count})
+    # return Response({Message.SC_NO_AUTH}, status=401)
 
 
 @api_view(["GET", "POST"])
@@ -319,36 +319,41 @@ def check_vote(request):
             "id": "5"
         }
     """
-    if not request.user.is_authenticated:
-        return Response({Message.SC_NO_AUTH}, status=401)
+    # if not request.user.is_authenticated:
+    #     return Response({Message.SC_NO_AUTH}, status=401)
     post_id = request.data.get('id')
+    print("post_id", post_id)
     if post_id:
         post = Post.objects.filter(id=post_id).first()
-        number_of_up_vote = post.up_vote.count()
-        number_of_down_vote = post.down_vote.count()
-        print("post_id", post_id)
-        if not post:
-            return Response({Message.SC_NOT_FOUND}, status=200)
-        if Post.objects.filter(up_vote=request.user, id=post_id):
-            return Response({
-                "current_vote": "up_vote",
-                "number_of_up_vote": number_of_up_vote,
-                "number_of_down_vote": number_of_down_vote
-            })
-        if Post.objects.filter(down_vote=request.user, id=post_id):
-            return Response({
-                "current_vote": "down_vote",
-                "number_of_up_vote": number_of_up_vote,
-                "number_of_down_vote": number_of_down_vote
-            })
-        return Response(
-            {
-                "current_vote": "",
-                "number_of_up_vote": number_of_up_vote,
-                "number_of_down_vote": number_of_down_vote
-            },
-            status=200)
-    return Response({Message.SC_BAD_RQ}, status=400)
+        print("post", post)
+        if post:
+            number_of_up_vote = post.up_vote.count()
+            print("vote", number_of_up_vote)
+            number_of_down_vote = post.down_vote.count()
+            if not post:
+                return Response({Message.SC_NOT_FOUND}, status=200)
+            if request.user.is_authenticated:
+                if Post.objects.filter(up_vote=request.user, id=post_id):
+                    return Response({
+                        "current_vote": "up_vote",
+                        "number_of_up_vote": number_of_up_vote,
+                        "number_of_down_vote": number_of_down_vote
+                    }, status=200)
+                if Post.objects.filter(down_vote=request.user, id=post_id):
+                    return Response({
+                        "current_vote": "down_vote",
+                        "number_of_up_vote": number_of_up_vote,
+                        "number_of_down_vote": number_of_down_vote
+                    }, status=200)
+            return Response(
+                    {
+                        "number_of_up_vote": number_of_up_vote,
+                        "number_of_down_vote": number_of_down_vote
+                    }, status=200)
+        print("it reach here")
+        return Response({Message.SC_NOT_FOUND}, status=200)
+
+    return Response({Message.SC_NOT_FOUND}, status=400)
 
 
 @api_view(["GET", "POST"])
@@ -432,12 +437,11 @@ def count_post_by_user(request, username):
     """
     ``GET, POST`` Return total number of posted post by provied user
     """
-    if request.user.is_authenticated:
-        count = Post.objects.filter(user__username=username).count()
-        if count:
-            return Response({"Total": count}, status=200)
-        return Response({Message.SC_NOT_FOUND}, status=400)
-    return Response({Message.SC_NO_AUTH}, status=401)
+
+    count = Post.objects.filter(user__username=username).count()
+    if count:
+        return Response({"Total": count}, status=200)
+    return Response({Message.SC_NOT_FOUND}, status=400)
 
 
 @api_view(["GET"])

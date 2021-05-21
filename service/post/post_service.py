@@ -20,6 +20,12 @@ import datetime
 from notify.models import EntityType, Notification, NotificationChange, NotificationObject, UserNotify, CommunityNotify
 from django.contrib.auth import get_user_model
 import random
+from operator import itemgetter
+import pandas as pd
+from surprise import Dataset
+from surprise import Reader
+from surprise import KNNWithMeans
+# from track.models import CommunityTrack, Track
 
 User = get_user_model()
 
@@ -51,7 +57,7 @@ def get_post_list(request):
     sort = request.data.get("sort")
     page_size = request.data.get("page_size")
     # this algorithm
-    if sort == 'best':
+    if sort == 'hot' or not sort:
         if request.user.is_authenticated:
             track = Track.objects.filter(user=request.user).first()
             if not track:
@@ -69,29 +75,102 @@ def get_post_list(request):
                     '-point')
             return get_paginated_queryset_response(query, request, page_size,
                                                    ModelName.POST)
+        else:
+            member = Community.objects.all()
+            array = []
+            for x in Community.objects.all():
+                array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+                # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
+
+            top_community = sorted(array, key=lambda k: k['count'])[10:]
+            community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
+            post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
+            # print(post.count())
+            return get_paginated_queryset_response(post_list, request, 10,
+                                                ModelName.POST)
+
+    if sort =='best':
+        if request.user.is_authenticated:
+            rating_list_p2 = []
+            user_list_p2 = []
+            item_list_p2 = []
+            recommend_list = []
+            post_list = Post.objects.all()
+            for post in post_list:
+                vote_list = post.vote.all()
+                for v in vote_list:
+                    rating_list_p2.append(v.get_rating())
+                    user_list_p2.append(v.user.id)
+                    item_list_p2.append(post.id)
+            if len(item_list_p2) == len(user_list_p2) == len(rating_list_p2):
+                print("we got what we want lol!")
+            rating_dict = {
+                "item": item_list_p2,
+                "user": user_list_p2,
+                "rating": rating_list_p2
+            }
+            df = pd.DataFrame(rating_dict)
+            reader = Reader(rating_scale=(1, 5))
+            # Loads Pandas dataframe
+            data = Dataset.load_from_df(df[["user", "item", "rating"]], reader)
+            sim_options = {
+                "name": "cosine",
+                "user_based": False,  # Compute  similarities between items
+            }
+            algo = KNNWithMeans(sim_options=sim_options)
+            trainingSet = data.build_full_trainset()
+            algo.fit(trainingSet)
+            prediction = algo.predict(4, 34)
+            print(prediction)
+            for p in post_list:
+                rt_dict = {}
+                rt_dict["id"] = p.id
+                rt_dict["point"] = algo.predict(request.user.id, p.id).est
+                recommend_list.append(rt_dict)
+            recommend_list.sort(key=lambda item: item.get("point"), reverse=True)
+            print(recommend_list[0:10])
+            post_id_list = []
+            post_list = []
+            post_list_1 = []
+            for r in recommend_list[0:10]:
+                post_list_1.append(Post.objects.filter(pk=r["id"]).first())
+            return get_paginated_queryset_response(post_list_1, request, 10,
+                                                ModelName.POST)
     top_community = Community.objects.filter(state=True).annotate(
         user_count=Count('user')).order_by('-user_count')
-    if not sort or sort == 'hot':
-        sort = '-point'
+
     if sort == 'timestamp':
-        sort = '-timestamp'
-    if request.user.is_authenticated:
-        # community need to be fix right here!
-        top_community = Community.objects.filter(user=request.user).union(
-            Community.objects.filter(community__state=True)).union(
-                Community.objects.filter(creator=request.user)).distinct()
-        query = Post.objects.filter(user=request.user).union(
-            Post.objects.filter(community__user=request.user)).union(
-                Post.objects.filter(user__following=Profile.objects.filter(
-                    user=request.user).first())).union(
-                        Post.objects.filter(community__state=True).distinct()
-                    ).distinct().order_by(sort)
-        return get_paginated_queryset_response(query, request, page_size,
-                                               ModelName.POST)
-    query = Post.objects.filter(community__state=True,
-                                community__in=top_community, hidden=False)
-    return get_paginated_queryset_response(query, request, page_size,
-                                           ModelName.POST)
+        if request.user.is_authenticated:
+            track = Track.objects.filter(user=request.user).first()
+            if not track:
+                track = Track.objects.create(user=request.user)
+                track.save()
+            community_track = CommunityTrack.objects.filter(
+                track=track).order_by('-timestamp')[0:4]
+            list_community_track = []
+            for c in community_track:
+                list_community_track.append(c.community.community_type)
+            community = Community.objects.filter(
+                community_type__in=list_community_track)
+            query = Post.objects.filter(
+                community__community_type__in=list_community_track).order_by(
+                    '-timestamp')
+            return get_paginated_queryset_response(query, request, page_size,
+                                                   ModelName.POST)
+        else:
+            member = Community.objects.all()
+            array = []
+            for x in Community.objects.all():
+                array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+                # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
+
+            top_community = sorted(array, key=lambda k: k['count'])[10:]
+            community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
+            post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp")
+            # print(post.count())
+            return get_paginated_queryset_response(post_list, request, 10,
+                                                ModelName.POST)
+    return Response({Message.SC_BAD_RQ},status=400)
 
 
 def handle_notification(post):
