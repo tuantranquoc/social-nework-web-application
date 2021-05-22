@@ -31,7 +31,7 @@ class PostSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField(read_only=True)
     point = serializers.SerializerMethodField(read_only=True)
     image = serializers.SerializerMethodField(read_only=True)
-    content = serializers.SerializerMethodField(read_only=True)
+    # content = serializers.SerializerMethodField(read_only=True)
     unix_timestamp = serializers.SerializerMethodField(read_only=True)
     unix_timestamp = serializers.SerializerMethodField(read_only=True)
     current_vote = serializers.SerializerMethodField(read_only=True)
@@ -91,27 +91,27 @@ class PostSerializer(serializers.ModelSerializer):
     def get_point(obj):
         return "%.2f" % obj.point
 
-    def get_content(self, obj):
-        user = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            user = request.user
-        # user =  self.context['request'].user
-        if obj.state == CommentState.PUBLIC:
-            return obj.content
-        if obj.state == CommentState.HIDDEN:
-            if obj.community.creator == user:
-                return obj.content
-            if user.is_authenticated:
-                member = Member.objects.filter(user=user).first()
-                member_info = MemberInfo.objects.filter(
-                    member=member, community=obj.community).first()
-                if member_info:
-                    if member_info.role == Role.MOD:
-                        return obj.content
-            return ["HIDDEN"]
-        if obj.state == CommentState.DELETED:
-            return ["Post has been delete by owner"]
+    # def get_content(self, obj):
+    #     user = None
+    #     request = self.context.get("request")
+    #     if request and hasattr(request, "user"):
+    #         user = request.user
+    #     # user =  self.context['request'].user
+    #     if obj.state == CommentState.PUBLIC:
+    #         return obj.content
+    #     if obj.state == CommentState.HIDDEN:
+    #         if obj.community.creator == user:
+    #             return obj.content
+    #         if user.is_authenticated:
+    #             member = Member.objects.filter(user=user).first()
+    #             member_info = MemberInfo.objects.filter(
+    #                 member=member, community=obj.community).first()
+    #             if member_info:
+    #                 if member_info.role == Role.MOD:
+    #                     return obj.content
+    #         return ["HIDDEN"]
+    #     if obj.state == CommentState.DELETED:
+    #         return ["Post has been delete by owner"]
 
     def get_image(self, obj):
         user = None

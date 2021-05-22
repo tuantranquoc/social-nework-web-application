@@ -306,6 +306,16 @@ def get_count_by_user_vote(request, username):
     return Response({"Total": up_vote_count + down_vote_count})
     # return Response({Message.SC_NO_AUTH}, status=401)
 
+@api_view(["GET"])
+def get_post_list_by_following_profile(request):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    user = request.user
+    following = user.profile.follower.all()
+    post_list = Post.objects.filter(user__in=following).order_by("-point")
+    return get_paginated_queryset_response(post_list, request, 10,
+                                                ModelName.POST)
+
 
 @api_view(["GET", "POST"])
 def check_vote(request):

@@ -371,6 +371,8 @@ def recommend_user_from_profile(request, username):
         u = u.exclude(user__profile__in=following).exclude(user=request.user)
         return get_paginated_queryset_response(u, request, page_size,
                                                ModelName.PROFILE)
+    return Response({Message.SC_NO_AUTH}, status=401)
+
 
 
 def recommend_user_from_feed(request):
@@ -398,7 +400,7 @@ def recommend_user_from_feed(request):
                 count=Count("follower")).order_by("-count")
         return get_paginated_queryset_response(profile_list, request,
                                                page_size, ModelName.PROFILE)
-    return Response({}, status=400)
+    return Response({Message.SC_NO_AUTH}, status=401)
 
 
 def recommend_user_from_global(request):
@@ -411,7 +413,7 @@ def recommend_user_from_global(request):
                 user=request.user).order_by("-count")
         return get_paginated_queryset_response(profiles, request, page_size,
                                                ModelName.PROFILE)
-    return Response({}, status=400)
+    return Response({Message.SC_NO_AUTH}, status=401)
 
 
 def spilt_content(hash_tag):

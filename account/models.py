@@ -77,6 +77,7 @@ post_save.connect(user_signal_save, sender=User)
 
 
 class CustomColor(models.Model):
+    id = models.AutoField(primary_key=True)
     background_color = models.CharField(default='#30363C', max_length=7)
     title_background_color = models.CharField(default='#30363C', max_length=7)
     description_background_color = models.CharField(default='#30363C',

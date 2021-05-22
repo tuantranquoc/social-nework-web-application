@@ -5,6 +5,8 @@ from .models import Post, PositivePoint, Comment, PostType, View, CommentPoint, 
 
 
 class PostAdmin(admin.ModelAdmin):
+    search_fields = ['id']
+
     list_display = [
         '__id__', '__title__', '__community__', '__user__', '__up_vote__', '__down_vote__',
        '__type__', '__view__', '__point__','__state__','hidden','hidden_in_community', '__time__'
