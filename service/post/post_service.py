@@ -96,12 +96,17 @@ def get_post_list(request):
             item_list_p2 = []
             recommend_list = []
             post_list = Post.objects.all()
-            for post in post_list:
-                vote_list = post.vote.all()
-                for v in vote_list:
-                    rating_list_p2.append(v.get_rating())
-                    user_list_p2.append(v.user.id)
-                    item_list_p2.append(post.id)
+            # for post in post_list:
+            #     vote_list = post.vote.all()
+            #     for v in vote_list:
+            #         rating_list_p2.append(v.get_rating())
+            #         user_list_p2.append(v.user.id)
+            #         item_list_p2.append(post.id)
+            uv_list = UserVote.objects.filter(user=request.user)
+            for uv in uv_list:
+                rating_list_p2.append(uv.get_rating())
+                user_list_p2.append(uv.user.id)
+                item_list_p2.append(uv.post.id)
             if len(item_list_p2) == len(user_list_p2) == len(rating_list_p2):
                 print("we got what we want lol!")
             rating_dict = {
@@ -251,6 +256,8 @@ def handle_notification(post):
         notification.save()
 
 
+
+
 def create_post(request):
     """
     data = {"title":"","content":"","community":"","type":"","image":"optional"}
@@ -361,6 +368,12 @@ def find_post_by_id(request, post_id):
                 check_community_track(track, post.community, request.user)
                 serializer = PostSerializer(post, context={"request": request})
                 return Response(serializer.data, status=200)
+            if request.user.is_authenticated:
+                user_vote =  UserVote.objects.filter(user=request.user, post=post).first()
+                if not user_vote:
+                    UserVote.objects.create(user=request.user, post=post, view=1)
+                else:
+                    user_vote.view = 1
             track = Track.objects.filter(user=request.user).first()
             check_community_track(track, post.community, request.user)
             view = View.objects.filter(user=request.user, post=post).first()
@@ -469,6 +482,14 @@ def action(request):
                 track = Track.objects.filter(user=request.user).first()
                 check_community_track(track, post.community, request.user)
                 return Response({Message.SC_OK}, status=200)
+            user_vote = UserVote.objects.filter(user=request.user, post=post).first()
+            if not user_vote:
+                UserVote.objects.create(user=request.user, post=post, view=1, like=1)
+            else:
+                user_vote.view = 1
+                user_vote.like = 1
+                user_vote.dislike = 0
+                user_vote.save()
             post.up_vote.add(request.user)
             post.down_vote.remove(request.user)
             positive_point.point = positive_point.point + 2
@@ -488,6 +509,16 @@ def action(request):
                                       post.down_vote.count(), post.timestamp)
                 post.save()
                 return Response({Message.SC_OK}, status=200)
+            user_vote = UserVote.objects.filter(user=request.user, post=post).first()
+
+            if not user_vote:
+                UserVote.objects.create(user=request.user, post=post, view=1, like=1)
+            else:
+                user_vote.view = 1
+                user_vote.dislike = 1
+                user_vote.like = 0
+                user_vote.save()
+                
             post.down_vote.add(request.user)
             post.up_vote.remove(request.user)
             positive_point.point = positive_point.point - 2

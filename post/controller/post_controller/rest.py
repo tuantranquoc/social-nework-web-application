@@ -811,3 +811,22 @@ def get_item_rating_1(request):
         return get_paginated_queryset_response(post_list_1, request, 10,
                                                ModelName.POST)
     return Response({Message.SC_NO_AUTH}, status=401)
+
+
+@api_view(["GET"])
+def collect_post_data(request):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    post_list = Post.objects.all()
+    for p in post_list:
+        for u in p.up_vote.all():
+            if not UserVote.objects.filter(user=u, post=p):
+                print("USER NAME up_vote:", u.username)
+                UserVote.objects.create(user=u, post=p,report=0, view=1, dislike=0, share=0, like=1)
+        for u in p.down_vote.all():
+            if not UserVote.objects.filter(user=u, post=p):
+                print("USER NAME down_vote:", u.username)
+                UserVote.objects.create(user=u, post=p, report=0, view=1, dislike=1, share=0, like=0)
+
+    return Response({"1"}, status=200)
+        

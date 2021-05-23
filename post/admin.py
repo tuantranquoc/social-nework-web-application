@@ -59,7 +59,7 @@ class ViewAdmin(admin.ModelAdmin):
 @admin.register(UserVote)
 class UserVoteAdmin(admin.ModelAdmin):
     search_fields = ['id']
-    list_display = ['id', 'user', 'report','view','like','share','get_rating']
+    list_display = ['id', 'user','post', 'report','view','like','share','dislike','get_rating']
 
 
 admin.site.register(Post, PostAdmin)

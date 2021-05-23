@@ -40,5 +40,6 @@ urlpatterns = [
     path('reset', post_api.reset),
     path('community/<str:community_type>', post_api.find_post_by_community),
     path('recommend', post_api.get_item_rating_1),
-    path('profile', post_api.get_post_list_by_following_profile)
+    path('profile', post_api.get_post_list_by_following_profile),
+    path('collect-data', post_api.collect_post_data)
 ]

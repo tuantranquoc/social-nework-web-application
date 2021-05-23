@@ -13,6 +13,10 @@ class UserVote(models.Model):
                              on_delete=models.CASCADE,
                              null=True,
                              blank=True)
+    post = models.ForeignKey("Post",
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
     report = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
     dislike = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
     view = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
@@ -25,6 +29,8 @@ class UserVote(models.Model):
 
     def get_rating(self):
         return 2 + self.view + self.like + self.share - self.dislike - self.report
+
+
 
 
 class Post(models.Model):
@@ -59,7 +65,7 @@ class Post(models.Model):
                              default='public')
     hidden = models.BooleanField(default=False)
     hidden_in_community= models.BooleanField(default=False)
-    vote = models.ManyToManyField(UserVote, blank=True)
+    # vote = models.ManyToManyField(UserVote, blank=True)
 
     class Meta:
         ordering = ['-point']
@@ -249,3 +255,6 @@ class View(models.Model):
 
     def __old_timestamp__(self):
         return self.old_timestamp
+
+
+
