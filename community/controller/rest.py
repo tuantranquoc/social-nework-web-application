@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 
 from account.models import Profile
-from community.models import Community
+from community.models import Community, Member
 from post.models import PositivePoint
 from post.serializers import CommunityGraphSerializer, CommunitySerializer
 from redditv1.message import Message
@@ -16,6 +16,8 @@ from django.utils import timezone
 from function.file import get_image
 import datetime
 from service.community import community_service
+from function.paginator import get_paginated_queryset_response
+from redditv1.name import ModelName
 
 User = get_user_model()
 
@@ -207,11 +209,25 @@ def hidden_post(request):
 
 
 
+# @api_view(['GET'])
+# def get_followed_community_by_username(request, username):
+#     return community_service.get_followed_community_by_username(
+#         request, username)
+
+
 @api_view(['GET'])
 def get_followed_community_by_username(request, username):
-    return community_service.get_followed_community_by_username(
-        request, username)
-
+    user = User.objects.filter(username=username).first()
+    print("un", username)
+    if user:
+        member = Member.objects.filter(user=user).first()
+        if member:
+            member_info = member.member_info.all()
+            community_list = Community.objects.filter(community_type__in=[x.community.community_type for x in member_info])
+            return get_paginated_queryset_response(community_list, request,10,ModelName.COMMUNITY)
+    return Response({Message.SC_NOT_FOUND}, status=200)
 
 def timestamp_in_the_past_by_day(days):
     return timezone.now() - datetime.timedelta(days)
+
+

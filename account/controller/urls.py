@@ -4,6 +4,9 @@ from account.controller import rest as profile_api
 urlpatterns = [
     path('', profile_api.profile_current_detail_view),
     path('<str:username>', profile_api.profile_detail_view),
+    path('<str:username>/following', profile_api.get_following_profile),
+        path('<str:username>/follower', profile_api.get_follower_profile),
+
     path('register/', profile_api.register_via_react_view),
     path('update/', profile_api.profile_update_via_react_view),
     path('action/', profile_api.profile_action),

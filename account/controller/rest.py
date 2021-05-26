@@ -43,6 +43,29 @@ def profile_detail_view(request, username):
     """
     return profile_service.profile_detail_view(request, username)
 
+@api_view(["GET"])
+def get_following_profile(request, username):
+    """
+    ``GET`` view profile detail info by provied username.
+    """
+    user = User.objects.filter(username=username).first()
+    if user:
+        profiles = Profile.objects.filter(follower=user)
+        return get_paginated_queryset_response(profiles,request, 10, ModelName.PROFILE)
+    return Response({Message.SC_NOT_FOUND}, status=200)
+
+
+@api_view(["GET"])
+def get_follower_profile(request, username):
+    """
+    ``GET`` view profile detail info by provied username.
+    """
+    user = User.objects.filter(username=username).first()
+    if user:
+        user_list = user.profile.follower.all()
+        profiles = Profile.objects.filter(user__in=user_list)
+        return get_paginated_queryset_response(profiles,request, 10, ModelName.PROFILE)
+    return Response({Message.SC_NOT_FOUND}, status=200)
 
 @api_view(["GET", "POST"])
 def profile_current_detail_view(request):

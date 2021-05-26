@@ -17,6 +17,6 @@ urlpatterns = [
     path('blacklist', community_api.blacklist),
     path('post/hidden', community_api.hidden_post),
 
-    path('user/list/<str:username>',
+    path('<str:username>/followed',
          community_api.get_followed_community_by_username),
 ]
