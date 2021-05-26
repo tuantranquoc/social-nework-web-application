@@ -26,6 +26,14 @@ class Profile(models.Model):
                                         blank=True,
                                         null=True,
                                         on_delete=models.CASCADE)
+    # background_color = models.CharField(default='30363C', max_length=7)
+    # title_background_color = models.CharField(default='30363C', max_length=7)
+    # description_background_color = models.CharField(default='30363C',
+    #                                                 max_length=7)
+    # button_background_color = models.CharField(default='30363C', max_length=7)
+    # button_text_color = models.CharField(default='30363C', max_length=7)
+    # text_color = models.CharField(default='30363C', max_length=7)
+    # post_background_color = models.CharField(default='30363C', max_length=7)
     """
     profile_obj = Profile.objects.first() get all the user that following you
     follower = profile_obj.follower.all()
@@ -52,10 +60,10 @@ class Profile(models.Model):
         return self.follower.count()
 
 
-class FollowerRelation(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now_add=True)
+# class FollowerRelation(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+#     timestamp = models.DateTimeField(auto_now_add=True)
 
 
 def user_did_save(sender, instance, created, *args, **kwargs):
