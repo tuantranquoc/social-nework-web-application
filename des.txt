@@ -68,3 +68,70 @@ e, d client < 105 for better precision
 
 
 not loai bo recent ben front end => dung sort = timestamp
+
+#Create db
+az postgres up --resource-group DefaultResourceGroup-SEA --location westus2 --sku-name B_Gen5_1 --server-name social-network --database-name pollsdb --admin-user tuantran --admin-password Dongha2030@ --ssl-enforcement Enabled
+
+#create appservice
+az webapp up --resource-group DefaultResourceGroup-SEA --location westus2 --plan DjangoPostgres-tutorial-plan --sku B1 --name k03q
+
+az webapp config appsettings set --resource-group DefaultResourceGroup-SEA --name k03q --settings  DBHOST="social-network" DBNAME="pollsdb" DBUSER="tuantran" DBPASS="Dongha2030@"
+
+res-group: DefaultResourceGroup-SEA
+server: social-network 
+admin: tuantran
+password: Dongha2030@
+dbname: pollsdb 
+location: westus2 
+
+
+{
+  "connectionStrings": {
+    "ado.net": "Server=social-network.postgres.database.azure.com;Database=pollsdb;Port=5432;User Id=tuantran@social-network;Password=Dongha2030@;",
+    "jdbc": "jdbc:postgresql://social-network.postgres.database.azure.com:5432/pollsdb?user=tuantran@social-network&password=Dongha2030@",
+    "jdbc Spring": "spring.datasource.url=jdbc:postgresql://social-network.postgres.database.azure.com:5432/pollsdb  spring.datasource.username=tuantran@social-network  spring.datasource.password=Dongha2030@",
+    "node.js": "var client = new pg.Client('postgres://tuantran@social-network:Dongha2030@@social-network.postgres.database.azure.com:5432/pollsdb');",
+    "php": "host=social-network.postgres.database.azure.com port=5432 dbname=pollsdb user=tuantran@social-network password=Dongha2030@",
+    "psql_cmd": "psql --host=social-network.postgres.database.azure.com --port=5432 --username=tuantran@social-network --dbname=pollsdb",
+    "python": "cnx = psycopg2.connect(database='pollsdb', user='tuantran@social-network', host='social-network.postgres.database.azure.com', password='Dongha2030@', port='5432')",
+    "ruby": "cnx = PG::Connection.new(:host => 'social-network.postgres.database.azure.com', :user => 'tuantran@social-network', :dbname => 'pollsdb', :port => '5432', :password => 'Dongha2030@')",        
+    "webapp": "Database=pollsdb; Data Source=social-network.postgres.database.azure.com; User Id=tuantran@social-network; Password=Dongha2030@"
+  },
+  "host": "social-network.postgres.database.azure.com",
+  "password": "Dongha2030@",
+  "username": "tuantran@social-network"
+}
+
+
+[
+  {
+    "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+    "slotSetting": false,
+    "value": "True"
+  },
+  {
+    "name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+    "slotSetting": false,
+    "value": "3"
+  },
+  {
+    "name": "DBHOST",
+    "slotSetting": false,
+    "value": "social-network"
+  },
+  {
+    "name": "DBNAME",
+    "slotSetting": false,
+    "value": "pollsdb"
+  },
+  {
+    "name": "DBUSER",
+    "slotSetting": false,
+    "value": "tuantran"
+  },
+  {
+    "name": "DBPASS",
+    "slotSetting": false,
+    "value": "Dongha2030@"
+  }
+]
