@@ -35,6 +35,7 @@ class PostSerializer(serializers.ModelSerializer):
     unix_timestamp = serializers.SerializerMethodField(read_only=True)
     unix_timestamp = serializers.SerializerMethodField(read_only=True)
     current_vote = serializers.SerializerMethodField(read_only=True)
+    community_avatar = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
@@ -42,8 +43,15 @@ class PostSerializer(serializers.ModelSerializer):
             'user', 'id', 'title', 'content', 'parent', 'timestamp', 'image',
             'timestamp', 'unix_timestamp', 'up_vote', 'down_vote',
             'community_type', 'type', 'view_count', 'point', 'state',
-            'current_vote'
+            'current_vote','community_avatar'
         ]
+
+    @staticmethod
+    def get_community_avatar(obj):
+        if obj.community:
+            if obj.community.avatar:
+                return obj.community.avatar.url
+        return None
 
     @staticmethod
     def get_up_vote(obj):

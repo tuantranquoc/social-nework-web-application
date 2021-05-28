@@ -47,7 +47,7 @@ choses item has highest or fresh rating on this user then choese it for recommen
 
 adb reverse tcp:8000 tcp:8000
 docker run -p 6379:6379 -d redis:5
-
+psql -h testmy.postgres.database.azure.com  -U dongha@testmy -d test < test3Schema.sql
 
 message encrypt in WebSocket
 
