@@ -86,7 +86,7 @@ DATABASES = {
     'default': {
         # test3
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'social-network',
+        'NAME': 'pollsdb',
         'USER': 'tuantran@social-network',
         'PASSWORD': 'Dongha2030@',
         'HOST': 'social-network.postgres.database.azure.com',
