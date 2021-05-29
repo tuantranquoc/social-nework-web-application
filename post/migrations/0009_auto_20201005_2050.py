@@ -17,9 +17,9 @@ class Migration(migrations.Migration):
             name='community',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='community.Community'),
         ),
-        migrations.AddField(
-            model_name='post',
-            name='sub_community',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='community.SubCommunity'),
-        ),
+        # migrations.AddField(
+        #     model_name='post',
+        #     name='sub_community',
+        #     field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='community.SubCommunity'),
+        # ),
     ]

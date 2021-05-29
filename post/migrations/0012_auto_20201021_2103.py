@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('post', '0011_remove_post_sub_community'),
+        ('post', '0010_comment_timestamp'),
     ]
 
     operations = [
