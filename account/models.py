@@ -98,7 +98,7 @@ class CustomColor(models.Model):
 
 def save_custom_color(sender, instance, created, *args, **kwargs):
     if created:
-        Profile.objects.get_or_create(profile=instance)
+        CustomColor.objects.get_or_create(profile=instance)
 
 
 # user save will trigger profile save
