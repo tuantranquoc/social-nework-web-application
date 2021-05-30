@@ -2,7 +2,7 @@ from django.urls import path
 from post.controller.post_controller import rest as post_api
 
 urlpatterns = [
-    path('<str:sort>', post_api.post_list_view),
+    path('filter/<str:sort>', post_api.post_list_view),
     path('create', post_api.post_create_api),
     path('<int:post_id>', post_api.find_post_by_id),
     path('delete/', post_api.post_delete_api),
