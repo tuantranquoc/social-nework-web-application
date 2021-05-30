@@ -20,12 +20,17 @@ ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", __file__)
+# import django
+# django.setup()
+
+
 INSTALLED_APPS = [
     'django.contrib.admin', 'django.contrib.auth',
     'django.contrib.contenttypes', 'django.contrib.sessions',
     'django.contrib.messages', 'django.contrib.staticfiles', 'account', 'post',
     'rest_framework', 'community', 'chat', 'corsheaders',
-    'rest_framework.authtoken','track','chatv0','channels','notify'
+    'rest_framework.authtoken','track','chatv0','channels','notify','daphne'
 ]
 
 MIDDLEWARE = [
@@ -40,7 +45,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'redditv1.urls'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

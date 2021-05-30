@@ -518,6 +518,13 @@ def action(request):
                 track = Track.objects.filter(user=request.user).first()
                 check_community_track(track, post.community, request.user)
                 return Response({Message.SC_OK}, status=200)
+                number_of_up_vote = post.up_vote.count()
+                number_of_down_vote = post.down_vote.count()
+                return Response({
+                        "current_vote": "up_vote",
+                        "number_of_up_vote": number_of_up_vote,
+                        "number_of_down_vote": number_of_down_vote
+                    }, status=200)
             user_vote = UserVote.objects.filter(user=request.user, post=post).first()
             if not user_vote:
                 UserVote.objects.create(user=request.user, post=post, view=1, like=1)
@@ -535,7 +542,13 @@ def action(request):
             post.save()
             track = Track.objects.filter(user=request.user).first()
             check_community_track(track, post.community, request.user)
-            return Response({Message.SC_OK}, status=200)
+            number_of_up_vote = post.up_vote.count()
+            number_of_down_vote = post.down_vote.count()
+            return Response({
+                    "current_vote": "up_vote",
+                    "number_of_up_vote": number_of_up_vote,
+                    "number_of_down_vote": number_of_down_vote
+                }, status=200)
         if action == "down_vote":
             if Post.objects.filter(id=post_id, down_vote=request.user):
                 post.down_vote.remove(request.user)
@@ -544,7 +557,13 @@ def action(request):
                 post.point = rank.hot(post.up_vote.count(),
                                       post.down_vote.count(), post.timestamp)
                 post.save()
-                return Response({Message.SC_OK}, status=200)
+                number_of_up_vote = post.up_vote.count()
+                number_of_down_vote = post.down_vote.count()
+                return Response({
+                        "current_vote": "down_vote",
+                        "number_of_up_vote": number_of_up_vote,
+                        "number_of_down_vote": number_of_down_vote
+                    }, status=200)
             user_vote = UserVote.objects.filter(user=request.user, post=post).first()
 
             if not user_vote:
@@ -562,7 +581,13 @@ def action(request):
             post.point = rank.hot(post.up_vote.count(), post.down_vote.count(),
                                   post.timestamp)
             post.save()
-            return Response({Message.SC_OK}, status=200)
+            number_of_up_vote = post.up_vote.count()
+            number_of_down_vote = post.down_vote.count()
+            return Response({
+                    "current_vote": "down_vote",
+                    "number_of_up_vote": number_of_up_vote,
+                    "number_of_down_vote": number_of_down_vote
+                }, status=200)
     return Response({Message.SC_BAD_RQ}, status=400)
 
 

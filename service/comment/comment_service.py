@@ -145,7 +145,9 @@ def comment_action(request):
             comment.up_vote.add(request.user)
             comment.down_vote.remove(request.user)
             comment_point_update(comment)
-            return Response(Message.SC_OK, status=200)
+            number_of_up_vote = comment.first().up_vote.all().count()
+            number_of_down_vote = comment.first().down_vote.all().count()
+            return Response({"current_vote":"up_vote","number_of_up_vote": number_of_up_vote, "number_of_down_vote": number_of_down_vote})
         if action == "down_vote":
             if Comment.objects.filter(id=comment_id, down_vote=request.user):
                 comment.down_vote.remove(request.user)
@@ -155,7 +157,9 @@ def comment_action(request):
             comment.up_vote.remove(request.user)
             comment.down_vote.add(request.user)
             comment_point_update(comment)
-            return Response(Message.SC_OK, status=200)
+            number_of_up_vote = comment.first().up_vote.all().count()
+            number_of_down_vote = comment.first().down_vote.all().count()
+            return Response({"current_vote":"down_vote","number_of_up_vote": number_of_up_vote, "number_of_down_vote": number_of_down_vote})
     return Response(Message.SC_BAD_RQ, status=400)
 
 

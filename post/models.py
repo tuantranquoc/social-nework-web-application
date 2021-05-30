@@ -8,27 +8,6 @@ User = get_user_model()
 
 
 # Create your models here.
-class UserVote(models.Model):
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             null=True,
-                             blank=True)
-    post = models.ForeignKey("Post",
-                             on_delete=models.CASCADE,
-                             null=True,
-                             blank=True)
-    report = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
-    dislike = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
-    view = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
-    like = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
-    share = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
-
-    def __str__(self):
-        # return ("User ratting" + " "  + self.user.username)
-        return ("Vote id" + " " + str(self.id) + " " + self.user.username)
-
-    def get_rating(self):
-        return 2 + self.view + self.like + self.share - self.dislike - self.report
 
 
 
@@ -112,6 +91,27 @@ class Post(models.Model):
     #     return self.hidden
 
 
+class UserVote(models.Model):
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    post = models.ForeignKey(Post,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
+    report = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    dislike = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    view = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    like = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    share = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+
+    def __str__(self):
+        # return ("User ratting" + " "  + self.user.username)
+        return ("Vote id" + " " + str(self.id) + " " + self.user.username)
+
+    def get_rating(self):
+        return 2 + self.view + self.like + self.share - self.dislike - self.report
 
 
 
