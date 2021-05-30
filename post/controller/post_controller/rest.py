@@ -26,7 +26,7 @@ User = get_user_model()
 
 
 @api_view(["GET", "POST"])
-def post_list_view(request):
+def post_list_view(request, sort):
     """
     ``GET`` or ``POST``  Return lists all post where being sort as ``BEST`` or ``HOT`` from current ``User``
 
@@ -39,7 +39,7 @@ def post_list_view(request):
         }
     """
 
-    return post_service.get_post_list(request)
+    return post_service.get_post_list(request, sort)
 
 
 @api_view(["POST"])

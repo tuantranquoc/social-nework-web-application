@@ -15,7 +15,7 @@ SECRET_KEY = '-$4r+c*pwl8-$#0-sl*dm8+u_j@%q5ad55gfb-f$v!8!5epk*z'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOST = ['127.0.0.1', 'localhost']
-ALLOWED_HOSTS = ['k03q.azurewebsites.net']
+ALLOWED_HOSTS = ['k03q.azurewebsites.ne','127.0.0.1']
 CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
