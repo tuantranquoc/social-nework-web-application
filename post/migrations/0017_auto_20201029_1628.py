@@ -7,15 +7,10 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('post', '0016_auto_20201029_1530'),
+        ('post', '0013_auto_20201029_1522'),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='post',
-            name='view',
-            field=models.IntegerField(default=0),
-        ),
         migrations.AlterField(
             model_name='comment',
             name='post',

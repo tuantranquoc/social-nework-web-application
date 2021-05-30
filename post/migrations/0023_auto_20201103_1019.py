@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('post', '0022_auto_20201103_0851'),
+        ('post', '0021_remove_view_new_timestamp'),
     ]
 
     operations = [

@@ -13,11 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='post',
-            old_name='view',
-            new_name='view_count',
-        ),
         migrations.CreateModel(
             name='View',
             fields=[

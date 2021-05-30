@@ -89,7 +89,7 @@ def get_post_list(request, sort):
                 community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
                 post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp","-point")
                 
-                return get_paginated_queryset_response(post_list, request, 10,
+                return get_paginated_queryset_response(post_list, request, page_size,
                                                     ModelName.POST)
             return get_paginated_queryset_response(query, request, page_size,
                                                    ModelName.POST)
@@ -105,7 +105,7 @@ def get_post_list(request, sort):
             community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
             post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
             # print(post.count())
-            return get_paginated_queryset_response(post_list, request, 10,
+            return get_paginated_queryset_response(post_list, request, page_size,
                                                 ModelName.POST)
 
     if sort =='best':
@@ -158,7 +158,7 @@ def get_post_list(request, sort):
             post_list_1 = []
             for r in recommend_list[0:10]:
                 post_list_1.append(Post.objects.filter(pk=r["id"]).first())
-            return get_paginated_queryset_response(post_list_1, request, 10,
+            return get_paginated_queryset_response(post_list_1, request, page_size,
                                                 ModelName.POST)
     top_community = Community.objects.filter(state=True).annotate(
         user_count=Count('user')).order_by('-user_count')
@@ -194,7 +194,7 @@ def get_post_list(request, sort):
                 community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
                 post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp","-point")
                 
-                return get_paginated_queryset_response(post_list, request, 10,
+                return get_paginated_queryset_response(post_list, request, page_size,
                                                     ModelName.POST)
             return get_paginated_queryset_response(query, request, page_size,
                                                    ModelName.POST)
@@ -209,7 +209,7 @@ def get_post_list(request, sort):
             community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
             post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp")
             # print(post.count())
-            return get_paginated_queryset_response(post_list, request, 10,
+            return get_paginated_queryset_response(post_list, request, page_size,
                                                 ModelName.POST)
     return Response({Message.SC_BAD_RQ},status=400)
 
@@ -281,16 +281,16 @@ def handle_notification(post):
     else:
         notification = Notification.objects.create(community=community)
         member_info = MemberInfo.objects.filter(community=community)
-        member = Member.objects.filter(member_info__in=member_info)
-        profiles = Profile.objects.filter(
-            reduce(operator.or_, (Q(user=x.user) for x in member)))
-        for p in profiles:
-            user_notify = UserNotify.objects.create(user=p.user)
-            user_notify.notification_object.add(notification_object)
-            user_notify.save()
-            notification.user_notify.add(user_notify)
-        notification.save()
-
+        member = Member.objects.filter(members_info__in=member_info)
+        if member:
+            profiles = Profile.objects.filter(
+                reduce(operator.or_, (Q(user=x.user) for x in member)))
+            for p in profiles:
+                user_notify = UserNotify.objects.create(user=p.user)
+                user_notify.notification_object.add(notification_object)
+                user_notify.save()
+                notification.user_notify.add(user_notify)
+            notification.save()
 
 
 
