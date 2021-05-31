@@ -75,29 +75,29 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         # test3
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'test3',
-#         'USER': 'postgres',
-#         'PASSWORD': 'password',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
 DATABASES = {
     'default': {
         # test3
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'pollsdb',
-        'USER': 'tuantran@social-network',
-        'PASSWORD': 'Dongha2030@',
-        'HOST': 'social-network.postgres.database.azure.com',
+        'NAME': 'test3',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         # test3
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'pollsdb',
+#         'USER': 'tuantran@social-network',
+#         'PASSWORD': 'Dongha2030@',
+#         'HOST': 'social-network.postgres.database.azure.com',
+#         'PORT': '5432',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

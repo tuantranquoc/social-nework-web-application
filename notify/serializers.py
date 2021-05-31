@@ -1,5 +1,6 @@
 from .models import SignalRoom, Notification, UserNotify
 from rest_framework import serializers
+from notify.models import NotificationChange
 
 
 class SignalRoomSerializer(serializers.ModelSerializer):
@@ -15,14 +16,31 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 
 class UserNotifySerializers(serializers.ModelSerializer):
-    avatar = serializers.SerializerMethodField(read_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = UserNotify
-        fields = ['id', 'message', 'status','avatar']
+        fields = ['id', 'message', 'status','user', 'type']
 
     @staticmethod
-    def get_avatar(obj):
-        if obj.user.profile.avatar:
-            return obj.user.profile.avatar.url
+    def get_user(obj):
+        for x in obj.notification_object.all():
+            nc = NotificationChange.objects.filter(notification_object=x).first()
+            if nc:
+                if nc.user.profile.avatar:
+                    return {"username":nc.user.username,"avatar":nc.user.profile.avatar.url}
+            return None
+
+    @staticmethod
+    def get_type(obj):
+        for x in obj.notification_object.all():
+            print(x.entity_type.id)
+            if x.entity_type.id == 4:
+                return "new_comment"
+            if x.entity_type.id == 6:
+                return "new_post"
         return None
+ 
+ 
 

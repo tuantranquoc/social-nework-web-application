@@ -51,7 +51,7 @@ def child_comment_create(request, comment_id):
             if comment:
                 post = find_post_by_comment(parent)
                 handle_notification(post, request.user,
-                                    NotificationOption.REPLY, parent.user)
+                                    NotificationOption.REPLY, parent.user, comment.content)
                 serializer = CommentSerializer(comment)
                 return Response(serializer.data, status=201)
             return Response({Message.SC_BAD_RQ}, status=400)
@@ -59,8 +59,8 @@ def child_comment_create(request, comment_id):
     return Response({Message.SC_NO_AUTH}, status=401)
 
 
-def handle_notification(post, source_user, ntf_type, dest_user):
-    entity_type = EntityType.objects.filter(id=6).first()
+def handle_notification(post, source_user, ntf_type, dest_user, content):
+    entity_type = EntityType.objects.filter(id=4).first()
     if ntf_type == NotificationOption.COMMENT:
         notification_object = NotificationObject.objects.create(
             entity_type=entity_type, post=post)
@@ -69,7 +69,9 @@ def handle_notification(post, source_user, ntf_type, dest_user):
         notification = Notification.objects.create()
         user_notify = UserNotify.objects.create(user=post.user)
         user_notify.notification_object.add(notification_object)
-        message = "User " + source_user.username + " has created a comment to your post"
+        # message = "User " + source_user.username + " has created a comment to your post"
+        message =content
+
         user_notify.message = message
         user_notify.save()
         notification.user_notify.add(user_notify)
@@ -82,7 +84,8 @@ def handle_notification(post, source_user, ntf_type, dest_user):
         notification = Notification.objects.create()
         user_notify = UserNotify.objects.create(user=dest_user)
         user_notify.notification_object.add(notification_object)
-        message = "User " + source_user.username + " has reply to your comment"
+        # message = "User " + source_user.username + " has reply to your comment"
+        message = content
         user_notify.message = message
         user_notify.save()
         notification.user_notify.add(user_notify)
@@ -99,7 +102,7 @@ def comment_create(request):
             comment = Comment.objects.create(user=request.user,
                                              post=post,
                                              content=content)
-            handle_notification(post, request.user, NotificationOption.COMMENT, post.user)
+            handle_notification(post, request.user, NotificationOption.COMMENT, post.user, content)
             # if comment:
             #     entity_type = EntityType.objects.filter(id=4).first()
             #     notification_object = NotificationObject.objects.create(
