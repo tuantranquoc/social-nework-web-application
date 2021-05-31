@@ -18,10 +18,11 @@ class NotificationSerializer(serializers.ModelSerializer):
 class UserNotifySerializers(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     type = serializers.SerializerMethodField(read_only=True)
+    entity_id = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = UserNotify
-        fields = ['id', 'message', 'status','user', 'type']
+        fields = ['id', 'message', 'status','user', 'type','entity_id']
 
     @staticmethod
     def get_user(obj):
@@ -40,6 +41,13 @@ class UserNotifySerializers(serializers.ModelSerializer):
                 return "new_comment"
             if x.entity_type.id == 6:
                 return "new_post"
+        return None
+
+    @staticmethod
+    def get_entity_id(obj):
+        for x in obj.notification_object.all():
+            if x.post:
+                return x.post.id
         return None
  
  
