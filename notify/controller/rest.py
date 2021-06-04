@@ -18,6 +18,7 @@ from function.paginator import get_paginated_queryset_response
 from redditv1.name import ModelName
 from community.models import Community
 from service.notify import notify_service
+from notify.models import UserNotify
 User = get_user_model()
 
 @api_view(["GET"])
@@ -48,4 +49,15 @@ def change_notify_status(request):
     """
     return notify_service.change_notify_status(request)
 
+@api_view(["GET"])
+def count_notification_has_not_view(request):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    user = request.user
+    notify_list = UserNotify.objects.filter(user=request.user)
+    count = 0
+    for n in notify_list:
+        if n.status==False:
+            count += 1
+    return Response({"notification_not_read_count":count}, status=200)
 

@@ -222,6 +222,7 @@ def handle_notification(post):
     notifycation_change = NotificationChange.objects.create(
         user=post.user, notification_object=notification_object)
     notification = Notification.objects.filter(community=community).first()
+
     if notification:
         user_notify_list = notification.user_notify.all()
         for n in user_notify_list:
@@ -253,6 +254,7 @@ def handle_notification(post):
                 notify_message = notify_message + connect_message + split_message
                 n.message = notify_message
                 n.save()
+
             if n.status == True:
                 new_notify = UserNotify.objects.create(user=n.user, parent=n)
                 notification.user_notify.remove(n)
@@ -279,6 +281,7 @@ def handle_notification(post):
                 new_notify.save()
                 print("create new notify message")
     else:
+        print("in here")
         notification = Notification.objects.create(community=community)
         member_info = MemberInfo.objects.filter(community=community)
         member = Member.objects.filter(members_info__in=member_info)

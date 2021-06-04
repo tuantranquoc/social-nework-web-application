@@ -285,7 +285,7 @@ def user_notify_create_handler(sender, instance, **kwargs):
         room_group_name = 'signal_%s' % signal_room.id
         # room_group_name = 'signal_%s' % 4
         print(room_group_name)
-        message = {"message": message, "type": "notification"}
+        message = {"message": message, "type": "message"}
         channel_layer = channels.layers.get_channel_layer()
         async_to_sync(channel_layer.group_send)(room_group_name, {
             'type': 'signal_message',

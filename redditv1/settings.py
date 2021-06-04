@@ -150,6 +150,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME ': timedelta(minutes=120),
 }
 
+
 if DEBUG:
     DEFAULT_RENDERER_CLASSES += [
         'rest_framework.renderers.BrowsableAPIRenderer',
@@ -163,7 +164,9 @@ if DEBUG:
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': DEFAULT_AUTHENTICATION_CLASSES,
-    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES
+    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES,
+    'DEFAULT_PAGINATION_CLASS':'function.paginator.CustomPagination',
+    'PAGE_SIZE': 5
 }
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
