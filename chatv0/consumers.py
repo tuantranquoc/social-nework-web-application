@@ -287,15 +287,24 @@ def user_notify_create_handler(sender, instance, **kwargs):
         print("instance", instance)
         print(instance.user.username)
         # message = {"message": message, "type": "notification"}
-        m = message.split("has")
-        n = m[0].split(" ")
-        print("p", n[0])
-        notify_message = {"message": message_to_notify_json(instance, n[0]), "type": "notification"}
-        channel_layer = channels.layers.get_channel_layer()
-        async_to_sync(channel_layer.group_send)(room_group_name, {
-            'type': 'signal_message',
-            'message': notify_message
-        })
+        # for x in instance.notification_object.all():
+        #     notification_change = NotificationChange.objects.filter(notification_object=x).first()
+        #     if notification_change:
+        #         print(notification_change.user)
+        nc = instance.notification_object.all().order_by("-id").first()
+        if nc:
+            notification_change = NotificationChange.objects.filter(notification_object=nc).first()
+            if notification_change:
+                print(notification_change.user)
+        # m = message.split("has")
+        # n = m[0].split(" ")
+        # print("p", n[0])
+                notify_message = {"message": message_to_notify_json(instance, notification_change.user.username), "type": "notification"}
+                channel_layer = channels.layers.get_channel_layer()
+                async_to_sync(channel_layer.group_send)(room_group_name, {
+                    'type': 'signal_message',
+                    'message': notify_message
+                })
 
 
 def messages_to_json(messages):
