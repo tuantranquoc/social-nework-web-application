@@ -73,24 +73,14 @@ def get_paginated_queryset_response(query_set, request, page_size, model):
                                          context={"request": request})
         return paginator.get_paginated_response(serializer.data)
     elif model == ModelName.USER_NOTIFY:
-        # serializer = UserNotifySerializers(paginated_qs,
-        #                                  many=True,
-        #                                  context={"request": request})
+        serializer = UserNotifySerializers(paginated_qs,
+                                         many=True,
+                                         context={"request": request})
         # return get_paginated_response(PageNumberPagination,  serializer.data,1)
         # page = paginator.paginate_queryset(query_set)
-        serializer_class = UserNotifySerializers(paginated_qs, many=True,)
-        return pagination.get_paginated_response(serializer_class.data)
+        # serializer_class = UserNotifySerializers(paginated_qs, many=True,)
+        return paginator.get_paginated_response(serializer.data)
 
 
 
 
-class CustomPagination(pagination.PageNumberPagination):
-    def get_paginated_response(self, data):
-        return Response({
-            'links': {
-                'next': self.get_next_link(),
-                'previous': self.get_previous_link()
-            },
-            'count': self.page.paginator.count,
-            'results': data
-        })

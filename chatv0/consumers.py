@@ -280,16 +280,21 @@ class SignalConsumer(WebsocketConsumer):
 def user_notify_create_handler(sender, instance, **kwargs):
     message = instance.message
     if message:
-        print("message from notify", message)
+        # print("message from notify", message)
         signal_room = SignalRoom.objects.filter(user=instance.user).first()
         room_group_name = 'signal_%s' % signal_room.id
         # room_group_name = 'signal_%s' % 4
-        print(room_group_name)
-        message = {"message": message, "type": "message"}
+        print("instance", instance)
+        print(instance.user.username)
+        # message = {"message": message, "type": "notification"}
+        m = message.split("has")
+        n = m[0].split(" ")
+        print("p", n[0])
+        notify_message = {"message": message_to_notify_json(instance, n[0]), "type": "notification"}
         channel_layer = channels.layers.get_channel_layer()
         async_to_sync(channel_layer.group_send)(room_group_name, {
             'type': 'signal_message',
-            'message': message
+            'message': notify_message
         })
 
 
@@ -308,6 +313,13 @@ def message_to_json(message):
             'created_at': str(message.created_at)
         }
 
+def message_to_notify_json(instance, author):
+    if instance:
+        return {
+            'author': author,
+            'content': instance.message,
+            'created_at': str(instance.created_at)
+        }
 
 def dest_message_to_json(message):
     if message:
