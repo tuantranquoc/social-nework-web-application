@@ -93,13 +93,17 @@ def get_lasted_message(request):
     if room_id:
         user = request.user
         room = Room.objects.filter(pk=room_id).first()
-        message_list = ChatMessage.objects.filter(room__id=room_id).order_by("-created_at")
-        count = 0
-        for m in message_list:
-            if m.state == False:
-                count +=1
-        if message_list:
-            return Response({"Lasted message":message_list.first().content,"new_message_count":count}, status=200)
+        if room:
+            message_list = ChatMessage.objects.filter(room__id=room_id).order_by("-created_at").first()
+            dest_user = Room.objects.filter(pk=room_id).first().user.exclude(username=user.username).first()
+            print("dest user", dest_user)
+            message_list_not_read = ChatMessage.objects.filter(room__id=room_id, state=False, author=dest_user)
+            count = 0
+            for m in message_list_not_read:
+                if m.state == False:
+                    count +=1
+            if message_list:
+                return Response({"Lasted message":message_list.content,"new_message_count":count}, status=200)
         return Response({Message.SC_NOT_FOUND}, status=200)
     return Response({Message.SC_OK},status=200)
 
