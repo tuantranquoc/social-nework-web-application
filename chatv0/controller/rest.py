@@ -98,6 +98,16 @@ def get_message_f(request):
 
 @api_view(["POST"])
 def set_message_read(request):
+    """
+    ``GET`` set message list to read
+
+    **Example request**:
+    .. code-block:: json
+
+        {
+            "id":"room_id",
+        }
+    """
     if not request.user.is_authenticated:
         return Response({Message.SC_NO_AUTH}, status=401)
     id = request.data.get("id")
