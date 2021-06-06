@@ -12,12 +12,13 @@ from account.models import Profile
 from account.serializers import PublicProfileSerializer
 from post.models import Post
 from post.serializers import PostSerializer
-from redditv1.message import Message
+from redditv1.message import Message as ResponseMessage
 from function.file import get_image
 from function.paginator import get_paginated_queryset_response
 from redditv1.name import ModelName
 from community.models import Community
 from service.chat import chat_service
+from chatv0.models import Message, Room
 User = get_user_model()
 
 @api_view(["POST"])
@@ -93,3 +94,19 @@ def get_message_f(request):
         }
     """
     return chat_service.get_message_f(request)
+
+
+@api_view(["POST"])
+def set_message_read(request):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    id = request.data.get("id")
+    if id:
+        count = 0
+        room = Room.objects.filter(user=request.user, id=id).first()
+        message_list = Message.objects.filter(room=room, state=False)
+        for m in message_list:
+            m.state =True
+            m.save()
+        return Response({ResponseMessage.SC_OK}, status=200)
+    return Response({ResponseMessage.SC_BAD_RQ}, status=400)

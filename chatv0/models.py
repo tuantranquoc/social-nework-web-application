@@ -10,6 +10,7 @@ class Room(models.Model):
     room_name = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    new_message = models.BooleanField(default=False)
     
     def __str__(self):
         return "room_id " + str(self.id)
@@ -28,6 +29,8 @@ class Message(models.Model):
                              on_delete=models.CASCADE,
                              blank=True,
                              null=True)
+    state = models.BooleanField(default=False)
+
     class Meta:
         ordering = ['-created_at']
 

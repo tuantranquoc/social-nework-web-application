@@ -70,7 +70,7 @@ def handle_notification(post, source_user, ntf_type, dest_user, content):
         user_notify = UserNotify.objects.create(user=post.user)
         user_notify.notification_object.add(notification_object)
         # message = "User " + source_user.username + " has created a comment to your post"
-        message =content
+        message = content
 
         user_notify.message = message
         user_notify.save()

@@ -90,10 +90,16 @@ def get_lasted_message(request):
     if not request.user.is_authenticated:
         return Response({Message.SC_NO_AUTH}, status=401)
     room_id = request.data.get("id")
-    user = request.user
-    room = Room.objects.filter(pk=room_id).first()
-    message_list = ChatMessage.objects.filter(room__id=room_id).order_by("-created_at").first()
-    if message_list:
-        return Response({"Lasted message":message_list.content}, status=200)
-    return Response({}, status=200)
+    if room_id:
+        user = request.user
+        room = Room.objects.filter(pk=room_id).first()
+        message_list = ChatMessage.objects.filter(room__id=room_id).order_by("-created_at")
+        count = 0
+        for m in message_list:
+            if m.state == False:
+                count +=1
+        if message_list:
+            return Response({"Lasted message":message_list.first().content,"new_message_count":count}, status=200)
+        return Response({Message.SC_NOT_FOUND}, status=200)
+    return Response({Message.SC_OK},status=200)
 

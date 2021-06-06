@@ -119,6 +119,8 @@ class ChatConsumer(WebsocketConsumer):
         user = User.objects.filter(pk=access_token['user_id']).first()
         if user:
             room = Room.objects.filter(pk=self.room_name, user=user).first()
+            # room.new_message = False
+            # room.save()
             messages = Message.objects.filter(room=room)[:10]
             last_ten_message = reversed(messages)
             if room:
