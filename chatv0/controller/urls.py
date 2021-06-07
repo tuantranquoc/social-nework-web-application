@@ -8,6 +8,6 @@ urlpatterns = [
     # path('get/room', chat_api.get_room_by_user),
     path('room/detail', chat_api.get_user_info_by_room_id),
     path('room/lasted/message', chat_api.get_lasted_message),
-        path('room/set/message', chat_api.set_message_read),
-
+    path('room/set/message', chat_api.set_message_read),
+    path('room/yet/message', chat_api.count_total_message_not_read_in_all_room)
 ]

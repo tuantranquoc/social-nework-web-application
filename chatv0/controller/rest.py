@@ -120,3 +120,14 @@ def set_message_read(request):
             m.save()
         return Response({ResponseMessage.SC_OK}, status=200)
     return Response({ResponseMessage.SC_BAD_RQ}, status=400)
+
+@api_view(["GET"])
+def count_total_message_not_read_in_all_room(request):
+    if not request.user.is_authenticated:
+        return Response({Message.SC_NO_AUTH}, status=401)
+    # message_list_not_read = Message.objects.filter(room__id=room_id, state=False, author=dest_user)
+    room_list = Room.objects.filter(user=request.user)
+    message_list_not_read_all_room_count = 0
+    for r in room_list:
+        message_list_not_read_all_room_count += Message.objects.filter(room__id=r.id, state=False).count()
+    return Response({"total_message_not_read_yet":message_list_not_read_all_room_count}, status=200)
