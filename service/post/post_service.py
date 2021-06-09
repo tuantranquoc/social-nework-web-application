@@ -121,7 +121,7 @@ def get_post_list(request, sort):
             #         rating_list_p2.append(v.get_rating())
             #         user_list_p2.append(v.user.id)
             #         item_list_p2.append(post.id)
-            uv_list = UserVote.objects.filter(user=request.user)
+            uv_list = UserVote.objects.all()
             for uv in uv_list:
                 rating_list_p2.append(uv.get_rating())
                 user_list_p2.append(uv.user.id)
@@ -144,13 +144,22 @@ def get_post_list(request, sort):
             algo = KNNWithMeans(sim_options=sim_options)
             trainingSet = data.build_full_trainset()
             algo.fit(trainingSet)
-            prediction = algo.predict(4, 34)
+            prediction = algo.predict(17, 149)[4]["was_impossible"]
             print(prediction)
+            post_list = Post.objects.filter(id__in=[x.post.id for x in uv_list])
             for p in post_list:
                 rt_dict = {}
                 rt_dict["id"] = p.id
-                rt_dict["point"] = algo.predict(request.user.id, p.id).est
+                predict = algo.predict(request.user.id, p.id)
+                if predict[4]["was_impossible"] == True:
+                    continue
+                rt_dict["point"] = predict.est
                 recommend_list.append(rt_dict)
+            # for p in uv_list:
+            #     rt_dict = {}
+            #     rt_dict["id"] = uv.post.id
+            #     rt_dict["point"] = algo.predict(request.user.id, uv.post.id).est
+            #     recommend_list.append(rt_dict)
             recommend_list.sort(key=lambda item: item.get("point"), reverse=True)
             print(recommend_list[0:10])
             post_id_list = []
