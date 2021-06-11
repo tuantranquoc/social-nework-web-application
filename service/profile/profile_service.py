@@ -258,7 +258,7 @@ def register_via_react_view(request):
             login(request, user)
         if not user:
             return Response({Message.SC_BAD_RQ}, status=400)
-    return Response({Message.SC_OK}, status=200)
+    return Response({Message.SC_BAD_RQ}, status=400)
 
 
 def logout_view_js(request):

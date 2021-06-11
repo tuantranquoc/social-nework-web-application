@@ -169,7 +169,7 @@ def login_via_react_view(request):
     return profile_service.login_via_react_view(request)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def register_via_react_view(request):
     return profile_service.register_via_react_view(request)
 
