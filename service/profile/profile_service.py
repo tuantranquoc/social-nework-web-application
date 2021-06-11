@@ -20,6 +20,9 @@ from community.models import Community
 from track.models import CommunityTrack, Track
 from service.post.post_service import check_community_track
 import datetime
+from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import AccessToken
 User = get_user_model()
 
 
@@ -253,9 +256,13 @@ def register_via_react_view(request):
     username = request.data.get("username")
     password = request.data.get("password")
     if username and password:
+        if User.objects.filter(username=username):
+            return Response({"Username already exist"}, status=200)
         user = User.objects.create_user(username=username, password=password)
         if user:
-            login(request, user)
+            tokenr = TokenObtainPairSerializer().get_token(user)  
+            tokena = AccessToken().for_user(user)
+            return Response({"refresh" : str(tokenr),"access" : str(tokena)}, status=201)
         if not user:
             return Response({Message.SC_BAD_RQ}, status=400)
     return Response({Message.SC_BAD_RQ}, status=400)
