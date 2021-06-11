@@ -165,7 +165,7 @@ def get_post_list(request, sort):
             post_id_list = []
             post_list = []
             post_list_1 = []
-            for r in recommend_list[0:10]:
+            for r in recommend_list:
                 post_list_1.append(Post.objects.filter(pk=r["id"]).first())
             return get_paginated_queryset_response(post_list_1, request, page_size,
                                                 ModelName.POST)
