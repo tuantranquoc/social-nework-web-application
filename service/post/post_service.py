@@ -529,7 +529,6 @@ def action(request):
                 post.save()
                 track = Track.objects.filter(user=request.user).first()
                 check_community_track(track, post.community, request.user)
-                return Response({Message.SC_OK}, status=200)
                 number_of_up_vote = post.up_vote.count()
                 number_of_down_vote = post.down_vote.count()
                 return Response({
