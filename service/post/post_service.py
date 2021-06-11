@@ -532,7 +532,7 @@ def action(request):
                 number_of_up_vote = post.up_vote.count()
                 number_of_down_vote = post.down_vote.count()
                 return Response({
-                        "current_vote": "up_vote",
+                        "current_vote": "",
                         "number_of_up_vote": number_of_up_vote,
                         "number_of_down_vote": number_of_down_vote
                     }, status=200)
@@ -556,7 +556,7 @@ def action(request):
             number_of_up_vote = post.up_vote.count()
             number_of_down_vote = post.down_vote.count()
             return Response({
-                    "current_vote": "",
+                    "current_vote": "up_vote",
                     "number_of_up_vote": number_of_up_vote,
                     "number_of_down_vote": number_of_down_vote
                 }, status=200)
@@ -571,7 +571,7 @@ def action(request):
                 number_of_up_vote = post.up_vote.count()
                 number_of_down_vote = post.down_vote.count()
                 return Response({
-                        "current_vote": "down_vote",
+                        "current_vote": "",
                         "number_of_up_vote": number_of_up_vote,
                         "number_of_down_vote": number_of_down_vote
                     }, status=200)
@@ -595,7 +595,7 @@ def action(request):
             number_of_up_vote = post.up_vote.count()
             number_of_down_vote = post.down_vote.count()
             return Response({
-                    "current_vote": "",
+                    "current_vote": "down_vote",
                     "number_of_up_vote": number_of_up_vote,
                     "number_of_down_vote": number_of_down_vote
                 }, status=200)
