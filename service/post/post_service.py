@@ -59,26 +59,54 @@ def get_post_list(request, sort):
     # this algorithm
     if sort == 'hot' or not sort:
         if request.user.is_authenticated:
-            print("comming in hot")
-            track = Track.objects.filter(user=request.user).first()
-            if not track:
-                track = Track.objects.create(user=request.user)
-                track.save()
-            community_track = CommunityTrack.objects.filter(
-                track=track).order_by('-timestamp')[0:4]
-            list_community_track = []
-            for c in community_track:
-                list_community_track.append(c.community.community_type)
-            community = Community.objects.filter(
-                community_type__in=list_community_track)
-            query = Post.objects.filter(
-                community__community_type__in=list_community_track).order_by(
-                    '-point')
-            if query.count() == 0:
-                print("zero query")
-                member = Community.objects.all()
+            # print("comming in hot")
+            # track = Track.objects.filter(user=request.user).first()
+            # if not track:
+            #     track = Track.objects.create(user=request.user)
+            #     track.save()
+            # community_track = CommunityTrack.objects.filter(
+            #     track=track).order_by('-timestamp')[0:4]
+            # list_community_track = []
+            # for c in community_track:
+            #     list_community_track.append(c.community.community_type)
+            # community = Community.objects.filter(
+            #     community_type__in=list_community_track)
+            # query = Post.objects.filter(
+            #     community__community_type__in=list_community_track).order_by(
+            #         '-point')
+            # if query.count() == 0:
+            #     print("zero query")
+            #     member = Community.objects.all()
+            #     array = []
+            #     for x in Community.objects.all():
+            #         print("community", Member.objects.filter(member_info__community=x))
+            #         array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+            #         # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
+            #     print("array", array)
+            #     top_community = sorted(array, key=lambda x: x['count'], reverse=True)
+
+            #     print("top community", top_community)
+            #     community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
+            #     post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
+                
+            #     return get_paginated_queryset_response(post_list, request, page_size,
+            #                                         ModelName.POST)
+            # return get_paginated_queryset_response(query, request, page_size,
+            #                                        ModelName.POST)
+                member = Community.objects.filter(user=request.user)
                 array = []
-                for x in Community.objects.all():
+                if member.count() == 0:
+                    for x in Community.objects.all():
+                        array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+                    # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
+
+                    top_community = sorted(array, key=lambda k: k['count'])[10:]
+                    community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
+                    post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
+                    # print(post.count())
+                    return get_paginated_queryset_response(post_list, request, page_size,
+                                                        ModelName.POST)
+                for x in member:
                     print("community", Member.objects.filter(member_info__community=x))
                     array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
                     # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
@@ -87,12 +115,10 @@ def get_post_list(request, sort):
 
                 print("top community", top_community)
                 community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
-                post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp","-point")
+                post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
                 
                 return get_paginated_queryset_response(post_list, request, page_size,
                                                     ModelName.POST)
-            return get_paginated_queryset_response(query, request, page_size,
-                                                   ModelName.POST)
 
         else:
             member = Community.objects.all()
@@ -174,39 +200,55 @@ def get_post_list(request, sort):
 
     if sort == 'new':
         if request.user.is_authenticated:
-            track = Track.objects.filter(user=request.user).first()
-            if not track:
-                track = Track.objects.create(user=request.user)
-                track.save()
-            community_track = CommunityTrack.objects.filter(
-                track=track).order_by('-timestamp')[0:4]
-            list_community_track = []
-            for c in community_track:
-                list_community_track.append(c.community.community_type)
-            community = Community.objects.filter(
-                community_type__in=list_community_track)
-            query = Post.objects.filter(
-                community__community_type__in=list_community_track).order_by(
-                    '-timestamp')
-            if query.count() == 0:
-                print("zero query")
-                member = Community.objects.all()
-                array = []
-                for x in Community.objects.all():
-                    print("community", Member.objects.filter(member_info__community=x))
-                    array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
-                    # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
-                print("array", array)
-                top_community = sorted(array, key=lambda x: x['count'], reverse=True)
+            # track = Track.objects.filter(user=request.user).first()
+            # if not track:
+            #     track = Track.objects.create(user=request.user)
+            #     track.save()
+            # community_track = CommunityTrack.objects.filter(
+            #     track=track).order_by('-timestamp')[0:4]
+            # list_community_track = []
+            # for c in community_track:
+            #     list_community_track.append(c.community.community_type)
+            # community = Community.objects.filter(
+            #     community_type__in=list_community_track)
+            # query = Post.objects.filter(
+            #     community__community_type__in=list_community_track).order_by(
+            #         '-timestamp')
+            # if query.count() == 0:
+            #     print("zero query")
+            #     member = Community.objects.all()
+            #     array = []
+            #     for x in Community.objects.all():
+            #         print("community", Member.objects.filter(member_info__community=x))
+            #         array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+            #         # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
+            #     print("array", array)
+            #     top_community = sorted(array, key=lambda x: x['count'], reverse=True)
 
-                print("top community", top_community)
-                community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
-                post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp","-point")
+            #     print("top community", top_community)
+            #     community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
+            #     post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp","-point")
                 
-                return get_paginated_queryset_response(post_list, request, page_size,
-                                                    ModelName.POST)
-            return get_paginated_queryset_response(query, request, page_size,
+            #     return get_paginated_queryset_response(post_list, request, page_size,
+            #                                         ModelName.POST)
+            # return get_paginated_queryset_response(query, request, page_size,
+            #                                        ModelName.POST)
+            member = Community.objects.filter(user=request.user)
+            array = []
+            for x in Community.objects.all():
+                print("community", Member.objects.filter(member_info__community=x))
+                array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+                # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
+            print("array", array)
+            top_community = sorted(array, key=lambda x: x['count'], reverse=True)
+
+            print("top community", top_community)
+            community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
+            post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp")
+            # post_list = Post.objects.all().order_by("-timestamp")
+            return get_paginated_queryset_response(post_list, request, page_size,
                                                    ModelName.POST)
+            
         else:
             member = Community.objects.all()
             array = []
