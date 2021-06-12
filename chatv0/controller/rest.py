@@ -129,5 +129,5 @@ def count_total_message_not_read_in_all_room(request):
     room_list = Room.objects.filter(user=request.user)
     message_list_not_read_all_room_count = 0
     for r in room_list:
-        message_list_not_read_all_room_count += Message.objects.filter(room__id=r.id, state=False).count()
+        message_list_not_read_all_room_count += Message.objects.filter(room__id=r.id, state=False).exclude(author=request.user).count()
     return Response({"total_message_not_read_yet":message_list_not_read_all_room_count}, status=200)
