@@ -40,8 +40,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'user', 'id', 'title', 'content', 'parent', 'timestamp', 'image',
-            'timestamp', 'unix_timestamp', 'up_vote', 'down_vote',
+            'user', 'id', 'title', 'content', 'parent','timestamp', 'image', 'unix_timestamp', 'up_vote', 'down_vote',
             'community_type', 'type', 'view_count', 'point', 'state',
             'current_vote','community_avatar'
         ]

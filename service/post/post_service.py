@@ -25,6 +25,7 @@ import pandas as pd
 from surprise import Dataset
 from surprise import Reader
 from surprise import KNNWithMeans
+from datetime import timedelta
 # from track.models import CommunityTrack, Track
 
 User = get_user_model()
@@ -57,6 +58,7 @@ def get_post_list(request, sort):
     # sort = request.data.get("sort")
     page_size = request.data.get("page_size")
     # this algorithm
+    print("sort", sort)
     if sort == 'hot' or not sort:
         if request.user.is_authenticated:
             # print("comming in hot")
@@ -88,53 +90,64 @@ def get_post_list(request, sort):
             #     print("top community", top_community)
             #     community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
             #     post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
-                
+
             #     return get_paginated_queryset_response(post_list, request, page_size,
             #                                         ModelName.POST)
             # return get_paginated_queryset_response(query, request, page_size,
             #                                        ModelName.POST)
-                member = Community.objects.filter(user=request.user)
-                array = []
-                if member.count() == 0:
-                    for x in Community.objects.all():
-                        array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
-                    # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
+            member = Community.objects.filter(user=request.user)
+            array = []
+            if member.count() == 0:
+                for x in Community.objects.all():
+                    array.append({"count": Member.objects.filter(
+                        member_info__community=x).count(), "id": x.id})
+                # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
 
-                    top_community = sorted(array, key=lambda k: k['count'])[10:]
-                    community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
-                    post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
-                    # print(post.count())
-                    return get_paginated_queryset_response(post_list, request, page_size,
-                                                        ModelName.POST)
-                for x in member:
-                    print("community", Member.objects.filter(member_info__community=x))
-                    array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
-                    # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
-                print("array", array)
-                top_community = sorted(array, key=lambda x: x['count'], reverse=True)
-
-                print("top community", top_community)
-                community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
-                post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
-                
+                top_community = sorted(array, key=lambda k: k['count'])[10:]
+                community_list = Community.objects.filter(
+                    id__in=[x["id"] for x in top_community])
+                post_list = Post.objects.filter(community__in=Community.objects.filter(
+                    id__in=[x["id"] for x in top_community])).order_by("-point")
+                # print(post.count())
                 return get_paginated_queryset_response(post_list, request, page_size,
-                                                    ModelName.POST)
+                                                       ModelName.POST)
+            for x in member:
+                print("community", Member.objects.filter(
+                    member_info__community=x))
+                array.append({"count": Member.objects.filter(
+                    member_info__community=x).count(), "id": x.id})
+                # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
+            print("array", array)
+            top_community = sorted(
+                array, key=lambda x: x['count'], reverse=True)
+
+            print("top community", top_community)
+            community_list = Community.objects.filter(
+                id__in=[x["id"] for x in top_community])
+            post_list = Post.objects.filter(community__in=Community.objects.filter(
+                id__in=[x["id"] for x in top_community])).order_by("-point")
+
+            return get_paginated_queryset_response(post_list, request, page_size,
+                                                   ModelName.POST)
 
         else:
             member = Community.objects.all()
             array = []
             for x in Community.objects.all():
-                array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+                array.append({"count": Member.objects.filter(
+                    member_info__community=x).count(), "id": x.id})
                 # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
 
             top_community = sorted(array, key=lambda k: k['count'])[10:]
-            community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
-            post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-point")
+            community_list = Community.objects.filter(
+                id__in=[x["id"] for x in top_community])
+            post_list = Post.objects.filter(community__in=Community.objects.filter(
+                id__in=[x["id"] for x in top_community])).order_by("-point")
             # print(post.count())
             return get_paginated_queryset_response(post_list, request, page_size,
-                                                ModelName.POST)
+                                                   ModelName.POST)
 
-    if sort =='best':
+    if sort == 'best':
         if request.user.is_authenticated:
             rating_list_p2 = []
             user_list_p2 = []
@@ -172,7 +185,8 @@ def get_post_list(request, sort):
             algo.fit(trainingSet)
             prediction = algo.predict(17, 149)[4]["was_impossible"]
             print(prediction)
-            post_list = Post.objects.filter(id__in=[x.post.id for x in uv_list])
+            post_list = Post.objects.filter(
+                id__in=[x.post.id for x in uv_list])
             for p in post_list:
                 rt_dict = {}
                 rt_dict["id"] = p.id
@@ -186,7 +200,8 @@ def get_post_list(request, sort):
             #     rt_dict["id"] = uv.post.id
             #     rt_dict["point"] = algo.predict(request.user.id, uv.post.id).est
             #     recommend_list.append(rt_dict)
-            recommend_list.sort(key=lambda item: item.get("point"), reverse=True)
+            recommend_list.sort(
+                key=lambda item: item.get("point"), reverse=True)
             print(recommend_list[0:10])
             post_id_list = []
             post_list = []
@@ -194,7 +209,7 @@ def get_post_list(request, sort):
             for r in recommend_list:
                 post_list_1.append(Post.objects.filter(pk=r["id"]).first())
             return get_paginated_queryset_response(post_list_1, request, page_size,
-                                                ModelName.POST)
+                                                   ModelName.POST)
     top_community = Community.objects.filter(state=True).annotate(
         user_count=Count('user')).order_by('-user_count')
 
@@ -228,7 +243,7 @@ def get_post_list(request, sort):
             #     print("top community", top_community)
             #     community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
             #     post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp","-point")
-                
+
             #     return get_paginated_queryset_response(post_list, request, page_size,
             #                                         ModelName.POST)
             # return get_paginated_queryset_response(query, request, page_size,
@@ -236,33 +251,60 @@ def get_post_list(request, sort):
             member = Community.objects.filter(user=request.user)
             array = []
             for x in Community.objects.all():
-                print("community", Member.objects.filter(member_info__community=x))
-                array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+                print("community", Member.objects.filter(
+                    member_info__community=x))
+                array.append({"count": Member.objects.filter(
+                    member_info__community=x).count(), "id": x.id})
                 # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
             print("array", array)
-            top_community = sorted(array, key=lambda x: x['count'], reverse=True)
+            top_community = sorted(
+                array, key=lambda x: x['count'], reverse=True)
 
             print("top community", top_community)
-            community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
-            post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp")
+            community_list = Community.objects.filter(
+                id__in=[x["id"] for x in top_community])
+            post_list = Post.objects.filter(community__in=Community.objects.filter(
+                id__in=[x["id"] for x in top_community])).order_by("-timestamp")
             # post_list = Post.objects.all().order_by("-timestamp")
             return get_paginated_queryset_response(post_list, request, page_size,
                                                    ModelName.POST)
-            
+
         else:
             member = Community.objects.all()
             array = []
             for x in Community.objects.all():
-                array.append({"count": Member.objects.filter(member_info__community=x).count(),"id": x.id})
+                array.append({"count": Member.objects.filter(
+                    member_info__community=x).count(), "id": x.id})
                 # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
 
             top_community = sorted(array, key=lambda k: k['count'])[10:]
-            community_list = Community.objects.filter(id__in=[x["id"] for x in top_community])
-            post_list = Post.objects.filter(community__in=Community.objects.filter(id__in=[x["id"] for x in top_community])).order_by("-timestamp")
+            community_list = Community.objects.filter(
+                id__in=[x["id"] for x in top_community])
+            post_list = Post.objects.filter(community__in=Community.objects.filter(
+                id__in=[x["id"] for x in top_community])).order_by("-timestamp")
             # print(post.count())
             return get_paginated_queryset_response(post_list, request, page_size,
-                                                ModelName.POST)
-    return Response({Message.SC_BAD_RQ},status=400)
+                                                   ModelName.POST)
+    if sort == "top":
+        # post_list = Post.objects.annotate(num_vote=Count("up_vote",  filter=Q(created_at__gt=(datetime.datetime.now(), timedelta.days(1)))))
+        option = request.data.get("option")
+        print("opt", option)
+        # if option != "day" or option != "month" or option != "week":
+        #     return Response({"Missing option"}, status=400)
+        day = 1
+        if option == "day":
+            day = 1
+        elif option == "week":
+            day = 7
+        elif option == "month":
+            day = 30
+        else:
+            return Response({"Missing option"}, status=400)
+        post_list = Post.objects.filter(timestamp__gte=(datetime.datetime.now() -  timedelta(days=day))).annotate(num_vote=Count("up_vote")).order_by("-num_vote")
+        return get_paginated_queryset_response(post_list, request, page_size, ModelName.POST)
+                                            #    timestamp__range=(datetime.datetime.now(), timedelta.days(1))
+
+    return Response({Message.SC_BAD_RQ}, status=400)
 
 
 def handle_notification(post):
@@ -345,7 +387,6 @@ def handle_notification(post):
                 user_notify.save()
                 notification.user_notify.add(user_notify)
             notification.save()
-
 
 
 def create_post(request):
@@ -459,9 +500,11 @@ def find_post_by_id(request, post_id):
                 serializer = PostSerializer(post, context={"request": request})
                 return Response(serializer.data, status=200)
             if request.user.is_authenticated:
-                user_vote =  UserVote.objects.filter(user=request.user, post=post).first()
+                user_vote = UserVote.objects.filter(
+                    user=request.user, post=post).first()
                 if not user_vote:
-                    UserVote.objects.create(user=request.user, post=post, view=1)
+                    UserVote.objects.create(
+                        user=request.user, post=post, view=1)
                 else:
                     user_vote.view = 1
             track = Track.objects.filter(user=request.user).first()
@@ -574,13 +617,15 @@ def action(request):
                 number_of_up_vote = post.up_vote.count()
                 number_of_down_vote = post.down_vote.count()
                 return Response({
-                        "current_vote": "",
-                        "number_of_up_vote": number_of_up_vote,
-                        "number_of_down_vote": number_of_down_vote
-                    }, status=200)
-            user_vote = UserVote.objects.filter(user=request.user, post=post).first()
+                    "current_vote": "",
+                    "number_of_up_vote": number_of_up_vote,
+                    "number_of_down_vote": number_of_down_vote
+                }, status=200)
+            user_vote = UserVote.objects.filter(
+                user=request.user, post=post).first()
             if not user_vote:
-                UserVote.objects.create(user=request.user, post=post, view=1, like=1)
+                UserVote.objects.create(
+                    user=request.user, post=post, view=1, like=1)
             else:
                 user_vote.view = 1
                 user_vote.like = 1
@@ -598,10 +643,10 @@ def action(request):
             number_of_up_vote = post.up_vote.count()
             number_of_down_vote = post.down_vote.count()
             return Response({
-                    "current_vote": "up_vote",
-                    "number_of_up_vote": number_of_up_vote,
-                    "number_of_down_vote": number_of_down_vote
-                }, status=200)
+                "current_vote": "up_vote",
+                "number_of_up_vote": number_of_up_vote,
+                "number_of_down_vote": number_of_down_vote
+            }, status=200)
         if action == "down_vote":
             if Post.objects.filter(id=post_id, down_vote=request.user):
                 post.down_vote.remove(request.user)
@@ -613,20 +658,22 @@ def action(request):
                 number_of_up_vote = post.up_vote.count()
                 number_of_down_vote = post.down_vote.count()
                 return Response({
-                        "current_vote": "",
-                        "number_of_up_vote": number_of_up_vote,
-                        "number_of_down_vote": number_of_down_vote
-                    }, status=200)
-            user_vote = UserVote.objects.filter(user=request.user, post=post).first()
+                    "current_vote": "",
+                    "number_of_up_vote": number_of_up_vote,
+                    "number_of_down_vote": number_of_down_vote
+                }, status=200)
+            user_vote = UserVote.objects.filter(
+                user=request.user, post=post).first()
 
             if not user_vote:
-                UserVote.objects.create(user=request.user, post=post, view=1, like=1)
+                UserVote.objects.create(
+                    user=request.user, post=post, view=1, like=1)
             else:
                 user_vote.view = 1
                 user_vote.dislike = 1
                 user_vote.like = 0
                 user_vote.save()
-                
+
             post.down_vote.add(request.user)
             post.up_vote.remove(request.user)
             positive_point.point = positive_point.point - 2
@@ -637,10 +684,10 @@ def action(request):
             number_of_up_vote = post.up_vote.count()
             number_of_down_vote = post.down_vote.count()
             return Response({
-                    "current_vote": "down_vote",
-                    "number_of_up_vote": number_of_up_vote,
-                    "number_of_down_vote": number_of_down_vote
-                }, status=200)
+                "current_vote": "down_vote",
+                "number_of_up_vote": number_of_up_vote,
+                "number_of_down_vote": number_of_down_vote
+            }, status=200)
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
@@ -666,7 +713,8 @@ def find_post_by_up_vote(request):
 
 def find_post_by_community(request, community_type):
     page_size = request.data.get("page_size")
-    post = Post.objects.filter(community__community_type=community_type, hidden_in_community=False, hidden=False)
+    post = Post.objects.filter(
+        community__community_type=community_type, hidden_in_community=False, hidden=False)
     community = Community.objects.filter(community_type=community_type).first()
     if not community:
         return Response({Message.SC_NOT_FOUND}, status=204)
@@ -735,7 +783,7 @@ def find_post_by_down_vote(request):
     if request.user.is_authenticated:
         post = Post.objects.filter(down_vote=request.user)
         return get_paginated_queryset_response(post, request, page_size,
-                                                   ModelName.POST)
+                                               ModelName.POST)
     return Response({Message.SC_LOGIN_REDIRECT}, status=401)
 
 
@@ -749,12 +797,11 @@ def find_post_by_username_down_vote(request, username):
                                        community__user=request.user)
 
         return get_paginated_queryset_response(no_block, request,
-                                                   page_size, ModelName.POST)
+                                               page_size, ModelName.POST)
     post = Post.objects.filter(down_vote__username=username,
                                community__state=True)
     return get_paginated_queryset_response(post, request, page_size,
-                                               ModelName.POST)
-
+                                           ModelName.POST)
 
 
 def find_post_by_username_up_vote(request, username):
@@ -854,7 +901,7 @@ def get_post_by_time_interval(request):
                                         community__state=True,
                                         timestamp__gte=from_timestamp,
                                         timestamp__lte=to_timestamp).distinct(
-                                        )).distinct().order_by('-point')
+                                    )).distinct().order_by('-point')
             # query = Post.objects.filter(timestamp__gte=from_timestamp,
             #                             timestamp__lte=to_timestamp,
             #                             user=request.user)
