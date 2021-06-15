@@ -19,12 +19,18 @@ class RoomSerializer(serializers.ModelSerializer):
 
     def get_user_list(self, obj):
         request = self.context.get("request")
-        if request.user:
-            user_list = obj.user.all()
-            if user_list:
-                u_l = []
-                for u in user_list:
-                    if u != request.user:
-                        u_l.append({"username":u.username,"avatar": u.profile.avatar.url or None})
-                return u_l
+        if request:
+            if request.user:
+                user_list = obj.user.all()
+                if user_list:
+                    u_l = []
+                    for u in user_list:
+                        if u != request.user:
+                            u_l.append({"username":u.username,"avatar": u.profile.avatar.url or None})
+                    return u_l
         return None
+
+
+class SingleRoomSerializer(serializers.Serializer):
+    class Meta:
+        field = ['id']

@@ -16,6 +16,8 @@ from django.db.models import Q
 from function.paginator import get_paginated_queryset_response
 from account.models import Profile
 from chatv0.models import Message as ChatMessage
+from chatv0.serializers import RoomSerializer
+import json
 User = get_user_model()
 
 
@@ -34,7 +36,13 @@ def create_chat_room(request):
         room.user.add(target)
         room.user.add(request.user)
         room.save()
-        return Response({Message.SC_OK}, status=201)
+        for u in room.user.all():
+            print(u)
+        serializer = RoomSerializer(room,context={"request": request})
+        # data=json.dumps(serializer.data)
+        print("data",serializer.data)
+        return Response(serializer.data, status=201)
+
     return Response({Message.SC_OK}, status=400)
 
 
