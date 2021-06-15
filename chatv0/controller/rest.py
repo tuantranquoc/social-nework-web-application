@@ -21,8 +21,8 @@ from service.chat import chat_service
 from chatv0.models import Message, Room
 User = get_user_model()
 
-@api_view(["POST"])
-def create_chat_room(request):
+@api_view(["GET"])
+def create_chat_room(request, target_user):
     """
     ``POST`` Create chatroom between user
 
@@ -33,7 +33,7 @@ def create_chat_room(request):
             "target_user":"target_user_name"
         }
     """
-    return chat_service.create_chat_room(request)
+    return chat_service.create_chat_room(request, target_user)
 
 @api_view(["GET","POST"])
 def find_room(request):

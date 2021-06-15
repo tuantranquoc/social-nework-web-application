@@ -21,17 +21,19 @@ import json
 User = get_user_model()
 
 
-def create_chat_room(request):
+def create_chat_room(request, target_user):
     if not request.user.is_authenticated:
         return Response({Message.SC_NO_AUTH}, status=401)
-    target_user = request.data.get('target_user')
     if target_user:
         target = User.objects.filter(username=target_user).first()
         print(target.username)
         room = Room.objects.filter(user__username=target.username)
         room = room.filter(user__username=request.user)
         if room:
-            return Response({Message.SC_OK}, status=200)
+            serializer = RoomSerializer(room.first(),context={"request": request})
+            # data=json.dumps(serializer.data)
+            print("data",serializer.data)
+            return Response(serializer.data, status=200)
         room = Room.objects.create()
         room.user.add(target)
         room.user.add(request.user)
