@@ -5,10 +5,10 @@ from .models import Post, PositivePoint, Comment, PostType, View, CommentPoint, 
 
 
 class PostAdmin(admin.ModelAdmin):
-    search_fields = ['id']
+    search_fields = ['id','community__community_type']
 
     list_display = [
-        '__id__', '__title__', '__user__', '__up_vote__', '__down_vote__',
+        '__id__', '__title__', '__user__','community', '__up_vote__', '__down_vote__',
        '__type__', '__view__', '__point__','__state__','hidden','hidden_in_community', '__time__'
       
     ]
@@ -59,7 +59,7 @@ class ViewAdmin(admin.ModelAdmin):
 @admin.register(UserVote)
 class UserVoteAdmin(admin.ModelAdmin):
     search_fields = ['id']
-    list_display = ['id', 'user','post', 'report','view','like','share','dislike','get_rating']
+    list_display = ['id', 'user','post', 'down_vote','view','like','share','dislike','get_rating']
 
 
 admin.site.register(Post, PostAdmin)

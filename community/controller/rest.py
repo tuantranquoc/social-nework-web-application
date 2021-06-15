@@ -94,7 +94,7 @@ def community_action(request):
     return community_service.community_action(request)
 
 
-@api_view(["GET"])
+@api_view(["GET","POST"])
 def get_list_community(request):
     """
     ``GET`` Return list community

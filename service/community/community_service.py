@@ -175,6 +175,7 @@ def check_member(member, community, user, action):
 
 def get_list_community(request):
     page_size = request.data.get("page_size")
+    print(page_size)
     query = Community.objects.all()
     return get_paginated_queryset_response(query, request, page_size,
                                            ModelName.COMMUNITY)

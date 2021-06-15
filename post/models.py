@@ -17,7 +17,7 @@ class Post(models.Model):
                                null=True,
                                on_delete=models.SET_NULL,
                                blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     content = models.TextField(blank=True, null=True)
     up_vote = models.ManyToManyField(User,
                                      related_name="p_up_vote",
@@ -100,7 +100,7 @@ class UserVote(models.Model):
                              on_delete=models.CASCADE,
                              null=True,
                              blank=True)
-    report = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
+    down_vote = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
     dislike = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
     view = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
     like = models.IntegerField(choices=choice.STATUS_CHOICES, default=0)
@@ -111,7 +111,7 @@ class UserVote(models.Model):
         return ("Vote id" + " " + str(self.id) + " " + self.user.username)
 
     def get_rating(self):
-        return 2 + self.view + self.like + self.share - self.dislike - self.report
+        return 2 + self.view + self.like + self.share - self.dislike - self.down_vote
 
 
 

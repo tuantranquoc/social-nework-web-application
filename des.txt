@@ -142,3 +142,5 @@ location: westus2
 profile service bug line 50
 
 
+apply migration:
+https://stackoverflow.com/questions/29902366/django-migration-is-not-applying-the-migration-changes

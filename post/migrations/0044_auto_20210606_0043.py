@@ -29,10 +29,5 @@ class Migration(migrations.Migration):
             name='up_vote',
             field=models.ManyToManyField(blank=True, related_name='p_up_vote', to=settings.AUTH_USER_MODEL),
         ),
-        migrations.AlterField(
-            model_name='post',
-            name='user',
-            field=models.ForeignKey(default=django.utils.timezone.now, on_delete=django.db.models.deletion.CASCADE, to='auth.user'),
-            preserve_default=False,
-        ),
+
     ]

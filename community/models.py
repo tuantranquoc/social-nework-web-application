@@ -13,7 +13,7 @@ User = get_user_model()
 class Community(models.Model):
     id = models.AutoField(primary_key=True)
     community_type = models.CharField(max_length=255, blank=True, null=True)
-    user = models.ManyToManyField(User, blank=True)
+    user = models.ManyToManyField(User, blank=True, null=True)
     parent = models.ForeignKey("self",
                                on_delete=models.CASCADE,
                                null=True,
@@ -25,7 +25,7 @@ class Community(models.Model):
                                 null=True,
                                 related_name="owner")
     state = models.BooleanField(default=True)
-    description = models.TextField(default="")
+    description = models.TextField(default="", blank=True)
     avatar = models.ImageField(upload_to='images/', blank=True, null=True)
     background = models.ImageField(upload_to='images/', blank=True, null=True)
     rule = models.TextField(blank=True, null=True)
@@ -83,6 +83,9 @@ class MemberInfo(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     state = models.BooleanField(default=True)
     role = models.CharField(max_length=30, default='MEMBER')
+
+    def __str__(self):
+        return self.community.community_type
 
     def __id__(self):
         return self.id

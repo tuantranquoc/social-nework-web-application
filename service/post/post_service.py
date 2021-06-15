@@ -134,11 +134,14 @@ def get_post_list(request, sort):
             member = Community.objects.all()
             array = []
             for x in Community.objects.all():
+                print(Member.objects.filter(
+                    member_info__community=x).count())
                 array.append({"count": Member.objects.filter(
                     member_info__community=x).count(), "id": x.id})
                 # member_info_list = Member.objects.annotate(count=Count("member_info", filter=Q(member_info__community=x))).order_by("count").distinct
 
-            top_community = sorted(array, key=lambda k: k['count'])[10:]
+            top_community = sorted(array, key=lambda k: k['count'])
+            print(top_community)
             community_list = Community.objects.filter(
                 id__in=[x["id"] for x in top_community])
             post_list = Post.objects.filter(community__in=Community.objects.filter(
@@ -629,7 +632,7 @@ def action(request):
             else:
                 user_vote.view = 1
                 user_vote.like = 1
-                user_vote.dislike = 0
+                user_vote.down_vote = 0
                 user_vote.save()
             post.up_vote.add(request.user)
             post.down_vote.remove(request.user)
@@ -670,7 +673,7 @@ def action(request):
                     user=request.user, post=post, view=1, like=1)
             else:
                 user_vote.view = 1
-                user_vote.dislike = 1
+                user_vote.down_vote = 1
                 user_vote.like = 0
                 user_vote.save()
 
