@@ -73,6 +73,9 @@ class Community(models.Model):
     def __mod__(self):
         return ",".join(
             [str(p.username) for p in self.mod.all().order_by('-id')])
+        
+    def pos_count(self):
+        post_count = Post.objects.filter()
 
 
 class MemberInfo(models.Model):

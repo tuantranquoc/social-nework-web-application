@@ -132,11 +132,13 @@ class ChatConsumer(WebsocketConsumer):
 
     def on_key_exchange(self, data):
 
-        primebits = 9
+        # primebits = 9
+        primebits = 16
 
         if self.prime == 0:
             self.count += 1
-            PRIME = 263
+            PRIME = 433
+            # 433 457 
             e, d = generate_keys(PRIME)
             while e > d:
                 e, d = generate_keys(PRIME)
@@ -166,10 +168,16 @@ class ChatConsumer(WebsocketConsumer):
                 print("we ot cipher", cipher)
                 print("eb, db", self.e, self.d)
                 array = []
+                temp_array = []
                 for c in cipher:
                     # print((c**self.e) % self.prime)
                     # print("c^e", c**self.e, (c**self.e) % self.prime)
                     array.append((c**self.e) % self.prime)
+                    # for k in c:
+                        # array.append((k**self.e) % self.prime)
+                        # temp_array.append((k**self.e) % self.prime)
+                        # array.append(temp_array)
+                        # temp_array =
                 print("cipher1", array)
                 channel_layer = channels.layers.get_channel_layer()
                 async_to_sync(channel_layer.group_send)(self.room_group_name, {
@@ -187,10 +195,11 @@ class ChatConsumer(WebsocketConsumer):
             cipher = data.get('cipher_message')
             if cipher:
                 print("we ot cipher 2", cipher)
+                print("char 7915", chr(7915))
                 for c in cipher:
                     if c:
                         # print((c**self.e) % self.prime)
-                        print(chr((c**self.d) % self.prime))
+                        print(chr((c**self.d) % self.prime), (c**self.d) % self.prime)
                         array.append(chr((c**self.d) % self.prime))
                 print("array to send", array)
                 values = ''.join(str(v) for v in array)
