@@ -138,7 +138,7 @@ class ChatConsumer(WebsocketConsumer):
         if self.prime == 0:
             self.count += 1
             PRIME = 433
-            # 433 457 
+            # 433 457  7949
             e, d = generate_keys(PRIME)
             while e > d:
                 e, d = generate_keys(PRIME)
@@ -199,7 +199,7 @@ class ChatConsumer(WebsocketConsumer):
                 for c in cipher:
                     if c:
                         # print((c**self.e) % self.prime)
-                        print(chr((c**self.d) % self.prime), (c**self.d) % self.prime)
+                        # print(chr((c**self.d) % self.prime), (c**self.d) % self.prime)
                         array.append(chr((c**self.d) % self.prime))
                 print("array to send", array)
                 values = ''.join(str(v) for v in array)
