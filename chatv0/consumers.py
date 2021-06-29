@@ -279,6 +279,7 @@ class SignalConsumer(WebsocketConsumer):
 @receiver(post_save, sender=UserNotify)
 def user_notify_create_handler(sender, instance, **kwargs):
     message = instance.message
+    print("capture save")
     if message:
         # print("message from notify", message)
         signal_room = SignalRoom.objects.filter(user=instance.user).first()

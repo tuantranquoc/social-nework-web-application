@@ -318,10 +318,12 @@ def handle_notification(post):
     notifycation_change = NotificationChange.objects.create(
         user=post.user, notification_object=notification_object)
     notification = Notification.objects.filter(community=community).first()
-
+    print("in handle notifications")
     if notification:
+        print("in handle notifications 1")
         user_notify_list = notification.user_notify.all()
         for n in user_notify_list:
+            print("in for")
             print(n.user.username)
             print(n.status)
             if n.status == False:
@@ -378,15 +380,22 @@ def handle_notification(post):
                 print("create new notify message")
     else:
         print("in here")
+        print("in handle notifications 2")
         notification = Notification.objects.create(community=community)
         member_info = MemberInfo.objects.filter(community=community)
-        member = Member.objects.filter(members_info__in=member_info)
+        member = Member.objects.filter(member_info__in=member_info)
         if member:
+            for x in member:
+                print(x.user.username)
             profiles = Profile.objects.filter(
                 reduce(operator.or_, (Q(user=x.user) for x in member)))
+            print("profile count",profiles.count)
             for p in profiles:
+                print("profile", p)
                 user_notify = UserNotify.objects.create(user=p.user)
                 user_notify.notification_object.add(notification_object)
+                split_message = post.user.username + " has created post in community " + community.community_type
+                user_notify.message = split_message
                 user_notify.save()
                 notification.user_notify.add(user_notify)
             notification.save()
@@ -441,6 +450,7 @@ def create_post(request):
                     type=PostType.objects.filter(type=type).first())
                 current_post.point = rank.hot(0, 0, current_post.timestamp)
                 current_post.save()
+                print("new post created")
                 if current_post:
                     handle_notification(current_post)
                     # entity_type = EntityType.objects.filter(id=1).first()

@@ -131,16 +131,16 @@ class ChatConsumer(WebsocketConsumer):
                 self.send_chat_message(content)
 
     def on_key_exchange(self, data):
-
+        print("on key exchane")
         # primebits = 9
         primebits = 16
 
         if self.prime == 0:
             self.count += 1
-            PRIME = 433
+            PRIME = 7949
             # 433 457  7949
             e, d = generate_keys(PRIME)
-            while e > d:
+            while (e > d and e > 300) or (e > d and d > 300):
                 e, d = generate_keys(PRIME)
             self.prime = PRIME
             self.e = e
@@ -171,7 +171,7 @@ class ChatConsumer(WebsocketConsumer):
                 temp_array = []
                 for c in cipher:
                     # print((c**self.e) % self.prime)
-                    # print("c^e", c**self.e, (c**self.e) % self.prime)
+                    print("c^e", c**self.e, (c**self.e) % self.prime)
                     array.append((c**self.e) % self.prime)
                     # for k in c:
                         # array.append((k**self.e) % self.prime)
