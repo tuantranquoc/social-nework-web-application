@@ -60,7 +60,7 @@ class UserNotifySerializers(serializers.ModelSerializer):
     def get_message(obj):
         for x in obj.notification_object.all():
             if x.entity_type.id == 4:
-                title = x.post.title
+                title = obj.message
                 return title
             if x.entity_type.id == 6:
                 title = x.post.title
