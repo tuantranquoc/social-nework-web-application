@@ -19,6 +19,7 @@ class UserNotifySerializers(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     type = serializers.SerializerMethodField(read_only=True)
     entity_id = serializers.SerializerMethodField(read_only=True)
+    # title = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = UserNotify
@@ -40,7 +41,8 @@ class UserNotifySerializers(serializers.ModelSerializer):
             if x.entity_type.id == 4:
                 return "new_comment"
             if x.entity_type.id == 6:
-                return "new_post"
+                title = x.post.title
+                return title
         return None
 
     @staticmethod
