@@ -137,7 +137,7 @@ class ChatConsumer(WebsocketConsumer):
 
         if self.prime == 0:
             self.count += 1
-            PRIME = 7949
+            PRIME = 433
             # 433 457  7949
             e, d = generate_keys(PRIME)
             while (e > d and e > 300) or (e > d and d > 300):
@@ -167,11 +167,12 @@ class ChatConsumer(WebsocketConsumer):
             if cipher:
                 print("we ot cipher", cipher)
                 print("eb, db", self.e, self.d)
+                print("prime", self.prime)
                 array = []
                 temp_array = []
                 for c in cipher:
                     # print((c**self.e) % self.prime)
-                    print("c^e", c**self.e, (c**self.e) % self.prime)
+                    # print("c^e", c**self.e, (c**self.e) % self.prime)
                     array.append((c**self.e) % self.prime)
                     # for k in c:
                         # array.append((k**self.e) % self.prime)
