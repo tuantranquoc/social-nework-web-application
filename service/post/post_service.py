@@ -701,6 +701,28 @@ def action(request):
                 "number_of_up_vote": number_of_up_vote,
                 "number_of_down_vote": number_of_down_vote
             }, status=200)
+        if action == "favorite":
+            if post in request.user.profile.favorite.all():
+                # return Response({Message.SC_OK}, status=200)
+                request.user.profile.favorite.remove(post)
+                user_vote = UserVote.objects.filter(user=request.user, post=post).first()
+                if not user_vote:
+                    UserVote.objects.create(
+                        user=request.user, post=post, view=1, share=0)
+                else:
+                    user_vote.share = 0
+                    user_vote.save()
+                return Response({Message.SC_OK}, status=200)
+            else:
+                request.user.profile.favorite.add(post)
+                user_vote = UserVote.objects.filter(user=request.user, post=post).first()
+                if not user_vote:
+                    UserVote.objects.create(
+                        user=request.user, post=post, view=1, share=1)
+                else:
+                    user_vote.share = 1
+                    user_vote.save()
+                return Response({Message.SC_CREATED}, status=201)
     return Response({Message.SC_BAD_RQ}, status=400)
 
 
@@ -975,6 +997,9 @@ def check_community():
         if not c.creator:
             c.creator = Profile.objects.filter().first().user
             c.save()
+            
+            
+
 
 
 def get_rating_list(request):

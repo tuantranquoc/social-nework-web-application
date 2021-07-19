@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, pre_save
 from notify.models import SignalRoom
+from post.models import Post
 
 User = get_user_model()
 
@@ -26,6 +27,7 @@ class Profile(models.Model):
                                         blank=True,
                                         null=True,
                                         on_delete=models.CASCADE)
+    favorite = models.ManyToManyField(Post, blank=True)
     # background_color = models.CharField(default='30363C', max_length=7)
     # title_background_color = models.CharField(default='30363C', max_length=7)
     # description_background_color = models.CharField(default='30363C',

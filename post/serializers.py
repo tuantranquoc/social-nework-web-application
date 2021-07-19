@@ -36,13 +36,15 @@ class PostSerializer(serializers.ModelSerializer):
     unix_timestamp = serializers.SerializerMethodField(read_only=True)
     current_vote = serializers.SerializerMethodField(read_only=True)
     community_avatar = serializers.SerializerMethodField(read_only=True)
+    favorite = serializers.SerializerMethodField(read_only=True)
+
 
     class Meta:
         model = Post
         fields = [
             'user', 'id', 'title', 'content', 'parent','timestamp', 'image', 'unix_timestamp', 'up_vote', 'down_vote',
             'community_type', 'type', 'view_count', 'point', 'state',
-            'current_vote','community_avatar'
+            'current_vote','community_avatar','favorite'
         ]
 
     @staticmethod
@@ -66,6 +68,16 @@ class PostSerializer(serializers.ModelSerializer):
                 return "up_vote"
             if Post.objects.filter(down_vote=user, id=obj.id):
                 return "down_vote"
+        return "None"
+    
+    def get_favorite(self, obj):
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        if request.user.is_authenticated:
+            if obj in request.user.profile.favorite.all():
+                return "favorite"
         return "None"
 
     @staticmethod

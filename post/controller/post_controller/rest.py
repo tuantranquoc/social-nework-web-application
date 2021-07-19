@@ -608,6 +608,18 @@ def reset(request):
 def find_post_by_community(request, community_type):
     return post_service.find_post_by_community(request, community_type)
 
+@api_view(["GET","POST"])
+def get_favorite_list(request):
+    if not request.user.is_authenticated:
+        return Response({Message.DETAIL: Message.SC_NO_AUTH}, status=401)
+    page_size = 10
+    if request.data.get("page_size"):
+        page_size = request.data.get("page_size")
+    post_list = request.user.profile.favorite.all()
+    return get_paginated_queryset_response(post_list, request, page_size,
+                                           ModelName.POST)
+
+
 
 def count_post_by_community(community):
     count = 0
@@ -651,6 +663,9 @@ def get_rating_dict(request):
         users = rating_dict["user"]
         rating_dict.update(user=items.append(post.id))
     print(rating_dict["item"])
+
+
+
 
 
 from operator import itemgetter

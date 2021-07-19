@@ -3,6 +3,7 @@ from post.controller.post_controller import rest as post_api
 
 urlpatterns = [
     path('filter/<str:sort>', post_api.post_list_view),
+    
     path('create', post_api.post_create_api),
     path('<int:post_id>', post_api.find_post_by_id),
     path('delete/', post_api.post_delete_api),
@@ -41,5 +42,8 @@ urlpatterns = [
     path('community/<str:community_type>', post_api.find_post_by_community),
     path('recommend', post_api.get_item_rating_1),
     path('profile', post_api.get_post_list_by_following_profile),
-    path('collect-data', post_api.collect_post_data)
+    path('collect-data', post_api.collect_post_data),
+     path('favorite/list', post_api.get_favorite_list)
+
+
 ]
