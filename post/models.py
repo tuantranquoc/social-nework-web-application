@@ -44,6 +44,9 @@ class Post(models.Model):
                              default='public')
     hidden = models.BooleanField(default=False)
     hidden_in_community= models.BooleanField(default=False)
+    viewed =  models.ManyToManyField(User,
+                                       related_name="p_view",
+                                       blank=True)
     # vote = models.ManyToManyField(UserVote, blank=True)
 
     class Meta:

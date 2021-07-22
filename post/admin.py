@@ -58,7 +58,7 @@ class ViewAdmin(admin.ModelAdmin):
         
 @admin.register(UserVote)
 class UserVoteAdmin(admin.ModelAdmin):
-    search_fields = ['id']
+    search_fields = ['id','post__id']
     list_display = ['id', 'user','post', 'down_vote','view','like','share','dislike','get_rating']
 
 

@@ -107,7 +107,7 @@ def get_post_list(request, sort):
                 community_list = Community.objects.filter(
                     id__in=[x["id"] for x in top_community])
                 post_list = Post.objects.filter(community__in=Community.objects.filter(
-                    id__in=[x["id"] for x in top_community])).order_by("-point")
+                    id__in=[x["id"] for x in top_community])).exclude(viewed=request.user).order_by("-point")
                 # print(post.count())
                 return get_paginated_queryset_response(post_list, request, page_size,
                                                        ModelName.POST)
@@ -125,7 +125,7 @@ def get_post_list(request, sort):
             community_list = Community.objects.filter(
                 id__in=[x["id"] for x in top_community])
             post_list = Post.objects.filter(community__in=Community.objects.filter(
-                id__in=[x["id"] for x in top_community])).order_by("-point")
+                id__in=[x["id"] for x in top_community])).exclude(viewed=request.user).order_by("-point")
 
             return get_paginated_queryset_response(post_list, request, page_size,
                                                    ModelName.POST)
@@ -189,7 +189,7 @@ def get_post_list(request, sort):
             prediction = algo.predict(17, 149)[4]["was_impossible"]
             print(prediction)
             post_list = Post.objects.filter(
-                id__in=[x.post.id for x in uv_list])
+                id__in=[x.post.id for x in uv_list]).exclude(viewed=request.user)
             for p in post_list:
                 rt_dict = {}
                 rt_dict["id"] = p.id
@@ -267,7 +267,7 @@ def get_post_list(request, sort):
             community_list = Community.objects.filter(
                 id__in=[x["id"] for x in top_community])
             post_list = Post.objects.filter(community__in=Community.objects.filter(
-                id__in=[x["id"] for x in top_community])).order_by("-timestamp")
+                id__in=[x["id"] for x in top_community])).exclude(viewed=request.user).order_by("-timestamp")
             # post_list = Post.objects.all().order_by("-timestamp")
             return get_paginated_queryset_response(post_list, request, page_size,
                                                    ModelName.POST)
@@ -303,7 +303,7 @@ def get_post_list(request, sort):
             day = 30
         else:
             return Response({"Missing option"}, status=400)
-        post_list = Post.objects.filter(timestamp__gte=(datetime.datetime.now() -  timedelta(days=day))).annotate(num_vote=Count("up_vote")).order_by("-num_vote")
+        post_list = Post.objects.filter(timestamp__gte=(datetime.datetime.now() -  timedelta(days=day))).exclude(viewed=request.user).annotate(num_vote=Count("up_vote")).order_by("-num_vote")
         return get_paginated_queryset_response(post_list, request, page_size, ModelName.POST)
                                             #    timestamp__range=(datetime.datetime.now(), timedelta.days(1))
 
@@ -524,6 +524,7 @@ def find_post_by_id(request, post_id):
             check_community_track(track, post.community, request.user)
             view = View.objects.filter(user=request.user, post=post).first()
             serializer = check_view(view, post, request.user, request)
+            post.viewed.add(request.user)
             return Response(serializer.data, status=200)
         if post.community.state is False:
             if not request.user.is_authenticated:
