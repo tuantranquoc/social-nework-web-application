@@ -171,8 +171,8 @@ def get_post_list(request, sort):
             if len(item_list_p2) == len(user_list_p2) == len(rating_list_p2):
                 print("we got what we want lol!")
             rating_dict = {
-                "item": item_list_p2,
                 "user": user_list_p2,
+                "item": item_list_p2,
                 "rating": rating_list_p2
             }
             df = pd.DataFrame(rating_dict)
@@ -181,7 +181,7 @@ def get_post_list(request, sort):
             data = Dataset.load_from_df(df[["user", "item", "rating"]], reader)
             sim_options = {
                 "name": "cosine",
-                "user_based": False,  # Compute  similarities between items
+                "user_based": True,  # Compute  similarities between items
             }
             algo = KNNWithMeans(sim_options=sim_options)
             trainingSet = data.build_full_trainset()
@@ -303,7 +303,11 @@ def get_post_list(request, sort):
             day = 30
         else:
             return Response({"Missing option"}, status=400)
-        post_list = Post.objects.filter(timestamp__gte=(datetime.datetime.now() -  timedelta(days=day))).exclude(viewed=request.user).annotate(num_vote=Count("up_vote")).order_by("-num_vote")
+        if request.user.isAuthenticated:
+            post_list = Post.objects.filter(timestamp__gte=(datetime.datetime.now() -  timedelta(days=day))).exclude(viewed=request.user).annotate(num_vote=Count("up_vote")).order_by("-num_vote")
+        else:
+            post_list = Post.objects.filter(timestamp__gte=(datetime.datetime.now() -  timedelta(days=day))).annotate(num_vote=Count("up_vote")).order_by("-num_vote")
+
         return get_paginated_queryset_response(post_list, request, page_size, ModelName.POST)
                                             #    timestamp__range=(datetime.datetime.now(), timedelta.days(1))
 
